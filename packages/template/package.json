@@ -6,5 +6,6 @@
   "license": "MIT",
   "dependencies": {
     "@lizzi/core": "^0.0.1"
-  }
+  },
+  "gitHead": "7d7fc8795657f2a8d8c37fbde61ba227c3049d17"
 }
