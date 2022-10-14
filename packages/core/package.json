@@ -4,5 +4,8 @@
   "description": "lizzi js reactive library",
   "main": "index.js",
   "license": "MIT",
-  "gitHead": "a50aa1af8fda926da2243339cac7a405da99360f"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": ""
 }
