@@ -1,11 +1,11 @@
 {
   "name": "@lizzi/sync",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "lizzi js sync library",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@lizzi/core": "^0.0.3"
+    "@lizzi/core": "^0.0.4"
   },
   "gitHead": "77d17d1f68515476206ad95102e02b6bf150da85"
 }
