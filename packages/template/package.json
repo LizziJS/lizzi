@@ -1,0 +1,10 @@
+{
+  "name": "@lizzi/template",
+  "version": "0.0.1",
+  "description": "lizzi js template DOM engine",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "@lizzi/core": "^0.0.1"
+  }
+}
