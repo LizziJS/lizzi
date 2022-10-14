@@ -1,6 +1,6 @@
 {
   "name": "@lizzi/core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "lizzi js reactive library",
   "main": "index.js",
   "license": "MIT",
