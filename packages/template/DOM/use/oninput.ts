@@ -1,6 +1,6 @@
 import { zzArray, zzBoolean, zzReactive, zzString } from "@lizzi/core";
 import { Debounce, EventWrapper } from "@lizzi/core/Event";
-import { DomElementView, HtmlView } from "../view/TagView";
+import { DomElementView } from "..";
 
 export function onInput<
   E extends DomElementView<HTMLInputElement | HTMLTextAreaElement>

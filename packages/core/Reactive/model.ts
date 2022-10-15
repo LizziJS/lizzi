@@ -56,7 +56,7 @@ export class zzModel<T extends object> extends zzReactive<InferModel<T>> {
 
       const rvalue = this.model[name];
       if (rvalue instanceof zzReactive) {
-        updates[name] = value;
+        updates[name] = value as any;
         try {
           rvalue.value = value;
         } catch (err) {
@@ -83,11 +83,11 @@ export class zzModel<T extends object> extends zzReactive<InferModel<T>> {
       const destructor = new DestructorsStack();
 
       for (let name in this.model) {
-        const value = this.model[name];
+        const rvalue = this.model[name];
 
-        if (value instanceof zzReactive) {
+        if (rvalue instanceof zzReactive) {
           destructor.add(
-            value.onChange.addListener((ev) => {
+            rvalue.onChange.addListener((ev) => {
               this.onChange.emit(ev);
             })
           );

@@ -4,6 +4,6 @@
  * This source code is licensed under the MIT license.
  */
 
-export * from "./view";
-export * from "./DOM";
-export * from "./helpers";
+export * from "./Elements";
+export * from "./IfElse";
+export * from "./Title";

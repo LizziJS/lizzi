@@ -1,5 +1,5 @@
 import { EventWrapper } from "@lizzi/core/Event";
-import { DomElementView } from "../view/TagView";
+import { DomElementView } from "..";
 
 export function onEvent<T extends DomElementView>(
   eventName: Parameters<T["element"]["addEventListener"]>[0],

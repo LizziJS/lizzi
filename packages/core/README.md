@@ -1,3 +1,3 @@
-# lizzi
+# @lizzi/core
 
 Lizzi javascript reactive library

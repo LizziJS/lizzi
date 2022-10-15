@@ -9,7 +9,11 @@ import { zzEvent } from "@lizzi/core/Event";
 
 type ViewComponentStatuses = "unmounted" | "mounted" | "in-unmount-process";
 
+export const isViewNodeConstructor = Symbol();
+
 export class ViewNode {
+  static [isViewNodeConstructor] = true;
+
   readonly _onMount = new zzEvent<(view: ViewNode) => void>();
   readonly _onUnmount = new zzEvent<(view: ViewNode) => void>();
   readonly afterMount = new zzEvent<(view: ViewNode) => void>();

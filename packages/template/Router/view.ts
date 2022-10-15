@@ -5,7 +5,7 @@
  */
 
 import { zzBoolean, zzReactive } from "@lizzi/core";
-import { AppRouter } from ".";
+import { AppRouter } from "./router";
 import { ViewComponent } from "../view/ViewComponent";
 import { ViewNode } from "../view/ViewNode";
 
@@ -105,7 +105,7 @@ export class RouteView extends RouterComponent {
     routes: Array<string | zzReactive<any>>,
     childrens: ViewNode[] = []
   ) {
-    super();
+    super({});
 
     this.isOpened = new zzBoolean(false);
 
@@ -155,7 +155,7 @@ export class RouteView extends RouterComponent {
 
 export class RouterView extends RouterComponent {
   constructor(childrens: ViewNode[] = []) {
-    super();
+    super({});
 
     this.append(childrens);
 
@@ -170,11 +170,3 @@ export class RouterView extends RouterComponent {
     });
   }
 }
-
-export const Router = (childrens: ViewNode[] = []) => new RouterView(childrens);
-export const Route = (
-  routes: Array<string | zzReactive<any>>,
-  childrens: ViewNode[] = []
-) => new RouteView(routes, childrens);
-
-export default { Router, Route };

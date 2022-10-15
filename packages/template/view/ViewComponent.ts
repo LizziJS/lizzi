@@ -9,16 +9,12 @@ import { ViewNode } from "./ViewNode";
 export class ViewComponent extends ViewNode {
   readonly element: Node;
 
-  constructor(childrens: ViewNode[] = []) {
+  constructor({ children }: { children?: ViewNode[] }) {
     super();
 
     this.element = document.createTextNode("");
     this.setNodeElements([this.element]);
 
-    this.append(childrens);
+    this.append(children ?? []);
   }
 }
-
-export const views = {
-  Component: (childrens: ViewNode[]) => new ViewComponent(childrens),
-};

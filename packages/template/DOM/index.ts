@@ -5,22 +5,26 @@
  */
 
 import { zzReactive } from "@lizzi/core";
-import { AttributeLink, ClassLink, StyleLink } from "../use/attributes";
-import { ViewNode } from "./ViewNode";
+import { AttributeLink, ClassLink, StyleLink } from "./use/attributes";
+import { ViewNode } from "../view/ViewNode";
 
-export type TagAttributes = {
+export * from "./use";
+
+export type DOMAttributes<T extends DomElementView> = {
   class?: Array<string | zzReactive<any>>;
   style?: { [key: string]: Array<string | zzReactive<any>> };
+  use?: Array<(view: T) => void>;
+  children?: Array<ViewNode>;
   [key: string]: any;
 };
 
 export class DomElementView<T extends Element = Element> extends ViewNode {
   readonly element: T;
 
-  constructor(tagName: string) {
+  constructor(element: T) {
     super();
 
-    this.element = this._createElement(tagName);
+    this.element = element;
     this.setNodeElements([this.element]);
   }
 
@@ -56,25 +60,20 @@ export class DomElementView<T extends Element = Element> extends ViewNode {
 export class HtmlView<
   T extends keyof HTMLElementTagNameMap
 > extends DomElementView<HTMLElementTagNameMap[T]> {
-  constructor(
-    tagName: T,
-    attributes: TagAttributes = {},
-    childrens: ViewNode[] = []
-  ) {
-    super(tagName);
+  constructor(tagName: T, attributes: DOMAttributes<HtmlView<T>> = {}) {
+    super(document.createElement(tagName));
 
-    this.append(childrens);
+    this.append(attributes.children ?? []);
 
     this._initAttributes(attributes);
   }
 
-  protected _createElement(tagName: T): HTMLElementTagNameMap[T] {
-    return document.createElement(tagName);
-  }
-
-  protected _initAttributes(attributes: TagAttributes) {
+  protected _initAttributes(attributes: DOMAttributes<HtmlView<T>>) {
     for (let name in attributes) {
       switch (name.toLocaleLowerCase()) {
+        case "children": {
+          break;
+        }
         case "class": {
           this.onMount(ClassLink(attributes.class as any));
           break;
@@ -84,6 +83,12 @@ export class HtmlView<
             this.onMount(
               StyleLink(styleName, (attributes.style as any)[styleName])
             );
+          }
+          break;
+        }
+        case "use": {
+          for (let useFn of attributes.use as any) {
+            this.onMount(useFn);
           }
           break;
         }
@@ -98,25 +103,20 @@ export class HtmlView<
 export class SvgView<
   T extends keyof SVGElementTagNameMap
 > extends DomElementView<SVGElementTagNameMap[T]> {
-  constructor(
-    tagName: T,
-    attributes: TagAttributes = {},
-    childrens: ViewNode[] = []
-  ) {
-    super(tagName);
+  constructor(tagName: T, attributes: DOMAttributes<SvgView<T>> = {}) {
+    super(document.createElementNS("http://www.w3.org/2000/svg", tagName));
 
-    this.append(childrens);
+    this.append(attributes.children ?? []);
 
     this._initAttributes(attributes);
   }
 
-  protected _createElement(tagName: T): SVGElementTagNameMap[T] {
-    return document.createElementNS("http://www.w3.org/2000/svg", tagName);
-  }
-
-  protected _initAttributes(attributes: TagAttributes) {
+  protected _initAttributes(attributes: DOMAttributes<SvgView<T>>) {
     for (let name in attributes) {
       switch (name.toLocaleLowerCase()) {
+        case "children": {
+          break;
+        }
         case "class": {
           this.onMount(ClassLink(attributes.class as any));
           break;
@@ -126,6 +126,12 @@ export class SvgView<
             this.onMount(
               StyleLink(styleName, (attributes.style as any)[styleName])
             );
+          }
+          break;
+        }
+        case "use": {
+          for (let useFn of attributes.use as any) {
+            this.onMount(useFn);
           }
           break;
         }

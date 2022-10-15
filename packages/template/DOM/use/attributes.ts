@@ -5,7 +5,7 @@
  */
 
 import { zzReactive, zzCompute, zzArray, runVar } from "@lizzi/core";
-import { DomElementView } from "../view/TagView";
+import { DomElementView } from "..";
 
 type InputTypes =
   | string

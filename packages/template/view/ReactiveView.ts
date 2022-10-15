@@ -5,10 +5,10 @@
  */
 
 import { zzArray, zzObject, zzReactive } from "@lizzi/core/index";
-import { ViewNode } from "./view/ViewNode";
+import { ViewNode } from "./ViewNode";
 
 export class TextView extends ViewNode {
-  constructor(text: number | string | zzReactive<any>) {
+  constructor(text: number | string | boolean | zzReactive<any>) {
     super();
 
     if (text instanceof zzReactive) {
@@ -138,10 +138,11 @@ export class ObjectView<T extends ViewNode> extends ViewNode {
   }
 }
 
-export const views = {
+export const reactiveViews = {
   Text: (
     value:
       | Array<number | string | zzReactive<any>>
+      | boolean
       | number
       | string
       | zzReactive<any>

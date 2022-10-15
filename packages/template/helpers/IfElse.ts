@@ -6,18 +6,22 @@
 
 import { zzEvent } from "@lizzi/core/Event";
 import { zzReactive } from "@lizzi/core/index";
-import { ViewComponent } from "./ViewComponent";
-import { ViewNode } from "./ViewNode";
+import { ViewComponent } from "../view/ViewComponent";
+import { ViewNode } from "../view/ViewNode";
 
 export class If extends ViewComponent {
-  constructor(
-    condition: zzReactive<any> | any,
-    condNodes: ViewNode[] = [],
-    elseNodes: ViewNode[] = []
-  ) {
-    super();
+  constructor({
+    condition,
+    children,
+  }: {
+    condition: zzReactive<any> | any;
+    children: ViewNode[];
+  }) {
+    super({ children });
 
     const afterChange = new zzEvent<() => void>();
+    const elseNodes = children.filter((node) => node instanceof Else);
+    const condNodes = children.filter((node) => !(node instanceof Else));
 
     if (condition instanceof zzReactive) {
       this.onMount((view) => {
@@ -65,10 +69,4 @@ export class If extends ViewComponent {
   }
 }
 
-export const views = {
-  If: (
-    condition: zzReactive<any> | any,
-    condNodes: ViewNode[] = [],
-    elseNodes: ViewNode[] = []
-  ) => new If(condition, condNodes, elseNodes),
-};
+export class Else extends ViewComponent {}
