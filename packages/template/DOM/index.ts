@@ -7,6 +7,7 @@
 import { zzReactive } from "@lizzi/core";
 import { AttributeLink, ClassLink, StyleLink } from "./use/attributes";
 import { ViewNode } from "../view/ViewNode";
+import { JSX } from "../jsx-runtime";
 
 export * from "./use";
 
@@ -14,7 +15,7 @@ export type DOMAttributes<T extends DomElementView> = {
   class?: Array<string | zzReactive<any>>;
   style?: { [key: string]: Array<string | zzReactive<any>> };
   use?: Array<(view: T) => void>;
-  children?: Array<ViewNode>;
+  children?: JSX.Childrens;
   [key: string]: any;
 };
 
@@ -60,10 +61,10 @@ export class DomElementView<T extends Element = Element> extends ViewNode {
 export class HtmlView<
   T extends keyof HTMLElementTagNameMap
 > extends DomElementView<HTMLElementTagNameMap[T]> {
-  constructor(tagName: T, attributes: DOMAttributes<HtmlView<T>> = {}) {
+  constructor(tagName: T, attributes: DOMAttributes<HtmlView<T>>) {
     super(document.createElement(tagName));
 
-    this.append(attributes.children ?? []);
+    this.append(attributes.children);
 
     this._initAttributes(attributes);
   }
@@ -103,10 +104,10 @@ export class HtmlView<
 export class SvgView<
   T extends keyof SVGElementTagNameMap
 > extends DomElementView<SVGElementTagNameMap[T]> {
-  constructor(tagName: T, attributes: DOMAttributes<SvgView<T>> = {}) {
+  constructor(tagName: T, attributes: DOMAttributes<SvgView<T>>) {
     super(document.createElementNS("http://www.w3.org/2000/svg", tagName));
 
-    this.append(attributes.children ?? []);
+    this.append(attributes.children);
 
     this._initAttributes(attributes);
   }

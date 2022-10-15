@@ -1,5 +1,5 @@
 import { zzInt } from "@lizzi/core";
-import { Body, Title, ViewComponent } from "@lizzi/template";
+import { Body, Title } from "@lizzi/template";
 
 function App() {
   const newI = new zzInt(0);

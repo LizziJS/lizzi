@@ -4,7 +4,13 @@
  * This source code is licensed under the MIT license.
  */
 
-import { InferReactive, zzReactive } from "./reactive";
+import {
+  InferReactive,
+  IReactive,
+  IReactiveEvent,
+  IReactiveValue,
+  zzReactive,
+} from "./reactive";
 import { DestructorsStack, IDestructor } from "../Destructor";
 import { zzEvent, EventsObserver, onStartListening } from "../Event";
 import { ValueChangeEvent } from "./reactive";
@@ -27,9 +33,44 @@ export class ArrayRemoveEvent<T> {
   ) {}
 }
 
-export class zzArray<T> extends zzReactive<T[]> {
+export interface IArrayEvent<T> extends IReactiveEvent<T[]> {
+  readonly onAdd: zzEvent<(event: ArrayAddEvent<T>) => void>;
+  readonly onRemove: zzEvent<(event: ArrayRemoveEvent<T>) => void>;
+}
+
+export interface IArrayMethods<T> extends IReactiveValue<T[]> {
+  readonly length: number;
+
+  add(elements: T[], index?: number): this;
+  addBefore(elements: T[], before: T): this;
+  addAfter(elements: T[], after: T): this;
+
+  remove(elements: T[]): this;
+  removeByIndex(index: number): this;
+  removeAll(): this;
+
+  has(element: T): boolean;
+  replace(newElements: T[]): this;
+
+  toArray(): T[];
+}
+
+export class zzArray<T>
+  extends zzReactive<T[]>
+  implements IArrayEvent<T>, IArrayMethods<T>
+{
   readonly onAdd = new zzEvent<(event: ArrayAddEvent<T>) => void>();
   readonly onRemove = new zzEvent<(event: ArrayRemoveEvent<T>) => void>();
+
+  static [Symbol.hasInstance](instance: any) {
+    return (
+      instance.onChange instanceof zzEvent &&
+      instance.onAdd instanceof zzEvent &&
+      instance.onRemove instanceof zzEvent &&
+      instance.hasOwnProperty("value") &&
+      typeof instance.toArray == "function"
+    );
+  }
 
   add(elements: T[], index?: number) {
     index === undefined && (index = this._value.length);
@@ -95,6 +136,8 @@ export class zzArray<T> extends zzReactive<T[]> {
       this.onRemove.emit(new ArrayRemoveEvent(removed[0], index, this));
       this.onChange.emit(new ValueChangeEvent(this._value, this._value, this));
     }
+
+    return this;
   }
 
   has(element: T) {

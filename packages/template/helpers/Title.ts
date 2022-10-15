@@ -6,8 +6,8 @@
 
 import { zzMakeReactive, ValueOrReactive, zzReactive } from "@lizzi/core";
 import { zzEvent } from "@lizzi/core/Event";
+import { JSX } from "@lizzi/template/jsx-runtime";
 import { ViewComponent } from "../view/ViewComponent";
-import { ViewNode } from "../view/ViewNode";
 
 export class Title extends ViewComponent {
   readonly onChangeTitle = new zzEvent<(title: string) => void>();
@@ -23,7 +23,7 @@ export class Title extends ViewComponent {
     children,
   }: {
     title: ValueOrReactive<string>;
-    children?: ViewNode[];
+    children: JSX.Childrens;
   }) {
     super({ children });
 

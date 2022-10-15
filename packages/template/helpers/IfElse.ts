@@ -4,7 +4,6 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzEvent } from "@lizzi/core/Event";
 import { zzReactive } from "@lizzi/core/index";
 import { ViewComponent } from "../view/ViewComponent";
 import { ViewNode } from "../view/ViewNode";
@@ -19,25 +18,17 @@ export class If extends ViewComponent {
   }) {
     super({ children });
 
-    const afterChange = new zzEvent<() => void>();
     const elseNodes = children.filter((node) => node instanceof Else);
     const condNodes = children.filter((node) => !(node instanceof Else));
 
     if (condition instanceof zzReactive) {
       this.onMount((view) => {
         let last: boolean | null = null;
-        let changing: boolean = false;
 
         const onChange = () => {
-          if (changing) {
-            return afterChange.addListenerOnce(onChange);
-          }
-
           const visible = Boolean(condition.value);
 
           if (last !== visible) {
-            changing = true;
-
             if (visible) {
               this.remove(elseNodes);
               this.append(condNodes);
@@ -47,9 +38,6 @@ export class If extends ViewComponent {
             }
 
             last = visible;
-
-            changing = false;
-            afterChange.emit();
           }
         };
 
