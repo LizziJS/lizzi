@@ -32,12 +32,6 @@ export class zzReactive<T> implements IReactive<T> {
   readonly onChange = new zzEvent<(event: ValueChangeEvent<T>) => void>();
   protected _value: T;
 
-  static [Symbol.hasInstance](instance: any) {
-    return (
-      instance.onChange instanceof zzEvent && instance.hasOwnProperty("value")
-    );
-  }
-
   get value(): T {
     return this._value;
   }

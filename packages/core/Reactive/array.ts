@@ -55,22 +55,11 @@ export interface IArrayMethods<T> extends IReactiveValue<T[]> {
   toArray(): T[];
 }
 
-export class zzArray<T>
-  extends zzReactive<T[]>
-  implements IArrayEvent<T>, IArrayMethods<T>
-{
+export type IArray<T> = IArrayEvent<T> & IArrayMethods<T>;
+
+export class zzArray<T> extends zzReactive<T[]> implements IArray<T> {
   readonly onAdd = new zzEvent<(event: ArrayAddEvent<T>) => void>();
   readonly onRemove = new zzEvent<(event: ArrayRemoveEvent<T>) => void>();
-
-  static [Symbol.hasInstance](instance: any) {
-    return (
-      instance.onChange instanceof zzEvent &&
-      instance.onAdd instanceof zzEvent &&
-      instance.onRemove instanceof zzEvent &&
-      instance.hasOwnProperty("value") &&
-      typeof instance.toArray == "function"
-    );
-  }
 
   add(elements: T[], index?: number) {
     index === undefined && (index = this._value.length);
