@@ -5,24 +5,26 @@
  */
 
 import { zzBoolean, zzReactive } from "@lizzi/core";
-import { AppRouter } from "./router";
+import { RouteState, zzRouter } from "./router";
 import { ViewComponent } from "../view/ViewComponent";
-import { ViewNode } from "../view/ViewNode";
+import { JSX } from "../jsx-runtime";
 
 export class RouterComponent extends ViewComponent {
   parentRouter: RouterComponent | null = null;
-  readonly routes: RouteView[] = [];
+  appRouter: zzRouter<any> | null = null;
+  readonly routes: Route[] = [];
   protected _lastPath: string = "";
 
-  addRoute(route: RouteView) {
+  addRoute(route: Route) {
     this.routes.push(route);
 
     route.parentRouter = this;
+    route.appRouter = this.appRouter;
 
     this.checkRoutes(this._lastPath);
   }
 
-  removeRoute(route: RouteView) {
+  removeRoute(route: Route) {
     const index = this.routes.indexOf(route);
     if (index !== -1) {
       route.parentRouter = null;
@@ -52,12 +54,16 @@ export class RouterComponent extends ViewComponent {
 
     return false;
   }
+
+  go(url: string) {
+    this.appRouter?.go({ url });
+  }
 }
 
-export class RouteView extends RouterComponent {
+export class Route extends RouterComponent {
   readonly regexp: RegExp;
   readonly paramNames: zzReactive<any>[];
-  readonly childrens: ViewNode[];
+  readonly childrens?: JSX.Childrens;
   protected isOpened: zzBoolean;
 
   check(path: string) {
@@ -87,7 +93,7 @@ export class RouteView extends RouterComponent {
     if (!this.isOpened.value) {
       this.isOpened.value = true;
 
-      this.childrens.forEach((node) => this.appendChild(node));
+      this.append(this.childrens);
     }
   }
 
@@ -95,28 +101,29 @@ export class RouteView extends RouterComponent {
     if (this.isOpened.value) {
       this.isOpened.value = false;
 
-      for (let node of this.childrens) {
-        node.parentNode?.removeNode(node);
-      }
+      this.removeAllChilds();
     }
   }
 
-  constructor(
-    routes: Array<string | zzReactive<any>>,
-    childrens: ViewNode[] = []
-  ) {
+  constructor({
+    route,
+    children,
+  }: {
+    route: Array<string | zzReactive<any>>;
+    children?: JSX.Childrens;
+  }) {
     super({});
 
     this.isOpened = new zzBoolean(false);
 
-    this.childrens = childrens;
+    this.childrens = children;
     this.paramNames = [];
 
     let regexp = "^";
-    for (let route of routes) {
+    for (let oneRoute of route) {
       regexp += "/";
-      if (typeof route === "string") {
-        let result = route.matchAll(
+      if (typeof oneRoute === "string") {
+        let result = oneRoute.matchAll(
           /\*\*|\*|[.()\\\/+{}^$?]|([^:.()\\\/+{}^$?*]+)/gmu
         );
 
@@ -133,7 +140,7 @@ export class RouteView extends RouterComponent {
         }
       } else {
         regexp += "([\\p{L}\\p{N}:+%_-]+)";
-        this.paramNames.push(route);
+        this.paramNames.push(oneRoute);
       }
     }
 
@@ -153,17 +160,25 @@ export class RouteView extends RouterComponent {
   }
 }
 
-export class RouterView extends RouterComponent {
-  constructor(childrens: ViewNode[] = []) {
+export class Router<T extends RouteState> extends RouterComponent {
+  constructor({
+    appRouter,
+    children,
+  }: {
+    appRouter: zzRouter<T>;
+    children: JSX.Childrens;
+  }) {
     super({});
 
-    this.append(childrens);
+    this.appRouter = appRouter;
+
+    this.append(children);
 
     this.onMount(() => {
       this.addToUnmount(
-        AppRouter.onChangeRoute
+        appRouter.onUpdate
           .addListener(() => {
-            this.checkRoutes(AppRouter.path);
+            this.checkRoutes(appRouter.model.url.value);
           })
           .run()
       );

@@ -1,33 +1,32 @@
-import { zzF, zzInt } from "@lizzi/core";
-import { Body, Title } from "@lizzi/template";
+import { zzInt, zzString } from "@lizzi/core";
+import { Body, onClick } from "@lizzi/template";
+import { Link, Route, Router, zzRouter } from "@lizzi/template/Router";
+
+const AppRouter = new zzRouter({
+  url: new zzString(""),
+});
 
 function App() {
-  const newI = new zzInt(0);
+  const newI = new zzString("");
 
   return (
-    <Title title="1One">
-      <div
-        use={[
-          (view) => {
-            const timer = setInterval(() => newI.value++, 100);
-
-            view.onceUnmount(() => {
-              clearInterval(timer);
-            });
-          },
-        ]}
-      >
-        <h1 class={["asd", zzF(() => (newI.value % 2 ? "a" : "b"), newI)]}>
-          {123} 123 <span></span>
-          {newI}
-        </h1>
-        <h1 class={["asd"]}>123</h1>
-        <svg viewBox="0 0 950 650">
-          <a svg></a>
-        </svg>
+    <Router appRouter={AppRouter}>
+      <div>
+        <div>
+          <Link href="/1/asd">1</Link>
+        </div>
+        <div>
+          <Link href="/2">2</Link>
+        </div>
+        <Route route={["1", newI]}>
+          <div>{newI}</div>
+        </Route>
+        <Route route={["2"]}>
+          <div>fuck</div>
+        </Route>
       </div>
-    </Title>
+    </Router>
   );
 }
 
-Body(App());
+Body(<App />);

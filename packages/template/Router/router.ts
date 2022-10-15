@@ -4,72 +4,57 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzEvent } from "@lizzi/core/Event";
+import { InferModel, zzModel, zzString } from "@lizzi/core";
 
-export type RouteParams = { [key: string]: string };
+export type RouteState = {
+  url: zzString;
+  [key: string]: any;
+};
 
-export class zzRouter {
-  readonly onChangeRoute = new zzEvent<(path: string) => void>();
-
-  path: string;
-  state: RouteParams;
-
-  protected trimPath(path: string) {
-    return path
-      .trim()
-      .replace(/[\/\\]+/g, "/")
-      .replace(/^\/+|\/+$/g, "");
+export class zzRouter<T extends RouteState> extends zzModel<T> {
+  protected getPath(path: string) {
+    return (
+      "/" +
+      path
+        .trim()
+        .replace(/[\/\\]+/g, "/")
+        .replace(/^\/+|\/+$/g, "")
+    );
   }
 
-  toUrl(route: Array<string> | string) {
-    if (Array.isArray(route)) {
-      route = route
-        .map(function (route) {
-          if (typeof route === "string" || typeof route === "number") {
-            return route;
-          }
-
-          return "";
-        })
-        .join("/");
-    }
-
-    if (typeof route === "string") {
-      return this.trimPath(route);
-    }
-
-    return "";
+  urlToString(route: Array<string>) {
+    return route
+      .map((route) =>
+        typeof route === "string" || typeof route === "number" ? route : ""
+      )
+      .join("/");
   }
 
-  protected __zzOnRoute() {
-    this.path = "/" + this.toUrl(window.location.pathname);
-    this.onChangeRoute.emit(this.path);
+  go(state: Partial<InferModel<T>>) {
+    this.value = {
+      ...state,
+      url: this.getPath(state.url ?? window.location.pathname),
+    };
+
+    const newState = this.value;
+
+    window.history.pushState(newState, "", newState.url);
   }
 
-  go(url: string) {
-    this.state = { url: url };
-    window.history.pushState(this.state, "", "/" + this.toUrl(url));
-    this.__zzOnRoute();
+  setState(state: Partial<InferModel<T>>) {
+    this.value = state;
+
+    window.history.replaceState(this.value, "");
   }
 
-  setState(object: RouteParams) {
-    for (let name in object) {
-      this.state[name] = object[name];
-    }
+  constructor(state: T) {
+    super(state);
 
-    window.history.replaceState(this.state, "", window.location.href);
-  }
-
-  constructor() {
     window.addEventListener("popstate", (event) => {
-      this.state = event.state;
-      this.__zzOnRoute();
+      this.value = event.state;
     });
-    this.path = "/" + this.toUrl(window.location.pathname);
+    this.value = { url: this.getPath(window.location.pathname) };
 
-    this.state = {};
-    this.setState({ url: window.location.pathname });
+    this.setState(this.value);
   }
 }
-
-export const AppRouter = new zzRouter();

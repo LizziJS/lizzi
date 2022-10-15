@@ -8,6 +8,10 @@ module.exports = {
     static: {
       directory: path.join(__dirname, "dist"),
     },
+    historyApiFallback: {
+      index: "index.html",
+    },
+    open: true,
     compress: true,
     port: 9000,
   },

@@ -6,3 +6,4 @@
 
 export * from "./router";
 export * from "./view";
+export * from "./link";

@@ -67,11 +67,11 @@ export class ViewNode implements ViewClass {
       const viewNodes = childrens.map(JSXChildrensToNodeMapper);
 
       for (let view of viewNodes) {
-        if (view !== undefined) {
+        if (view) {
           this.appendChild(view);
         }
       }
-    } else if (childrens !== undefined) {
+    } else if (childrens) {
       this.appendChild(JSXChildrensToNodeMapper(childrens));
     }
 
@@ -267,27 +267,6 @@ export class ViewNode implements ViewClass {
   }
 }
 
-export const JSXChildrensToNodeMapper = (element: JSX.Children): ViewNode => {
-  if (element instanceof zzArray || Array.isArray(element)) {
-    return reactiveViews.Array(element);
-  }
-
-  if (element instanceof zzObject) {
-    return reactiveViews.Object(element);
-  }
-
-  if (
-    typeof element === "boolean" ||
-    typeof element === "string" ||
-    typeof element === "number" ||
-    element instanceof zzReactive
-  ) {
-    return reactiveViews.Text(element);
-  }
-
-  return element;
-};
-
 export class TextView extends ViewNode {
   constructor(text: number | string | boolean | zzReactive<any>) {
     super();
@@ -419,7 +398,7 @@ export class ObjectView<T extends ViewNode> extends ViewNode {
   }
 }
 
-const reactiveViews = {
+export const view = {
   Text: (
     value:
       | Array<number | string | zzReactive<any>>
@@ -447,4 +426,25 @@ const reactiveViews = {
   },
   Array: <T extends ViewNode>(value: zzArray<T> | T[]) => new ArrayView(value),
   Object: <T extends ViewNode>(value: zzObject<T> | T) => new ObjectView(value),
+};
+
+export const JSXChildrensToNodeMapper = (element: JSX.Children): ViewNode => {
+  if (element instanceof zzArray || Array.isArray(element)) {
+    return view.Array(element);
+  }
+
+  if (element instanceof zzObject) {
+    return view.Object(element);
+  }
+
+  if (
+    typeof element === "boolean" ||
+    typeof element === "string" ||
+    typeof element === "number" ||
+    element instanceof zzReactive
+  ) {
+    return view.Text(element);
+  }
+
+  return element;
 };
