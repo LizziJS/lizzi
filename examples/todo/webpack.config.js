@@ -31,41 +31,8 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.css$/,
-        use: [
-          {
-            loader: "css-loader",
-            options: {
-              esModule: false,
-              modules: {
-                localIdentName: "[local]__[hash:base64]__",
-              },
-            },
-          },
-        ],
-      },
-      {
-        test: /\.html/,
-        use: [
-          {
-            loader: "html-loader",
-            options: {
-              esModule: false,
-            },
-          },
-        ],
-      },
-      {
-        test: /\.(png|jpg|gif|svg)/,
-        use: ["file-loader"],
-      },
-      {
-        test: /\.(mp3)/,
-        use: ["file-loader"],
-      },
-      {
-        test: /\.(ttf|woff|woff2|eot)/,
-        use: ["file-loader"],
+        test: /\.css$/i,
+        use: ["style-loader", "css-loader", "postcss-loader"],
       },
       {
         test: /\.tsx?$/,

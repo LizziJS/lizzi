@@ -7,7 +7,7 @@
 import { DestructorsStack, IDestructor } from "@lizzi/core/Destructor";
 import { zzEvent } from "@lizzi/core/Event";
 import { JSX } from "@lizzi/template/jsx-runtime";
-import { zzArray, zzObject, zzReactive } from "@lizzi/core";
+import { zzArray, zzComputeFn, zzObject, zzReactive } from "@lizzi/core";
 
 type ViewComponentStatuses = "unmounted" | "mounted" | "in-unmount-process";
 
@@ -363,7 +363,7 @@ export class ArrayView<T extends ViewNode> extends ViewNode {
 }
 
 export class ObjectView<T extends ViewNode> extends ViewNode {
-  constructor(viewObject: zzObject<T> | T) {
+  constructor(viewObject: zzComputeFn<T | null> | zzObject<T> | T) {
     super();
 
     this.setNodeElements([document.createTextNode("")]);
@@ -371,7 +371,7 @@ export class ObjectView<T extends ViewNode> extends ViewNode {
     if (viewObject instanceof zzReactive) {
       this.onMount(() => {
         this.addToUnmount(
-          viewObject.onChange.addListener(async (ev) => {
+          viewObject.onChange.addListener((ev) => {
             if (ev.last) {
               this.removeNode(ev.last);
             }
@@ -425,7 +425,9 @@ export const view = {
     return new TextHtmlView(value);
   },
   Array: <T extends ViewNode>(value: zzArray<T> | T[]) => new ArrayView(value),
-  Object: <T extends ViewNode>(value: zzObject<T> | T) => new ObjectView(value),
+  Object: <T extends ViewNode>(
+    value: zzComputeFn<T | null> | zzObject<T> | T
+  ) => new ObjectView(value),
 };
 
 export const JSXChildrensToNodeMapper = (element: JSX.Children): ViewNode => {

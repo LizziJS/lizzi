@@ -311,7 +311,7 @@ export class zzArray<T> extends zzReactive<T[]> implements IArray<T> {
     return joinedString;
   }
 
-  map<NewT>(filterFn: (value: T, index: number) => NewT) {
+  map<NewT>(filterFn: (value: T, index: number, self: zzArray<T>) => NewT) {
     return new zzArrayMap<T, NewT>(this, filterFn);
   }
 
@@ -358,7 +358,7 @@ export class zzComputeArrayFn<T> extends zzArray<T> {
 export class zzArrayMap<T, NewT> extends zzArray<NewT> {
   readonly mappedArray: zzArray<T>;
   readonly sourceArray: zzArray<T>;
-  readonly mapFn: (value: T, index: number) => NewT;
+  readonly mapFn: (value: T, index: number, self: zzArray<T>) => NewT;
   protected readonly eventObserver: EventsObserver;
 
   get value() {
@@ -384,7 +384,7 @@ export class zzArrayMap<T, NewT> extends zzArray<NewT> {
     do {
       index = source.indexOf(element, index);
       if (index !== -1) {
-        const newValue = this.mapFn(element, index);
+        const newValue = this.mapFn(element, index, this.sourceArray);
 
         this.removeByIndex(index);
         this.add([newValue], index);
@@ -395,14 +395,18 @@ export class zzArrayMap<T, NewT> extends zzArray<NewT> {
   }
 
   refresh() {
-    this.replace(this.mappedArray.toArray().map(this.mapFn));
+    this.replace(
+      this.mappedArray
+        .toArray()
+        .map((value, index) => this.mapFn(value, index, this.sourceArray))
+    );
 
     return this;
   }
 
   constructor(
     sourceArray: zzArray<T>,
-    mapFn: (value: T, index: number) => NewT
+    mapFn: (value: T, index: number, self: zzArray<T>) => NewT
   ) {
     super([]);
 
@@ -411,7 +415,7 @@ export class zzArrayMap<T, NewT> extends zzArray<NewT> {
     this.mapFn = mapFn;
 
     this.mappedArray.onAdd.addListener((ev) => {
-      const newValue = mapFn(ev.added, ev.index);
+      const newValue = mapFn(ev.added, ev.index, this.sourceArray);
 
       this.add([newValue], ev.index);
     });

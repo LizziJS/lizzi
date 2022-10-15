@@ -108,10 +108,12 @@ export function ClassLink<T extends DomElementView>(array: InputTypes) {
     const classList = element.classList;
 
     view.onceUnmount(() => {
-      for (const className of classArray) {
-        classList.remove(
-          String(className instanceof zzReactive ? className.value : className)
-        );
+      for (const classNames of classArray) {
+        String(classNames instanceof zzReactive ? classNames.value : classNames)
+          .split(/\s+/)
+          .forEach(
+            (className) => className !== "" && classList.remove(className)
+          );
       }
     });
 
@@ -122,11 +124,21 @@ export function ClassLink<T extends DomElementView>(array: InputTypes) {
             return item.onChange
               .addListener((event) => {
                 if (event.last) {
-                  classList.remove(String(event.last));
+                  String(event.last)
+                    .split(/\s+/)
+                    .forEach(
+                      (className) =>
+                        className !== "" && classList.remove(className)
+                    );
                 }
 
                 if (event.value) {
-                  classList.add(String(event.value));
+                  String(event.value)
+                    .split(/\s+/)
+                    .forEach(
+                      (className) =>
+                        className !== "" && classList.add(className)
+                    );
                 }
               })
               .run(runVar(item));
@@ -139,9 +151,11 @@ export function ClassLink<T extends DomElementView>(array: InputTypes) {
           }
         },
         (item) => {
-          classList.remove(
-            String(item instanceof zzReactive ? item.value : item)
-          );
+          String(item instanceof zzReactive ? item.value : item)
+            .split(/\s+/)
+            .forEach(
+              (className) => className !== "" && classList.add(className)
+            );
         }
       )
     );

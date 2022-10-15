@@ -4,6 +4,7 @@ import { isViewNodeConstructor, ViewClass, ViewNode } from "../view/ViewNode";
 import { isSvgTag } from "../DOM/SvgTags";
 import { HtmlView, SvgView } from "../DOM";
 import { JSX } from "./namespace";
+import { ViewComponent } from "../view";
 
 export const jsx = (
   type: string | ViewNode,
@@ -41,3 +42,5 @@ export const jsxs = (
     );
   }
 };
+
+export const Fragment = ViewComponent;
