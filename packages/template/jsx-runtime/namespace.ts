@@ -5,8 +5,14 @@ import { DomElementView } from "../DOM";
 type AllElementsTagName = HTMLElementTagNameMap & SVGElementTagNameMap;
 
 interface JSXAttributes<T extends keyof AllElementsTagName> {
-  class?: Array<string | zzReactive<any>>;
-  style?: { [key: string]: Array<string | zzReactive<any>> };
+  class?: Array<string | zzReactive<any>> | string | zzReactive<any>;
+  style?: {
+    [key: string]:
+      | Array<string | zzReactive<any>>
+      | string
+      | number
+      | zzReactive<any>;
+  };
   use?: Array<(view: DomElementView<AllElementsTagName[T]>) => void>;
   [key: string]: any;
 }

@@ -39,6 +39,7 @@ export const zzS = (strings: TemplateStringsArray, ...values: any) => {
   return joinedString;
 };
 
+/*
 export const zzF = <T>(strings: TemplateStringsArray, ...values: any) => {
   const concat: any[] = [];
 
@@ -75,3 +76,4 @@ export const zzF = <T>(strings: TemplateStringsArray, ...values: any) => {
 
   return joinedFn;
 };
+*/

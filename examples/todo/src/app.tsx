@@ -1,4 +1,4 @@
-import { zzInt } from "@lizzi/core";
+import { zzF, zzInt } from "@lizzi/core";
 import { Body, Title } from "@lizzi/template";
 
 function App() {
@@ -17,7 +17,7 @@ function App() {
           },
         ]}
       >
-        <h1 class={["asd"]}>
+        <h1 class={["asd", zzF(() => (newI.value % 2 ? "a" : "b"), newI)]}>
           {123} 123 <span></span>
           {newI}
         </h1>

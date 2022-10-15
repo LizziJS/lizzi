@@ -71,6 +71,7 @@ export function zzCompute<T>(
 }
 
 export const zzMemo = zzCompute;
+export const zzF = zzCompute;
 
 function zzComputeArray<T>(
   fn: (...args: any) => Array<T>,

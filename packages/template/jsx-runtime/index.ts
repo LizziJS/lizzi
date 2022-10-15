@@ -24,7 +24,7 @@ export const jsxs = (
   }
 ): ViewNode => {
   if (typeof type === "string") {
-    if (type in isSvgTag || props.svg) {
+    if (isSvgTag.has(type as any) || props.svg) {
       return new SvgView(type as any, props);
     }
 
