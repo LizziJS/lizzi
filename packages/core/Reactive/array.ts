@@ -250,7 +250,7 @@ export class zzArray<T> extends zzReactive<T[]> implements IArray<T> {
 
   filter(
     filterFn: (value: T, index: number, array: this) => boolean,
-    ...dependencies: zzReactive<any>[]
+    ...dependencies: (zzReactive<any> | zzEvent<any>)[]
   ) {
     return new zzComputeArrayFn(
       () =>
@@ -270,7 +270,7 @@ export class zzArray<T> extends zzReactive<T[]> implements IArray<T> {
 
   find(
     findFn: (value: T, index: number, array: this) => boolean,
-    ...dependencies: zzReactive<any>[]
+    ...dependencies: (zzReactive<any> | zzEvent<any>)[]
   ) {
     return zzCompute(
       () => this.toArray().find((value, index) => findFn(value, index, this)),
@@ -279,7 +279,10 @@ export class zzArray<T> extends zzReactive<T[]> implements IArray<T> {
     );
   }
 
-  sort(sortFn: (a: T, b: T) => number, ...dependencies: zzReactive<any>[]) {
+  sort(
+    sortFn: (a: T, b: T) => number,
+    ...dependencies: (zzReactive<any> | zzEvent<any>)[]
+  ) {
     return new zzComputeArrayFn(
       () => this.toArray().slice().sort(sortFn),
       this,

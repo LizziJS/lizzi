@@ -268,8 +268,21 @@ export class ViewNode implements ViewClass {
 }
 
 export class TextView extends ViewNode {
-  constructor(text: number | string | boolean | zzReactive<any>) {
+  constructor({
+    children,
+  }: {
+    children:
+      | string
+      | number
+      | boolean
+      | zzReactive<any>
+      | Array<string | number | boolean | zzReactive<any>>;
+  }) {
     super();
+
+    const text = Array.isArray(children)
+      ? (new zzArray(children).join("") as zzReactive<any>)
+      : children;
 
     if (text instanceof zzReactive) {
       const textElement = document.createTextNode("");
@@ -290,60 +303,29 @@ export class TextView extends ViewNode {
   }
 }
 
-export class TextHtmlView extends ViewNode {
-  constructor(text: number | string | zzReactive<any>) {
-    super();
-
-    if (text instanceof zzReactive) {
-      const htmlElement = document.createElementNS(
-        "http://www.w3.org/1999/xhtml",
-        "zz-html"
-      );
-      this.setNodeElements([htmlElement]);
-
-      this.onMount(() => {
-        this.addToUnmount(
-          text.onChange
-            .addListener(() => {
-              htmlElement.innerHTML = text.value;
-            })
-            .run()
-        );
-      });
-    } else {
-      const htmlElement = document.createElementNS(
-        "http://www.w3.org/1999/xhtml",
-        "zz-html"
-      );
-      htmlElement.innerHTML = String(text);
-      this.setNodeElements([htmlElement]);
-    }
-  }
-}
-
 export class ArrayView<T extends ViewNode> extends ViewNode {
-  constructor(viewsList: zzArray<T> | T[]) {
+  constructor({ children }: { children: zzArray<T> | T[] }) {
     super();
 
     this.setNodeElements([document.createTextNode("")]);
 
-    if (viewsList instanceof zzArray) {
+    if (children instanceof zzArray) {
       this.onMount(() => {
         const mapArray: T[] = [];
 
-        for (let view of viewsList) {
+        for (let view of children) {
           this.appendChild(view);
 
           mapArray.push(view);
         }
 
         this.addToUnmount(
-          viewsList.onAdd.addListener((ev) => {
+          children.onAdd.addListener((ev) => {
             this.insertBefore(ev.added, mapArray[ev.index]);
 
             mapArray.splice(ev.index, 0, ev.added);
           }),
-          viewsList.onRemove.addListener((ev) => {
+          children.onRemove.addListener((ev) => {
             this.removeNode(ev.removed);
 
             mapArray.splice(ev.index, 1);
@@ -357,21 +339,21 @@ export class ArrayView<T extends ViewNode> extends ViewNode {
         });
       });
     } else {
-      this.append(viewsList);
+      this.append(children);
     }
   }
 }
 
 export class ObjectView<T extends ViewNode> extends ViewNode {
-  constructor(viewObject: zzComputeFn<T | null> | zzObject<T> | T) {
+  constructor({ children }: { children: zzReactive<T | null> | T }) {
     super();
 
     this.setNodeElements([document.createTextNode("")]);
 
-    if (viewObject instanceof zzReactive) {
+    if (children instanceof zzReactive) {
       this.onMount(() => {
         this.addToUnmount(
-          viewObject.onChange.addListener((ev) => {
+          children.onChange.addListener((ev) => {
             if (ev.last) {
               this.removeNode(ev.last);
             }
@@ -382,73 +364,41 @@ export class ObjectView<T extends ViewNode> extends ViewNode {
           })
         );
 
-        if (viewObject.value) {
-          this.appendChild(viewObject.value);
+        if (children.value) {
+          this.appendChild(children.value);
         }
 
         this.onceUnmount(async () => {
-          if (viewObject.value) {
-            this.removeNode(viewObject.value);
+          if (children.value) {
+            this.removeNode(children.value);
           }
         });
       });
     } else {
-      this.appendChild(viewObject);
+      this.appendChild(children);
     }
   }
 }
 
-export const view = {
-  Text: (
-    value:
-      | Array<number | string | zzReactive<any>>
-      | boolean
-      | number
-      | string
-      | zzReactive<any>
-  ) => {
-    if (Array.isArray(value)) {
-      return new TextView(new zzArray(value).join());
-    }
-    return new TextView(value);
-  },
-  Html: (
-    value:
-      | Array<number | string | zzReactive<any>>
-      | number
-      | string
-      | zzReactive<any>
-  ) => {
-    if (Array.isArray(value)) {
-      return new TextHtmlView(new zzArray(value).join());
-    }
-    return new TextHtmlView(value);
-  },
-  Array: <T extends ViewNode>(value: zzArray<T> | T[]) => new ArrayView(value),
-  Object: <T extends ViewNode>(
-    value: zzComputeFn<T | null> | zzObject<T> | T
-  ) => new ObjectView(value),
-};
-
-export const JSXChildrenToNodeMapper = (element: JSX.Children): ViewNode => {
-  if (element instanceof zzArray || Array.isArray(element)) {
-    return view.Array(element);
+export const JSXChildrenToNodeMapper = (children: JSX.Children): ViewNode => {
+  if (children instanceof zzArray || Array.isArray(children)) {
+    return new ArrayView({ children });
   }
 
-  if (element instanceof zzObject) {
-    return view.Object(element);
+  if (children instanceof zzObject) {
+    return new ObjectView({ children });
   }
 
   if (
-    typeof element === "boolean" ||
-    typeof element === "string" ||
-    typeof element === "number" ||
-    element instanceof zzReactive
+    typeof children === "boolean" ||
+    typeof children === "string" ||
+    typeof children === "number" ||
+    children instanceof zzReactive
   ) {
-    return view.Text(element);
+    return new TextView({ children });
   }
 
-  return element;
+  return children;
 };
 
 export const MapJSXChildrensToNodes = (
@@ -456,8 +406,7 @@ export const MapJSXChildrensToNodes = (
 ): ViewNode[] => {
   if (Array.isArray(childrens)) {
     return childrens.map(JSXChildrenToNodeMapper).filter((view) => view);
-  } else if (childrens) {
-    return [JSXChildrenToNodeMapper(childrens)].filter((view) => view);
   }
-  return [];
+
+  return [JSXChildrenToNodeMapper(childrens)].filter((view) => view);
 };

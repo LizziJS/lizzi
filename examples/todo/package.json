@@ -1,11 +1,11 @@
 {
-  "name": "todo.app",
+  "name": "example.todo.app",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "watch": "npx webpack serve --config webpack.dev.js"
+    "dev": "npx webpack serve --config webpack.dev.js"
   },
   "dependencies": {
     "@lizzi/core": "*",
