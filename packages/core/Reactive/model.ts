@@ -13,13 +13,10 @@ export type InferModel<Type extends object> = {
 };
 
 export class ModelUpdateEvent<T extends object> {
-  readonly values: Partial<InferModel<T>>;
-  readonly target: zzModel<T>;
-
-  constructor(values: Partial<InferModel<T>>, target: zzModel<T>) {
-    this.values = values;
-    this.target = target;
-  }
+  constructor(
+    readonly values: Partial<InferModel<T>>,
+    readonly target: zzModel<T>
+  ) {}
 }
 
 export class zzModel<T extends object> extends zzReactive<InferModel<T>> {

@@ -14,7 +14,7 @@ import {
 import { DestructorsStack, IDestructor } from "../Destructor";
 import { zzEvent, EventsObserver, onStartListening } from "../Event";
 import { ValueChangeEvent } from "./reactive";
-import { zzMakeReactive, ValueOrReactive } from "./helpers";
+import { zzMakeReactive, ValueOrReactive, runVar } from "./helpers";
 import { zzCompute, zzComputeFn } from "./compute";
 
 export class ArrayAddEvent<T> {
@@ -344,10 +344,12 @@ export class zzComputeArrayFn<T> extends zzArray<T> {
     this.sourceArray = new zzComputeFn(fn, ...dependencies);
 
     onStartListening(
-      () =>
-        this.sourceArray.onChange.addListener((ev) => {
-          this.replace(ev.value);
-        }),
+      () => {
+        this._value = this.sourceArray.value;
+        return this.sourceArray.onChange.addListener(() => {
+          this.replace(this.sourceArray.value);
+        });
+      },
       this.onAdd,
       this.onChange,
       this.onRemove
