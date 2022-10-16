@@ -64,7 +64,7 @@ export class ViewNode implements ViewClass {
 
   append(childrens?: JSX.Childrens) {
     if (Array.isArray(childrens)) {
-      const viewNodes = childrens.map(JSXChildrensToNodeMapper);
+      const viewNodes = childrens.map(JSXChildrenToNodeMapper);
 
       for (let view of viewNodes) {
         if (view) {
@@ -72,7 +72,7 @@ export class ViewNode implements ViewClass {
         }
       }
     } else if (childrens) {
-      this.appendChild(JSXChildrensToNodeMapper(childrens));
+      this.appendChild(JSXChildrenToNodeMapper(childrens));
     }
 
     return this;
@@ -430,7 +430,7 @@ export const view = {
   ) => new ObjectView(value),
 };
 
-export const JSXChildrensToNodeMapper = (element: JSX.Children): ViewNode => {
+export const JSXChildrenToNodeMapper = (element: JSX.Children): ViewNode => {
   if (element instanceof zzArray || Array.isArray(element)) {
     return view.Array(element);
   }
@@ -449,4 +449,15 @@ export const JSXChildrensToNodeMapper = (element: JSX.Children): ViewNode => {
   }
 
   return element;
+};
+
+export const MapJSXChildrensToNodes = (
+  childrens: JSX.Childrens
+): ViewNode[] => {
+  if (Array.isArray(childrens)) {
+    return childrens.map(JSXChildrenToNodeMapper).filter((view) => view);
+  } else if (childrens) {
+    return [JSXChildrenToNodeMapper(childrens)].filter((view) => view);
+  }
+  return [];
 };

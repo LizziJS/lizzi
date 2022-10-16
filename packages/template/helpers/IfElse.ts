@@ -5,8 +5,9 @@
  */
 
 import { zzReactive } from "@lizzi/core/index";
+import { JSX } from "@lizzi/template/jsx-runtime";
+import { MapJSXChildrensToNodes } from "../view";
 import { ViewComponent } from "../view/ViewComponent";
-import { ViewNode } from "../view/ViewNode";
 
 export class If extends ViewComponent {
   constructor({
@@ -14,12 +15,14 @@ export class If extends ViewComponent {
     children,
   }: {
     condition: zzReactive<any> | any;
-    children: ViewNode[];
+    children: JSX.Childrens;
   }) {
-    super({ children });
+    super();
 
-    const elseNodes = children.filter((node) => node instanceof Else);
-    const condNodes = children.filter((node) => !(node instanceof Else));
+    const nodes = MapJSXChildrensToNodes(children);
+
+    const elseNodes = nodes.filter((node) => node instanceof Else);
+    const condNodes = nodes.filter((node) => !(node instanceof Else));
 
     if (condition instanceof zzReactive) {
       this.onMount((view) => {

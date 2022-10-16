@@ -6,24 +6,24 @@ import { HtmlView, SvgView } from "../DOM";
 import { JSX } from "./namespace";
 import { ViewComponent } from "../view";
 
-export const jsx = (
-  type: string | ViewNode,
+export const jsx = <T extends ViewNode>(
+  type: string | T,
   props: {
     [k: string]: any;
     children: any;
   }
-): ViewNode => {
-  return jsxs(type, props);
+) => {
+  return jsxs<T>(type, props);
 };
 
-export const jsxs = (
-  type: string | ViewNode,
+export const jsxs = <T extends ViewNode>(
+  type: string | T,
   props: {
     svg?: boolean | undefined;
     children: JSX.Childrens;
     [k: string]: any;
   }
-): ViewNode => {
+) => {
   if (typeof type === "string") {
     if (isSvgTag.has(type as any) || props.svg) {
       return new SvgView(type as any, props);
@@ -32,10 +32,10 @@ export const jsxs = (
     return new HtmlView(type as any, props);
   } else if (typeof type === "function") {
     if (type[isViewNodeConstructor]) {
-      return new (type as new (props: object) => ViewNode)(props);
+      return new (type as new (props: object) => T)(props);
     }
 
-    return (type as (props: object) => ViewNode)(props);
+    return (type as (props: object) => T)(props);
   } else {
     throw new Error(
       "JSX constructor should be string, HTML tag or ViewNode constructor"
