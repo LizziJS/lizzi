@@ -4,26 +4,17 @@ import { AddTodo } from "./AddTodo";
 import { SearchComponent } from "./SearchComponent";
 import { Todo } from "../data/Todo";
 import { TodoView } from "./TodoView";
-import { FilterComponent } from "./FilterComponent";
 
 export function TodoApp({ todos }: { todos: zzArray<Todo> }) {
   const searchComponent = (<SearchComponent />) as SearchComponent;
-  const filterComponent = (<FilterComponent />) as FilterComponent;
 
-  const filteredTodos = todos
-    .filter(
-      (todo) =>
-        todo.todo.value
-          .toLocaleLowerCase()
-          .startsWith(searchComponent.search.value.toLocaleLowerCase()),
-      searchComponent.search
-    )
-    .filter(
-      (todo) =>
-        filterComponent.filter.value === "ALL" ||
-        todo.done.value === (filterComponent.filter.value === "COMPLETED"),
-      filterComponent.filter
-    );
+  const filteredTodos = todos.filter(
+    (todo) =>
+      todo.todo.value
+        .toLocaleLowerCase()
+        .startsWith(searchComponent.search.value.toLocaleLowerCase()),
+    searchComponent.search
+  );
 
   const isEmptyTodos = zzCompute(() => todos.length === 0, todos);
   const isEmptyResults = zzCompute(
@@ -33,10 +24,7 @@ export function TodoApp({ todos }: { todos: zzArray<Todo> }) {
 
   return (
     <div class="max-w-2xl w-full mx-auto my-10">
-      <div class="my-10">
-        {searchComponent}
-        {filterComponent}
-      </div>
+      <div class="my-10">{searchComponent}</div>
       <div class="my-5 mx-5 flex flex-col">
         <If condition={isEmptyResults}>
           <If condition={isEmptyTodos}>
