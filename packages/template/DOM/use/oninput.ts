@@ -3,65 +3,29 @@ import { Debounce, EventWrapper } from "@lizzi/core/Event";
 import { DomElementView } from "..";
 
 export function onInput<
-  E extends DomElementView<HTMLInputElement | HTMLTextAreaElement>
->(value: zzReactive<any>) {
-  return (view: E) => {
-    if (!(value instanceof zzReactive))
-      throw new Error("input variable is not zzReactive");
-
-    const element = view.element;
-
-    if (
-      !(
-        element instanceof HTMLInputElement ||
-        element instanceof HTMLTextAreaElement
-      )
-    )
-      throw new Error(
-        "onInput error: Element is not HTMLTextAreaElement | HTMLInputElement"
-      );
-
-    view.addToUnmount(
-      value.onChange.addListener(() => {
-        if (element.value !== value.value) {
-          element.value = value.value;
-        }
-      }),
-      new EventWrapper(
-        element,
-        "input",
-        () => {
-          if (element.value !== value.value) {
-            value.value = element.value;
-          }
-        },
-        false
-      ),
-      new EventWrapper(
-        element,
-        "blur",
-        () => {
-          if (element.value !== value.value) {
-            element.value = value.value;
-          }
-        },
-        false
-      )
-    );
-
-    element.value = value.value;
-  };
-}
-
-export function onInputFilter<
+  E extends DomElementView<HTMLTextAreaElement | HTMLInputElement>
+>(
+  value: zzReactive<string>,
+  onChange?: (value: string) => void
+): (view: E) => void;
+export function onInput<
   T,
   E extends DomElementView<HTMLTextAreaElement | HTMLInputElement>
->(value: zzReactive<T>, filterFn: (value: string) => false | T) {
+>(value: zzReactive<T>, onChange: (value: string) => void): (view: E) => void;
+export function onInput<
+  T,
+  E extends DomElementView<HTMLTextAreaElement | HTMLInputElement>
+>(value: zzReactive<T>, onChange?: (value: string) => void) {
   return (view: E) => {
     if (!(value instanceof zzReactive))
       throw new Error("input variable is not zzReactive");
 
     const element = view.element;
+    const onInputChange =
+      onChange ??
+      ((inputValue: string) => {
+        value.value = inputValue as T;
+      });
 
     if (
       !(
@@ -84,10 +48,7 @@ export function onInputFilter<
         "input",
         () => {
           if (element.value !== String(value.value)) {
-            const filteredValue = filterFn(element.value);
-            if (filteredValue !== false) {
-              value.value = filteredValue;
-            }
+            onInputChange(element.value);
           }
         },
         false

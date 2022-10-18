@@ -4,24 +4,42 @@ import { DomElementView } from "../DOM";
 
 type AllElementsTagName = HTMLElementTagNameMap & SVGElementTagNameMap;
 
-interface JSXAttributes<T extends keyof AllElementsTagName> {
-  class?: Array<string | zzReactive<any>> | string | zzReactive<any>;
-  style?: {
-    [key: string]:
-      | Array<string | zzReactive<any>>
-      | string
-      | number
-      | zzReactive<any>;
-  };
-  use?: Array<(view: DomElementView<AllElementsTagName[T]>) => void>;
-  [key: string]: any;
-}
-
 export declare namespace JSX {
   interface Element extends ViewNode {}
 
-  type Children = Element | string | number | boolean | zzReactive<any>;
-  type Childrens = Array<Children> | Children;
+  interface Attributes<T extends keyof AllElementsTagName> {
+    class?: Array<string | zzReactive<any>> | string | zzReactive<any>;
+    style?: {
+      [key: string]:
+        | Array<string | zzReactive<any>>
+        | string
+        | number
+        | zzReactive<any>;
+    };
+    use?: Array<(view: DomElementView<AllElementsTagName[T]>) => void>;
+    [key: string]: any;
+  }
+
+  type Children<T extends ViewNode = ViewNode> =
+    | ViewNode
+    | string
+    | number
+    | boolean
+    | zzReactive<any>
+    | ((view: T) => ViewNode);
+
+  type Childrens<T extends ViewNode = ViewNode> =
+    | Array<Children<T>>
+    | Children<T>;
+
+  type ChildrenProps<T extends ViewNode = ViewNode> = {
+    children: Childrens<T>;
+  };
+
+  type PropsWithChildren<
+    P extends object = {},
+    T extends ViewNode = ViewNode
+  > = P & ChildrenProps<T>;
 
   interface ElementClass extends ViewNode {}
   interface ElementChildrenAttribute {
@@ -29,6 +47,6 @@ export declare namespace JSX {
   }
 
   type IntrinsicElements = {
-    [T in keyof AllElementsTagName]: JSXAttributes<T>;
+    [T in keyof AllElementsTagName]: JSX.Attributes<T>;
   };
 }
