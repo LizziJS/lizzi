@@ -9,7 +9,7 @@ import { DestructorsStack } from "../../Destructor";
 import { onStartListening, zzEvent } from "../../Event";
 import { zzCompute } from "../compute";
 
-export const zzS = (strings: TemplateStringsArray, ...values: any) => {
+export const zz = (strings: TemplateStringsArray, ...values: any) => {
   const concatArrayString: any[] = [];
 
   for (let i = 0; i < strings.length - 1; i++) {
