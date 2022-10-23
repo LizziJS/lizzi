@@ -74,7 +74,10 @@ export class ViewNode implements ViewClass {
         }
       }
     } else if (childrens) {
-      this.appendChild(JSXChildrenToNodeMapper(childrens, this));
+      const view = JSXChildrenToNodeMapper(childrens, this);
+      if (view) {
+        this.appendChild(view);
+      }
     }
 
     return this;
@@ -179,9 +182,9 @@ export class ViewNode implements ViewClass {
     for (let child of this.childNodes) {
       if (findFn(child)) {
         results.push(child as T);
+      } else {
+        results = results.concat(child.filterChilds(findFn));
       }
-
-      results = results.concat(child.filterChilds(findFn));
     }
 
     return results;
@@ -335,9 +338,7 @@ export class ArrayView<T extends ViewNode> extends ViewNode {
         );
 
         this.onceUnmount(() => {
-          for (let view of mapArray) {
-            this.removeNode(view);
-          }
+          this.removeAllChilds();
         });
       });
     } else {
@@ -370,10 +371,8 @@ export class ObjectView<T extends ViewNode> extends ViewNode {
           this.appendChild(children.value);
         }
 
-        this.onceUnmount(async () => {
-          if (children.value) {
-            this.removeNode(children.value);
-          }
+        this.onceUnmount(() => {
+          this.removeAllChilds();
         });
       });
     } else {

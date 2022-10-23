@@ -48,14 +48,6 @@ export class DomElementView<T extends Element = Element> extends ViewNode {
   protected _createElement(tagName: string): T {
     throw new Error("rewrite _createElement method");
   }
-
-  apply(...mountFn: ((view: this) => void)[]) {
-    for (let useFn of mountFn) {
-      this.onMount(useFn);
-    }
-
-    return this;
-  }
 }
 
 export class HtmlView<

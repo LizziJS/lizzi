@@ -339,12 +339,15 @@ export class zzComputeArrayFn<T> extends zzArray<T> {
   }
 
   constructor(
-    fn: (...args: any) => Array<T>,
+    fn: (currentArray: Array<T>) => T[],
     ...dependencies: (zzReactive<any> | zzEvent<any>)[]
   ) {
     super([]);
 
-    this.sourceArray = new zzComputeFn(fn, ...dependencies);
+    this.sourceArray = new zzComputeFn(
+      () => (this._value = fn(this._value)),
+      ...dependencies
+    );
 
     onStartListening(
       () => {
@@ -365,6 +368,36 @@ export class zzArrayMap<T, NewT> extends zzArray<NewT> {
   readonly sourceArray: zzArray<T>;
   readonly mapFn: (value: T, index: number, self: zzArray<T>) => NewT;
   protected readonly eventObserver: EventsObserver;
+
+  protected _isSilent = false;
+
+  add(elements: NewT[], index?: number) {
+    index === undefined && (index = this._value.length);
+
+    this._value.splice(index, 0, ...elements);
+
+    if (this._isSilent) return this;
+
+    for (let i = 0; i < elements.length; i++) {
+      this.onAdd.emit(new ArrayAddEvent(elements[i], index + i, this));
+    }
+    this.onChange.emit(new ValueChangeEvent(this._value, this._value, this));
+
+    return this;
+  }
+
+  removeByIndex(index: number) {
+    if (typeof this._value[index] !== "undefined") {
+      const removed = this._value.splice(index, 1);
+
+      if (this._isSilent) return this;
+
+      this.onRemove.emit(new ArrayRemoveEvent(removed[0], index, this));
+      this.onChange.emit(new ValueChangeEvent(this._value, this._value, this));
+    }
+
+    return this;
+  }
 
   get value() {
     return this.toArray();
@@ -431,7 +464,10 @@ export class zzArrayMap<T, NewT> extends zzArray<NewT> {
 
     this.eventObserver = onStartListening(
       () => {
+        //make silent values initialization, if listeners are added partly
+        this._isSilent = true;
         this.mappedArray.replace(this.sourceArray.toArray());
+        this._isSilent = false;
 
         return new DestructorsStack(
           sourceArray.onAdd.addListener((ev) => {

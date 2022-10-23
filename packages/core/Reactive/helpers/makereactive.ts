@@ -7,6 +7,7 @@
 import { zzReactive } from "../reactive";
 
 export type ValueOrReactive<T> = T | zzReactive<T>;
+export type zzRoV<T> = ValueOrReactive<T>; // shortcut
 
 export function zzMakeReactive<T>(value: ValueOrReactive<T>) {
   return value instanceof zzReactive ? value : new zzReactive<T>(value);

@@ -7,7 +7,7 @@
 import { IReactiveEvent, ValueChangeEvent, zzReactive } from "./reactive";
 import { DestructorsStack, IDestructor } from "../Destructor";
 import { onStartListening, zzEvent } from "../Event";
-import { zzComputeArrayFn } from "./array";
+import { zzArray, zzComputeArrayFn } from "./array";
 
 export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
   protected _fn: () => T;
@@ -74,7 +74,7 @@ export const zzMemo = zzCompute;
 export const zzF = zzCompute;
 
 export function zzComputeArray<T>(
-  fn: (...args: any) => Array<T>,
+  fn: (oldArray: Array<T>) => Array<T>,
   ...dependencies: (zzReactive<any> | zzEvent<any>)[]
 ) {
   return new zzComputeArrayFn(fn, ...dependencies);

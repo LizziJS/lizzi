@@ -1,7 +1,7 @@
 import { EventWrapper } from "@lizzi/core/Event";
 import { DomElementView } from "..";
 
-export function onEvent<T extends DomElementView>(
+export function on<T extends DomElementView>(
   eventName: Parameters<T["element"]["addEventListener"]>[0],
   fn: (...args: any) => any,
   options: boolean = false
@@ -10,3 +10,5 @@ export function onEvent<T extends DomElementView>(
     view.addToUnmount(new EventWrapper(view.element, eventName, fn, options));
   };
 }
+
+export const onEvent = on;
