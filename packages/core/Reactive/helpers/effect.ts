@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-import { IReactiveEvent } from "../reactive";
+import { IReactive, IReactiveEvent, IReactiveValue } from "../reactive";
 import { DestructorsStack } from "../../Destructor";
 import { onStartListening, zzEvent } from "../../Event";
 
@@ -27,7 +27,7 @@ export function zzEffect(
   return destructor;
 }
 
-export function zzLinkEvents(
+export function zzEventsAffect(
   ...dependencies: (IReactiveEvent<any> | zzEvent<any>)[]
 ) {
   const event = new zzEvent<(...args: any) => void>();
@@ -51,4 +51,13 @@ export function zzLinkEvents(
   }, event);
 
   return event;
+}
+
+export function zzValueAffect<T>(
+  source: IReactive<T>,
+  value: IReactiveValue<T>
+) {
+  return source.onChange.addListener(() => {
+    value.value = source.value;
+  });
 }

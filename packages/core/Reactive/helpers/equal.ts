@@ -34,6 +34,8 @@ export const zzNot = <T>(value: ValueOrReactive<T>) => {
   return zzCompute(() => !vr.value, vr);
 };
 
+export const zzN = zzNot;
+
 export const zzIf = <T, R>(
   cond: ValueOrReactive<T>,
   onTrue: ValueOrReactive<R>,

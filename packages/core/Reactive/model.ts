@@ -136,3 +136,35 @@ export class zzModelConcat<A extends object, B extends object> extends zzModel<
     );
   }
 }
+
+export class ModelGroup {
+  protected prototypesValuesMap = new Map<any, Set<string>>();
+
+  add: (prototype: object, valueName: string) => void;
+
+  getFrom(object: { [key: string]: any }) {
+    const values = this.prototypesValuesMap.get(Object.getPrototypeOf(object));
+
+    if (!values) throw new TypeError("Can't getFrom values from " + object);
+
+    const result: { [key: string]: any } = {};
+
+    for (const value of values) {
+      result[value] = object[value];
+    }
+
+    return result;
+  }
+
+  constructor() {
+    this.add = ((prototype: object, valueName: string) => {
+      let values = this.prototypesValuesMap.get(prototype);
+      if (!values) {
+        values = new Set();
+        this.prototypesValuesMap.set(prototype, values);
+      }
+
+      values.add(valueName);
+    }).bind(this);
+  }
+}
