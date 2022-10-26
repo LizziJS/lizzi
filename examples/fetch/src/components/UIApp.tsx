@@ -5,7 +5,7 @@ import { zzFetch } from "../lib/fetch";
 import { zzUrlParams } from "../lib/urlParams";
 
 export function UIApp() {
-  const posts = new Products();
+  const products = new Products();
 
   const fetch = new zzFetch<{
     products: { id: number }[];
@@ -18,7 +18,7 @@ export function UIApp() {
   const { isError, isLoading, errorMessage, onComplete } = fetch;
 
   onComplete.addListener((jsonData: any) => {
-    posts.fromJSON(jsonData.products);
+    products.fromJSON(jsonData.products);
   });
 
   fetch.get();
@@ -27,7 +27,7 @@ export function UIApp() {
     <div>
       <If condition={zzNot(isLoading)}>
         <If condition={zzNot(isError)}>
-          {posts.map((post) => (
+          {products.map((post) => (
             <div>
               {post.id} {post.thumbnail}
             </div>
