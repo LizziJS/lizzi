@@ -23,15 +23,15 @@ export class Product {
   @json.add readonly thumbnail = new zzString("");
   @json.add readonly images = new zzArray<string>();
 
-  readonly jsonModel = new zzModel(json.getFrom(this));
+  readonly jsonModel = new zzModel(json.variables(this));
 
-  jsonUpdate(values: JSONValue) {
+  fromJSON(values: JSONValue) {
     this.jsonModel.value = values;
   }
 }
 
 export class Products extends zzArray<Product> {
-  jsonUpdate(productList: { id: number; [key: string]: any }[]) {
+  fromJSON(productList: { id: number; [key: string]: any }[]) {
     if (!Array.isArray(productList))
       throw new TypeError(
         productList + " is not match type " + this.constructor.name
@@ -48,7 +48,7 @@ export class Products extends zzArray<Product> {
         prod = new Product();
       }
 
-      prod.jsonUpdate(newProductValues);
+      prod.fromJSON(newProductValues);
 
       return prod;
     });

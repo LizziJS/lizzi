@@ -142,7 +142,7 @@ export class ModelGroup {
 
   add: (prototype: object, valueName: string) => void;
 
-  getFrom(object: { [key: string]: any }) {
+  variables(object: { [key: string]: any }) {
     const values = this.prototypesValuesMap.get(Object.getPrototypeOf(object));
 
     if (!values) throw new TypeError("Can't getFrom values from " + object);
@@ -152,6 +152,8 @@ export class ModelGroup {
     for (const value of values) {
       result[value] = object[value];
     }
+
+    console.log(result);
 
     return result;
   }

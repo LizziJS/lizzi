@@ -1,4 +1,4 @@
-import { zzNot, zzBoolean, zzString } from "@lizzi/core";
+import { zzNot } from "@lizzi/core";
 import { Else, If } from "@lizzi/template";
 import { Products } from "../data/product";
 import { zzFetch } from "../lib/fetch";
@@ -6,18 +6,17 @@ import { zzFetch } from "../lib/fetch";
 export function UIApp() {
   const posts = new Products();
 
-  const isLoading = new zzBoolean(false);
-  const isError = new zzBoolean(false);
-  const errorMessage = new zzString("");
+  const fetch = new zzFetch<{
+    products: { id: number }[];
+  }>(`https://dummyjson.com/products`);
 
-  const fetch = zzFetch<{ products: { id: number }[] }>(
-    `https://dummyjson.com/products`,
-    { isLoading, isError, errorMessage }
-  );
+  const { isError, isLoading, errorMessage, onComplete } = fetch;
 
-  fetch.onComplete.addListener((jsonData: any) => {
-    posts.jsonUpdate(jsonData.products);
+  onComplete.addListener((jsonData: any) => {
+    posts.fromJSON(jsonData.products);
   });
+
+  fetch.get();
 
   return (
     <div>

@@ -2,30 +2,28 @@ import { zzBoolean, zzObject, zzReactive, zzString } from "@lizzi/core";
 import { zzEvent } from "@lizzi/core/Event";
 import { JSONValue } from "./json";
 
-export function zzFetch<T extends JSONValue>(
-  url: string,
-  {
-    isLoading,
-    isError,
-    data,
-    errorMessage,
-  }: {
-    isLoading?: zzBoolean;
-    isError?: zzBoolean;
-    data?: zzObject<any>;
-    errorMessage?: zzString;
-  }
-) {
-  const onComplete = new zzEvent<(jsonData: T) => void>();
-  const onError = new zzEvent<(message: string) => void>();
+export class zzFetch<T extends JSONValue> {
+  readonly onComplete = new zzEvent<(jsonData: T) => void>();
+  readonly onError = new zzEvent<(message: string) => void>();
 
-  const runFetch = async () => {
-    isLoading && (isLoading.value = true);
-    isError && (isError.value = false);
-    data && (data.value = null);
+  readonly isLoading = new zzBoolean(false);
+  readonly isError = new zzBoolean(false);
+  readonly errorMessage = new zzString("");
+  readonly data = new zzObject<T>(null);
+
+  protected setError(message: string) {
+    this.errorMessage.value = message;
+    this.onError.emit(message);
+    this.isError.value = true;
+  }
+
+  async get() {
+    this.isLoading.value = true;
+    this.isError.value = false;
+    this.data.value = null;
 
     try {
-      const response = await fetch(url, {
+      const response = await fetch(this.url, {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8",
@@ -34,23 +32,17 @@ export function zzFetch<T extends JSONValue>(
 
       if (response.ok) {
         const json = await response.json();
-        data && (data.value = json);
-        onComplete.emit(json);
+        this.data.value = json;
+        this.onComplete.emit(json);
       } else {
-        isError && (isError.value = true);
-        errorMessage && (errorMessage.value = response.statusText);
-        onError.emit(response.statusText);
+        this.setError(response.statusText);
       }
     } catch (error: any) {
-      isError && (isError.value = true);
-      errorMessage && (errorMessage.value = error.message);
-      onError.emit(error.message);
+      this.setError(error.message);
     }
 
-    isLoading && (isLoading.value = false);
-  };
+    this.isLoading.value = false;
+  }
 
-  runFetch();
-
-  return { onComplete, onError };
+  constructor(public readonly url: string) {}
 }
