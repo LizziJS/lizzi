@@ -153,8 +153,6 @@ export class ModelGroup {
       result[value] = object[value];
     }
 
-    console.log(result);
-
     return result;
   }
 

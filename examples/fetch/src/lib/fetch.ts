@@ -1,5 +1,14 @@
-import { zzBoolean, zzObject, zzReactive, zzString } from "@lizzi/core";
+import {
+  zzBoolean,
+  zzInteger,
+  zzMakeReactive,
+  zzObject,
+  zzReactive,
+  zzRoV,
+  zzString,
+} from "@lizzi/core";
 import { zzEvent } from "@lizzi/core/Event";
+import { zzUrlParams } from "./urlParams";
 import { JSONValue } from "./json";
 
 export class zzFetch<T extends JSONValue> {
@@ -8,8 +17,11 @@ export class zzFetch<T extends JSONValue> {
 
   readonly isLoading = new zzBoolean(false);
   readonly isError = new zzBoolean(false);
+  readonly status = new zzInteger(0);
   readonly errorMessage = new zzString("");
   readonly data = new zzObject<T>(null);
+
+  readonly url: zzUrlParams;
 
   protected setError(message: string) {
     this.errorMessage.value = message;
@@ -21,14 +33,17 @@ export class zzFetch<T extends JSONValue> {
     this.isLoading.value = true;
     this.isError.value = false;
     this.data.value = null;
+    this.status.value = 0;
 
     try {
-      const response = await fetch(this.url, {
+      const response = await fetch(this.url.createURL(), {
         method: "GET",
         headers: {
           "Content-type": "application/json; charset=UTF-8",
         },
       });
+
+      this.status.value = response.status;
 
       if (response.ok) {
         const json = await response.json();
@@ -44,5 +59,8 @@ export class zzFetch<T extends JSONValue> {
     this.isLoading.value = false;
   }
 
-  constructor(public readonly url: string) {}
+  constructor(url: zzRoV<string> | zzUrlParams) {
+    this.url =
+      url instanceof zzUrlParams ? url : new zzUrlParams(zzMakeReactive(url));
+  }
 }
