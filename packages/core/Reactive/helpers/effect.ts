@@ -4,7 +4,12 @@
  * This source code is licensed under the MIT license.
  */
 
-import { IReactive, IReactiveEvent, IReactiveValue } from "../reactive";
+import {
+  IReactive,
+  IReactiveEvent,
+  IReactiveValue,
+  zzReactive,
+} from "../reactive";
 import { DestructorsStack } from "../../Destructor";
 import { onStartListening, zzEvent } from "../../Event";
 
@@ -60,4 +65,28 @@ export function zzValueAffect<T>(
   return source.onChange.addListener(() => {
     value.value = source.value;
   });
+}
+
+export class zzValueFilter<T> extends zzReactive<T> {
+  onChange;
+
+  protected readonly onChangeFn: (newValue: T) => void;
+  protected readonly source: zzReactive<T>;
+
+  get value(): T {
+    return this.source.value;
+  }
+
+  set value(newValue: T) {
+    this.onChangeFn(newValue);
+  }
+
+  constructor(value: zzReactive<T>, onChange: (newValue: T) => void) {
+    super(null as any);
+
+    this.source = value;
+    this.onChange = value.onChange;
+
+    this.onChangeFn = onChange;
+  }
 }

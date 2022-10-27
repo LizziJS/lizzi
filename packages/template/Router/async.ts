@@ -7,7 +7,7 @@
 import { ViewComponent } from "../view/ViewComponent";
 import { ViewNode } from "../view/ViewNode";
 
-export class ViewAsyncInstance extends ViewComponent {
+export class AsyncView extends ViewComponent {
   constructor(asyncFn: () => Promise<ViewNode>) {
     super();
 
