@@ -344,20 +344,15 @@ export class zzComputeArrayFn<T> extends zzArray<T> {
     super([]);
 
     this.sourceArray = new zzComputeFn(
-      () => (this._value = fn(this._value)),
+      () => fn(this._value),
       ...dependencies
     );
 
-    setInterval(() => {
-      console.log(this._value === this.sourceArray.value);
-    }, 1000);  
-
     onStartListening(
       () => {
-        this._value = [...this.sourceArray.value];
+        this._value = this.sourceArray.value;
         return this.sourceArray.onChange.addListener(() => {
-          const newElements = this.sourceArray.value
-          this.replace(newElements);
+          this.replace(this.sourceArray.value);
         });
       },
       this.onAdd,
