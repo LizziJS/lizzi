@@ -3,12 +3,11 @@ import {
   zzInteger,
   zzMakeReactive,
   zzObject,
-  zzReactive,
   zzRoV,
   zzString,
 } from "@lizzi/core";
 import { zzEvent } from "@lizzi/core/Event";
-import { zzUrlParams } from "./urlParams";
+import { zzUrlGetParams } from "./urlParams";
 import { JSONValue } from "./json";
 
 export class zzFetch<T extends JSONValue> {
@@ -21,7 +20,7 @@ export class zzFetch<T extends JSONValue> {
   readonly errorMessage = new zzString("");
   readonly data = new zzObject<T>(null);
 
-  readonly url: zzUrlParams;
+  readonly url: zzUrlGetParams;
 
   protected setError(message: string) {
     this.errorMessage.value = message;
@@ -59,8 +58,8 @@ export class zzFetch<T extends JSONValue> {
     this.isLoading.value = false;
   }
 
-  constructor(url: zzRoV<string> | zzUrlParams) {
-    this.url =
-      url instanceof zzUrlParams ? url : new zzUrlParams(zzMakeReactive(url));
+  constructor(url: zzRoV<string> | zzUrlGetParams) {
+    this.url = 
+      url instanceof zzUrlGetParams ? url : new zzUrlGetParams(zzMakeReactive(url));
   }
 }

@@ -6,7 +6,6 @@
 
 import {
   InferReactive,
-  IReactive,
   IReactiveEvent,
   IReactiveValue,
   zzReactive,
@@ -349,11 +348,16 @@ export class zzComputeArrayFn<T> extends zzArray<T> {
       ...dependencies
     );
 
+    setInterval(() => {
+      console.log(this._value === this.sourceArray.value);
+    }, 1000);  
+
     onStartListening(
       () => {
-        this._value = this.sourceArray.value;
+        this._value = [...this.sourceArray.value];
         return this.sourceArray.onChange.addListener(() => {
-          this.replace(this.sourceArray.value);
+          const newElements = this.sourceArray.value
+          this.replace(newElements);
         });
       },
       this.onAdd,
