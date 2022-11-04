@@ -338,15 +338,10 @@ export class zzComputeArrayFn<T> extends zzArray<T> {
   }
 
   constructor(
-    fn: (currentArray: Array<T>) => T[],
+    fn: () => T[],
     ...dependencies: (zzReactive<any> | zzEvent<any>)[]
   ) {
     super([]);
-
-    this.sourceArray = new zzComputeFn(
-      () => fn(this._value),
-      ...dependencies
-    );
 
     onStartListening(
       () => {
@@ -358,6 +353,11 @@ export class zzComputeArrayFn<T> extends zzArray<T> {
       this.onAdd,
       this.onChange,
       this.onRemove
+    );
+
+    this.sourceArray = new zzComputeFn(
+      fn,
+      ...dependencies
     );
   }
 }

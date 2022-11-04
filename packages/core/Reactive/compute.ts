@@ -74,7 +74,7 @@ export const zzMemo = zzCompute;
 export const zzF = zzCompute;
 
 export function zzComputeArray<T>(
-  fn: (oldArray: Array<T>) => Array<T>,
+  fn: () => Array<T>,
   ...dependencies: (zzReactive<any> | zzEvent<any>)[]
 ) {
   return new zzComputeArrayFn(fn, ...dependencies);
