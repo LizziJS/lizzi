@@ -1,7 +1,8 @@
 import { zzEvent } from "../Event";
 import { ArrayAddEvent, ArrayRemoveEvent, zzArray, zzArrayMap, zzComputeArrayFn } from "./array";
-import { zzCompute, zzComputeFn } from "./compute";
+import { zzComputeFn } from "./compute";
 import { ValueChangeEvent } from "./reactive";
+import { zzInteger } from "./vars";
 
 describe('zzArray', () =>
 {
@@ -432,15 +433,15 @@ describe('zzArray', () =>
           const array = new zzArray([1, 4, 2]);
           const find = array.find(findFn);
 
-          expect(findFn.mock.calls.length).toBe(2);
+          expect(findFn.mock.calls.length).toBe(0);
 
           expect(find.value).toBe(4);
-          expect(findFn.mock.calls.length).toBe(4);
+          expect(findFn.mock.calls.length).toBe(2);
 
           array.replace([6, 4, 2, 0]);
 
           expect(find.value).toBe(4);
-          expect(findFn.mock.calls.length).toBe(6);
+          expect(findFn.mock.calls.length).toBe(4);
         });
 
         it('should be undefined if not found', () => {
@@ -448,15 +449,15 @@ describe('zzArray', () =>
           const array = new zzArray([1, 2]);
           const find = array.find(findFn);
 
-          expect(findFn.mock.calls.length).toBe(2);
+          expect(findFn.mock.calls.length).toBe(0);
 
           expect(find.value).toBe(undefined);
-          expect(findFn.mock.calls.length).toBe(4);
+          expect(findFn.mock.calls.length).toBe(2);
 
           array.replace([6, 9, 2, 0]);
 
           expect(find.value).toBe(undefined);
-          expect(findFn.mock.calls.length).toBe(8);
+          expect(findFn.mock.calls.length).toBe(6);
         });
 
 
@@ -491,6 +492,53 @@ describe('zzArray', () =>
 
           expect(listener.mock.calls.length).toBe(2);
           expect(listener.mock.calls[1][0]).toEqual(new ValueChangeEvent(undefined, 4, find));
+          expect(find.value).toBe(undefined);
+        });
+
+        it('should find value with dependency listener', () => {
+          const dependency = new zzInteger(4);
+          const findFn = jest.fn(value => value === dependency.value);
+          const array = new zzArray([1, 2]);
+          const find = array.find(findFn, dependency);
+          const listener = jest.fn();
+
+          expect(findFn.mock.calls.length).toBe(0);
+          expect(listener.mock.calls.length).toBe(0);
+
+          find.onChange.addListener(listener);
+
+          expect(findFn.mock.calls.length).toBe(2);
+          expect(listener.mock.calls.length).toBe(0);
+
+          expect(find.value).toBe(undefined);
+          expect(findFn.mock.calls.length).toBe(2);
+
+          array.add([6, 2]);
+
+          expect(array.value).toEqual([1, 2, 6, 2]);
+          expect(findFn.mock.calls.length).toBe(6);
+          expect(listener.mock.calls.length).toBe(0);
+          expect(find.value).toBe(undefined);
+
+          dependency.value = 6;
+
+          expect(findFn.mock.calls.length).toBe(9);
+          expect(listener.mock.calls.length).toBe(1);
+          expect(listener.mock.calls[0][0]).toEqual(new ValueChangeEvent(6, undefined, find));
+          expect(find.value).toBe(6);
+
+          dependency.value = 2;
+
+          expect(findFn.mock.calls.length).toBe(11);
+          expect(listener.mock.calls.length).toBe(2);
+          expect(listener.mock.calls[1][0]).toEqual(new ValueChangeEvent(2, 6, find));
+          expect(find.value).toBe(2);
+
+          dependency.value = 5;
+
+          expect(findFn.mock.calls.length).toBe(15);
+          expect(listener.mock.calls.length).toBe(3);
+          expect(listener.mock.calls[2][0]).toEqual(new ValueChangeEvent(undefined, 2, find));
           expect(find.value).toBe(undefined);
         });
     });

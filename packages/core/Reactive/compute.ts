@@ -18,7 +18,11 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
   }
 
   get value() {
-    return this._fn.apply(this);
+    if (!this.eventObserver.isWatching){
+      this._value = this._fn.apply(this);
+    }
+
+    return this._value;
   }
 
   private set value(set: T) {
@@ -26,7 +30,7 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
   }
 
   protected checkChange() {
-    let newValue = this.value;
+    let newValue = this._fn.apply(this);
 
     if (this._value !== newValue) {
       let ev = new ValueChangeEvent<T>(newValue, this._value, this);
@@ -39,12 +43,14 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
     fn: () => T,
     ...dependencies: (IReactiveEvent<any> | zzEvent<any>)[]
   ) {
-    super(fn());
+    super(undefined as any);
 
     this._fn = fn;
 
     this.eventObserver = onStartListening(() => {
       const eventsStack = new DestructorsStack();
+
+      this._value = this._fn.apply(this);
 
       for (let varOrEvent of dependencies) {
         if (varOrEvent instanceof zzEvent) {
@@ -55,8 +61,6 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
           );
         }
       }
-
-      this._value = this.value;
 
       return eventsStack;
     }, this.onChange);
