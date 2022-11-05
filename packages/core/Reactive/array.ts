@@ -313,8 +313,9 @@ export class zzArray<T> extends zzReactive<T[]> implements IArray<T> {
     return joinedString;
   }
 
-  map<NewT>(filterFn: (value: T, index: number, self: zzArray<T>) => NewT) {
-    return new zzArrayMap<T, NewT>(this, filterFn);
+  map<NewT>(filterFn: (value: T, index: number, self: zzArray<T>) => NewT,
+    ...dependencies: (zzReactive<any> | zzEvent<any>)[]) {
+    return new zzArrayMap<T, NewT>(this, filterFn, dependencies);
   }
 
   constructor(array: T[] = []) {
@@ -432,18 +433,15 @@ export class zzArrayMap<T, NewT> extends zzArray<NewT> {
   }
 
   refresh() {
-    this.replace(
-      this.mappedArray
-        .toArray()
-        .map((value, index) => this.mapFn(value, index, this.sourceArray))
-    );
+    this.mappedArray.replace(this.sourceArray.value);
 
     return this;
   }
 
   constructor(
     sourceArray: zzArray<T>,
-    mapFn: (value: T, index: number, self: zzArray<T>) => NewT
+    mapFn: (value: T, index: number, self: zzArray<T>) => NewT,
+    dependencies: (zzReactive<any> | zzEvent<any>)[]
   ) {
     super([]);
 
@@ -465,10 +463,10 @@ export class zzArrayMap<T, NewT> extends zzArray<NewT> {
       () => {
         //make silent values initialization, if listeners are added partly
         this._isSilent = true;
-        this.mappedArray.replace(this.sourceArray.toArray());
+        this.refresh();
         this._isSilent = false;
 
-        return new DestructorsStack(
+        const eventsStack = new DestructorsStack(
           sourceArray.onAdd.addListener((ev) => {
             this.mappedArray.add([ev.added], ev.index);
           }),
@@ -476,6 +474,20 @@ export class zzArrayMap<T, NewT> extends zzArray<NewT> {
             this.mappedArray.removeByIndex(ev.index);
           })
         );
+
+        for (let varOrEvent of dependencies) {
+          if (varOrEvent instanceof zzEvent) {
+            eventsStack.add(
+              varOrEvent.addListener(() => this.refresh())
+            );
+          } else if (varOrEvent.onChange instanceof zzEvent) {
+            eventsStack.add(
+              varOrEvent.onChange.addListener(() => this.refresh())
+            );
+          }
+        }
+  
+        return eventsStack;
       },
       this.onAdd,
       this.onChange,
