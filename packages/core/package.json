@@ -5,7 +5,12 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
-  "author": "Stanislav Shishankin"
+  "author": "Stanislav Shishankin",
+  "devDependencies": {
+    "@types/jest": "^29.2.2",
+    "jest": "^29.2.2",
+    "ts-jest": "^29.0.3"
+  }
 }
