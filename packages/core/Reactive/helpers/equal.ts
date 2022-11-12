@@ -11,7 +11,7 @@ export const zzIsEqual = <T>(a: ValueOrReactive<T>, b: ValueOrReactive<T>) => {
   const ar = zzMakeReactive(a);
   const br = zzMakeReactive(b);
 
-  return zzCompute(() => ar.value === br.value, ar, br);
+  return zzCompute(() => ar.value === br.value);
 };
 
 export const zzEq = zzIsEqual;
@@ -23,7 +23,7 @@ export const zzIsNotEqual = <T>(
   const ar = zzMakeReactive(a);
   const br = zzMakeReactive(b);
 
-  return zzCompute(() => ar.value !== br.value, ar, br);
+  return zzCompute(() => ar.value !== br.value);
 };
 
 export const zzNEq = zzIsNotEqual;
@@ -31,7 +31,7 @@ export const zzNEq = zzIsNotEqual;
 export const zzNot = <T>(value: ValueOrReactive<T>) => {
   const vr = zzMakeReactive(value);
 
-  return zzCompute(() => !vr.value, vr);
+  return zzCompute(() => !vr.value);
 };
 
 export const zzN = zzNot;
@@ -45,5 +45,5 @@ export const zzIf = <T, R>(
   const tr = zzMakeReactive(onTrue);
   const fr = zzMakeReactive(onFalse);
 
-  return zzCompute(() => (Boolean(cr.value) ? tr.value : fr.value), cr, tr, fr);
+  return zzCompute(() => (Boolean(cr.value) ? tr.value : fr.value));
 };

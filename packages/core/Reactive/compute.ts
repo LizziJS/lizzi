@@ -4,7 +4,12 @@
  * This source code is licensed under the MIT license.
  */
 
-import { IReactiveEvent, ValueChangeEvent, zzReactive } from "./reactive";
+import {
+  IReactiveEvent,
+  ValueChangeEvent,
+  zzReactive,
+  zzValuesObserver,
+} from "./reactive";
 import { DestructorsStack, IDestructor } from "../Destructor";
 import { onStartListening, zzEvent } from "../Event";
 import { zzComputeArrayFn } from "./array";
@@ -18,7 +23,9 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
   }
 
   get value() {
-    if (!this.eventObserver.isWatching){
+    zzValuesObserver.emit(this);
+
+    if (!this.eventObserver.isWatching) {
       this._value = this._fn.apply(this);
     }
 
@@ -27,16 +34,6 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
 
   private set value(set: T) {
     throw new SyntaxError("You can not set compute value");
-  }
-
-  protected checkChange() {
-    let newValue = this._fn.apply(this);
-
-    if (this._value !== newValue) {
-      let ev = new ValueChangeEvent<T>(newValue, this._value, this);
-      this._value = newValue;
-      this.onChange.emit(ev);
-    }
   }
 
   constructor(
@@ -48,17 +45,40 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
     this._fn = fn;
 
     this.eventObserver = onStartListening(() => {
-      const eventsStack = new DestructorsStack();
+      const variableStack = new DestructorsStack();
+      const eventsStack = new DestructorsStack(variableStack);
+
+      const checkChange = () => {
+        variableStack.destroy();
+
+        const valueListener = zzValuesObserver.addListener((variable) => {
+          variableStack.add(variable.onChange.addListener(checkChange));
+        });
+
+        let newValue = this._fn.apply(this);
+
+        valueListener.remove();
+
+        if (this._value !== newValue) {
+          let ev = new ValueChangeEvent<T>(newValue, this._value, this);
+          this._value = newValue;
+          this.onChange.emit(ev);
+        }
+      };
+
+      const valueListener = zzValuesObserver.addListener((variable) => {
+        variableStack.add(variable.onChange.addListener(checkChange));
+      });
 
       this._value = this._fn.apply(this);
 
+      valueListener.remove();
+
       for (let varOrEvent of dependencies) {
         if (varOrEvent instanceof zzEvent) {
-          eventsStack.add(varOrEvent.addListener(() => this.checkChange()));
+          eventsStack.add(varOrEvent.addListener(checkChange));
         } else if (varOrEvent.onChange instanceof zzEvent) {
-          eventsStack.add(
-            varOrEvent.onChange.addListener(() => this.checkChange())
-          );
+          eventsStack.add(varOrEvent.onChange.addListener(checkChange));
         }
       }
 

@@ -9,6 +9,7 @@ import {
   IReactiveEvent,
   IReactiveValue,
   zzReactive,
+  zzValuesObserver,
 } from "../reactive";
 import { DestructorsStack } from "../../Destructor";
 import { onStartListening, zzEvent } from "../../Event";
@@ -74,6 +75,8 @@ export class zzValueFilter<T> extends zzReactive<T> {
   protected readonly source: zzReactive<T>;
 
   get value(): T {
+    zzValuesObserver.emit(this);
+    
     return this.source.value;
   }
 

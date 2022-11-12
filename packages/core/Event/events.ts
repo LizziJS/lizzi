@@ -106,7 +106,7 @@ export class _Event<ListenerFuncT extends (...args: any[]) => void> {
   }
 
   emit(...args: Parameters<ListenerFuncT>) {
-    const values = this.listenersMap.values();
+    const values = Array.from(this.listenersMap.values());
 
     for (let listener of values) {
       listener.run(...args);

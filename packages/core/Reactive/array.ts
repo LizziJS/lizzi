@@ -9,6 +9,7 @@ import {
   IReactiveEvent,
   IReactiveValue,
   zzReactive,
+  zzValuesObserver,
 } from "./reactive";
 import { DestructorsStack, IDestructor } from "../Destructor";
 import { zzEvent, EventsObserver, onStartListening } from "../Event";
@@ -194,6 +195,8 @@ export class zzArray<T> extends zzReactive<T[]> implements IArray<T> {
   }
 
   toArray() {
+    zzValuesObserver.emit(this);
+
     return this._value;
   }
 
@@ -254,17 +257,16 @@ export class zzArray<T> extends zzReactive<T[]> implements IArray<T> {
     return new zzComputeArrayFn(
       () =>
         this.toArray().filter((value, index) => filterFn(value, index, this)),
-      this,
       ...dependencies
     );
   }
 
   includes(value: T | zzReactive<T>) {
     if (value instanceof zzReactive) {
-      return zzCompute(() => this.toArray().includes(value.value), this, value);
+      return zzCompute(() => this.toArray().includes(value.value));
     }
 
-    return zzCompute(() => this.toArray().includes(value), this);
+    return zzCompute(() => this.toArray().includes(value));
   }
 
   find(
@@ -273,7 +275,6 @@ export class zzArray<T> extends zzReactive<T[]> implements IArray<T> {
   ) {
     return zzCompute(
       () => this.toArray().find((value, index) => findFn(value, index, this)),
-      this,
       ...dependencies
     );
   }
@@ -284,38 +285,23 @@ export class zzArray<T> extends zzReactive<T[]> implements IArray<T> {
   ) {
     return new zzComputeArrayFn(
       () => this.toArray().slice().sort(sortFn),
-      this,
       ...dependencies
     );
   }
 
   join(join: ValueOrReactive<string> = "") {
     const joinReact = zzMakeReactive(join);
-    const refreshEvent = new zzEvent<() => void>();
 
-    const joinedString = zzCompute(
-      () => this.value.join(joinReact.value),
-      this,
-      joinReact,
-      refreshEvent
-    );
-
-    onStartListening(
-      () =>
-        this.setItemsListener((item) => {
-          if (item instanceof zzReactive) {
-            return item.onChange.addListener(() => refreshEvent.emit());
-          }
-        }),
-      joinedString.onChange
-    );
+    const joinedString = zzCompute(() => this.value.join(joinReact.value));
 
     return joinedString;
   }
 
-  map<NewT>(filterFn: (value: T, index: number, self: zzArray<T>) => NewT,
-    ...dependencies: (zzReactive<any> | zzEvent<any>)[]) {
-    return new zzArrayMap<T, NewT>(this, filterFn, dependencies);
+  map<NewT>(
+    mapFn: (value: T, index: number, self: zzArray<T>) => NewT,
+    ...dependencies: (zzReactive<any> | zzEvent<any>)[]
+  ) {
+    return new zzArrayMap<T, NewT>(this, mapFn, dependencies);
   }
 
   constructor(array: T[] = []) {
@@ -335,6 +321,8 @@ export class zzComputeArrayFn<T> extends zzArray<T> {
   }
 
   toArray() {
+    zzValuesObserver.emit(this);
+
     return this.sourceArray.value;
   }
 
@@ -356,10 +344,7 @@ export class zzComputeArrayFn<T> extends zzArray<T> {
       this.onRemove
     );
 
-    this.sourceArray = new zzComputeFn(
-      fn,
-      ...dependencies
-    );
+    this.sourceArray = new zzComputeFn(fn, ...dependencies);
   }
 }
 
@@ -408,6 +393,8 @@ export class zzArrayMap<T, NewT> extends zzArray<NewT> {
   }
 
   toArray() {
+    zzValuesObserver.emit(this);
+
     if (!this.eventObserver.isWatching) {
       this.mappedArray.replace(this.sourceArray.toArray());
     }
@@ -477,16 +464,14 @@ export class zzArrayMap<T, NewT> extends zzArray<NewT> {
 
         for (let varOrEvent of dependencies) {
           if (varOrEvent instanceof zzEvent) {
-            eventsStack.add(
-              varOrEvent.addListener(() => this.refresh())
-            );
+            eventsStack.add(varOrEvent.addListener(() => this.refresh()));
           } else if (varOrEvent.onChange instanceof zzEvent) {
             eventsStack.add(
               varOrEvent.onChange.addListener(() => this.refresh())
             );
           }
         }
-  
+
         return eventsStack;
       },
       this.onAdd,
@@ -506,6 +491,8 @@ export class zzArrayModel<
   readonly model: zzArray<NewT>;
 
   get value(): T[] {
+    zzValuesObserver.emit(this);
+
     return this.model.toArray().map((model) => model.value);
   }
 
@@ -524,14 +511,12 @@ export class zzArrayModel<
   ) {
     super([]);
 
-    this.model = new zzComputeArrayFn(
-      () =>
-        this.toArray().map((value, index) => {
-          const model = modelContructorFn(value, index);
-          modelUpdateFn(model, value);
-          return model;
-        }),
-      this
+    this.model = new zzComputeArrayFn(() =>
+      this.toArray().map((value, index) => {
+        const model = modelContructorFn(value, index);
+        modelUpdateFn(model, value);
+        return model;
+      })
     );
   }
 }

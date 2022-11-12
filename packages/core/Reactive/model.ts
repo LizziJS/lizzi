@@ -6,7 +6,8 @@
 
 import { DestructorsStack } from "../Destructor";
 import { onStartListening, zzEvent } from "../Event";
-import { InferReactive, zzReactive } from "./reactive";
+import { zzArray } from "./array";
+import { InferReactive, zzReactive, zzValuesObserver } from "./reactive";
 
 export type InferModel<Type extends object> = {
   [P in keyof Type]: InferReactive<Type[P]>;
@@ -39,6 +40,8 @@ export class zzModel<T extends object> extends zzReactive<InferModel<T>> {
   }
 
   get value(): InferModel<T> {
+    zzValuesObserver.emit(this);
+    
     return this.values();
   }
 
@@ -134,37 +137,5 @@ export class zzModelConcat<A extends object, B extends object> extends zzModel<
         ),
       this.onChange
     );
-  }
-}
-
-export class ModelGroup {
-  protected prototypesValuesMap = new Map<any, Set<string>>();
-
-  add: (prototype: object, valueName: string) => void;
-
-  variables(object: { [key: string]: any }) {
-    const values = this.prototypesValuesMap.get(Object.getPrototypeOf(object));
-
-    if (!values) throw new TypeError("Can't getFrom values from " + object);
-
-    const result: { [key: string]: any } = {};
-
-    for (const value of values) {
-      result[value] = object[value];
-    }
-
-    return result;
-  }
-
-  constructor() {
-    this.add = ((prototype: object, valueName: string) => {
-      let values = this.prototypesValuesMap.get(prototype);
-      if (!values) {
-        values = new Set();
-        this.prototypesValuesMap.set(prototype, values);
-      }
-
-      values.add(valueName);
-    }).bind(this);
   }
 }

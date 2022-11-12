@@ -28,17 +28,21 @@ export interface IReactiveValue<T> {
 
 export type IReactive<T> = IReactiveEvent<T> & IReactiveValue<T>;
 
-export class zzReactive<T> implements IReactive<T> {
-  readonly onChange = new zzEvent<(event: ValueChangeEvent<T>) => void>();
-  protected _value: T;
+export const zzValuesObserver = new zzEvent<(variable: zzReactive<any>) => void>();
 
-  get value(): T {
+export class zzReactive<TValue> implements IReactive<TValue> {
+  readonly onChange = new zzEvent<(event: ValueChangeEvent<TValue>) => void>();
+  protected _value: TValue;
+
+  get value(): TValue {
+    zzValuesObserver.emit(this);
+
     return this._value;
   }
 
-  set value(newValue: T) {
+  set value(newValue: TValue) {
     if (this._value !== newValue) {
-      let ev = new ValueChangeEvent<T>(newValue, this._value, this);
+      let ev = new ValueChangeEvent<TValue>(newValue, this._value, this);
       this._value = newValue;
       this.onChange.emit(ev);
     }
@@ -52,7 +56,7 @@ export class zzReactive<T> implements IReactive<T> {
     return this.value;
   }
 
-  constructor(value: T) {
+  constructor(value: TValue) {
     this._value = value;
   }
 }
@@ -71,6 +75,8 @@ export class zzType<T> extends zzReactive<T> {
   }
 
   get value(): T {
+    zzValuesObserver.emit(this);
+    
     return this._value;
   }
 
