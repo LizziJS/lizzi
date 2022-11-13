@@ -1,11 +1,13 @@
 import { Post, Posts } from "./Post";
+import { RouteState } from "./RouteState";
 import { server } from "./ServerSnapshot";
 import { User, Users } from "./User";
 
-export class AppState{
-    @server.arr(Post) readonly posts = new Posts();
-    @server.arr(User) readonly users = new Users();
+@server.obj
+export class AppState {
+  @server.var readonly posts = new Posts();
+  @server.var readonly users = new Users();
+  readonly route = new RouteState();
 }
 
-export const appState = new AppState;
-
+export const appState = new AppState();

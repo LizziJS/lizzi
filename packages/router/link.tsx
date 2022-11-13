@@ -4,10 +4,9 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzMakeReactive, zz, zzRoV } from "@lizzi/core";
-import { onClick } from "../DOM";
-import { JSX } from "../jsx-runtime";
-import { ViewComponent } from "../view";
+import { zzMakeReactive, zzRoV } from "@lizzi/core";
+import { onClick, ViewComponent } from "@lizzi/template";
+import { JSX } from "@lizzi/template/jsx-runtime";
 import { Router } from "./view";
 
 export class Link extends ViewComponent {

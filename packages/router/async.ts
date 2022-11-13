@@ -4,8 +4,8 @@
  * This source code is licensed under the MIT license.
  */
 
-import { ViewComponent } from "../view/ViewComponent";
-import { ViewNode } from "../view/ViewNode";
+import { ViewComponent } from "@lizzi/template/view/ViewComponent";
+import { ViewNode } from "@lizzi/template/view/ViewNode";
 
 export class AsyncView extends ViewComponent {
   constructor(asyncFn: () => Promise<ViewNode>) {

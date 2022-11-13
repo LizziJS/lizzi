@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzReactive } from "@lizzi/core/index";
+import { zzCompute, zzReactive } from "@lizzi/core/index";
 import { JSX } from "@lizzi/template/jsx-runtime";
 import { MapJSXChildrensToNodes } from "../view";
 import { ViewComponent } from "../view/ViewComponent";
@@ -14,7 +14,7 @@ export class If extends ViewComponent {
     condition,
     children,
   }: {
-    condition: zzReactive<any> | any;
+    condition: zzReactive<any> | (() => boolean) | any;
     children: JSX.Childrens<If>;
   }) {
     super();
@@ -23,6 +23,10 @@ export class If extends ViewComponent {
 
     const elseNodes = nodes.filter((node) => node instanceof Else);
     const condNodes = nodes.filter((node) => !(node instanceof Else));
+
+    if (typeof condition === "function") {
+      condition = zzCompute(condition);
+    }
 
     if (condition instanceof zzReactive) {
       this.onMount((view) => {

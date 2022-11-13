@@ -14,21 +14,34 @@ import {
 import { DestructorsStack } from "../../Destructor";
 import { onStartListening, zzEvent } from "../../Event";
 
-export function zzEffect(
+export function zzObserver(
   fn: (...args: any) => void,
   ...dependencies: (IReactiveEvent<any> | zzEvent<any>)[]
 ) {
-  const destructor = new DestructorsStack();
+  const variableStack = new DestructorsStack();
+  const destructor = new DestructorsStack(variableStack);
+
+  const checkChange = () => {
+    variableStack.destroy();
+
+    const valueListener = zzValuesObserver.addListener((variable) => {
+      variableStack.add(variable.onChange.addListener(checkChange));
+    });
+
+    fn();
+
+    valueListener.remove();
+  };
 
   for (let varOrEvent of dependencies) {
     if (varOrEvent instanceof zzEvent) {
-      destructor.add(varOrEvent.addListener(fn));
+      destructor.add(varOrEvent.addListener(checkChange));
     } else if (varOrEvent.onChange instanceof zzEvent) {
-      destructor.add(varOrEvent.onChange.addListener(fn));
+      destructor.add(varOrEvent.onChange.addListener(checkChange));
     }
   }
 
-  fn();
+  checkChange();
 
   return destructor;
 }
@@ -76,7 +89,7 @@ export class zzValueFilter<T> extends zzReactive<T> {
 
   get value(): T {
     zzValuesObserver.emit(this);
-    
+
     return this.source.value;
   }
 

@@ -1,4 +1,3 @@
-import { Snapshot } from "@lizzi/core";
+import { Snapshot } from "@lizzi/snapshot";
 
-export const server = new Snapshot;
-
+export const server = new Snapshot();

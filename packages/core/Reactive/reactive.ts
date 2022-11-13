@@ -28,7 +28,9 @@ export interface IReactiveValue<T> {
 
 export type IReactive<T> = IReactiveEvent<T> & IReactiveValue<T>;
 
-export const zzValuesObserver = new zzEvent<(variable: zzReactive<any>) => void>();
+export const zzValuesObserver = new zzEvent<
+  (variable: zzReactive<any>) => void
+>();
 
 export class zzReactive<TValue> implements IReactive<TValue> {
   readonly onChange = new zzEvent<(event: ValueChangeEvent<TValue>) => void>();
@@ -76,7 +78,7 @@ export class zzType<T> extends zzReactive<T> {
 
   get value(): T {
     zzValuesObserver.emit(this);
-    
+
     return this._value;
   }
 

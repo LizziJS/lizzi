@@ -278,6 +278,82 @@ describe("zzArray", () => {
         new ArrayAddEvent(8, 1, filter)
       );
     });
+
+    it("should add listeners to sub-items", () => {
+      const array = new zzArray(
+        [1, 2, 3, 4, 5, 6, 7, 8, 9].map<{ id: zzInteger }>((value) => ({
+          id: new zzInteger(value),
+        }))
+      );
+      const lessId = new zzInteger(5);
+      const filterFn = jest.fn(
+        (item: { id: zzInteger }) => item.id.value < lessId.value
+      );
+
+      const filter = array.filter(filterFn);
+
+      expect(filterFn.mock.calls.length).toBe(0);
+      expect(array.onChange.countListeners()).toBe(0);
+      for (const item of array) {
+        expect(item.id.onChange.countListeners()).toBe(0);
+      }
+
+      const listener = filter.onChange.addListener(() => {});
+
+      expect(JSON.stringify(filter)).toEqual(
+        JSON.stringify([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }])
+      );
+      expect(filterFn.mock.calls.length).toBe(18);
+      expect(array.onChange.countListeners()).toBe(1);
+      for (const item of array) {
+        expect(item.id.onChange.countListeners()).toBe(1);
+      }
+
+      array.toArray()[0].id.value = 5;
+      expect(filterFn.mock.calls.length).toBe(27);
+      expect(JSON.stringify(filter)).toEqual(
+        JSON.stringify([{ id: 2 }, { id: 3 }, { id: 4 }])
+      );
+
+      array.toArray()[7].id.value = 1;
+      expect(filterFn.mock.calls.length).toBe(36);
+      expect(JSON.stringify(filter)).toEqual(
+        JSON.stringify([{ id: 2 }, { id: 3 }, { id: 4 }, { id: 1 }])
+      );
+
+      lessId.value = 7;
+      expect(filterFn.mock.calls.length).toBe(45);
+      expect(JSON.stringify(filter)).toEqual(
+        JSON.stringify([
+          { id: 5 },
+          { id: 2 },
+          { id: 3 },
+          { id: 4 },
+          { id: 5 },
+          { id: 6 },
+          { id: 1 },
+        ])
+      );
+
+      listener.destroy();
+      expect(filterFn.mock.calls.length).toBe(45);
+      expect(array.onChange.countListeners()).toBe(0);
+      for (const item of array) {
+        expect(item.id.onChange.countListeners()).toBe(0);
+      }
+
+      expect(JSON.stringify(filter)).toEqual(
+        JSON.stringify([
+          { id: 5 },
+          { id: 2 },
+          { id: 3 },
+          { id: 4 },
+          { id: 5 },
+          { id: 6 },
+          { id: 1 },
+        ])
+      );
+    });
   });
 
   describe("zzArray map", () => {

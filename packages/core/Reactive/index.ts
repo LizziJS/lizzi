@@ -10,5 +10,4 @@ export * from "./object";
 export * from "./array";
 export * from "./compute";
 export * from "./model";
-export * from "./snapshot";
 export * from "./helpers";

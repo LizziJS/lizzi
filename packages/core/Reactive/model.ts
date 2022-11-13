@@ -41,7 +41,7 @@ export class zzModel<T extends object> extends zzReactive<InferModel<T>> {
 
   get value(): InferModel<T> {
     zzValuesObserver.emit(this);
-    
+
     return this.values();
   }
 
