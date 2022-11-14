@@ -4,9 +4,6 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzReactive } from "../reactive";
-import { DestructorsStack } from "../../Destructor";
-import { onStartListening, zzEvent } from "../../Event";
 import { zzCompute } from "../compute";
 
 export const zz = (strings: TemplateStringsArray, ...values: any) => {
@@ -18,25 +15,7 @@ export const zz = (strings: TemplateStringsArray, ...values: any) => {
   }
   concatArrayString.push(strings[strings.length - 1]);
 
-  const refreshEvent = new zzEvent<() => void>();
-  const joinedString = zzCompute(
-    () => concatArrayString.join(""),
-    refreshEvent
-  );
-
-  onStartListening(() => {
-    const destructor = new DestructorsStack();
-
-    for (const value of values) {
-      if (value instanceof zzReactive) {
-        destructor.add(value.onChange.addListener(() => refreshEvent.emit()));
-      }
-    }
-
-    return destructor;
-  }, joinedString.onChange);
-
-  return joinedString;
+  return zzCompute(() => concatArrayString.join(""));
 };
 
 /*

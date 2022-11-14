@@ -1,6 +1,7 @@
 import { zzEvent } from "../Event";
 import { zzComputeFn } from "./compute";
-import { zzBoolean, zzInteger } from "./vars";
+import { zzObject } from "./object";
+import { zzBoolean, zzInteger, zzString } from "./vars";
 
 describe("zzCompute", () => {
   describe("zzCompute functionality", () => {
@@ -178,6 +179,64 @@ describe("zzCompute", () => {
       expect(value2.onChange.countListeners()).toBe(0);
       expect(value3.onChange.countListeners()).toBe(0);
       expect(compute2.value).toBe(6);
+    });
+
+    it("should add listener to nested object reactive variables", () => {
+      const listener = jest.fn();
+
+      let str1 = new zzString("string1");
+      let str2 = new zzString("other2");
+      let obj21 = new zzObject<{ str: typeof str1 }>({ str: str1 });
+      let obj22 = new zzObject<{ str: typeof str2 }>({ str: str2 });
+      let obj1 = new zzObject<{ obj2: typeof obj21 }>(null);
+
+      const computeFn = jest.fn(() => obj1.value?.obj2.value?.str.value);
+      const compute = new zzComputeFn(computeFn);
+
+      expect(compute.value).toBe(undefined);
+      expect(obj1.onChange.countListeners()).toBe(0);
+      expect(obj21.onChange.countListeners()).toBe(0);
+      expect(obj22.onChange.countListeners()).toBe(0);
+      expect(str1.onChange.countListeners()).toBe(0);
+      expect(str2.onChange.countListeners()).toBe(0);
+
+      compute.onChange.addListener(listener);
+
+      expect(listener.mock.calls.length).toBe(0);
+      expect(obj1.onChange.countListeners()).toBe(1);
+      expect(obj21.onChange.countListeners()).toBe(0);
+      expect(obj22.onChange.countListeners()).toBe(0);
+      expect(str1.onChange.countListeners()).toBe(0);
+      expect(str2.onChange.countListeners()).toBe(0);
+
+      obj1.value = { obj2: obj21 };
+
+      expect(compute.value).toBe("string1");
+      expect(listener.mock.calls.length).toBe(1);
+      expect(obj1.onChange.countListeners()).toBe(1);
+      expect(obj21.onChange.countListeners()).toBe(1);
+      expect(obj22.onChange.countListeners()).toBe(0);
+      expect(str1.onChange.countListeners()).toBe(1);
+      expect(str2.onChange.countListeners()).toBe(0);
+
+      obj1.value = { obj2: obj22 };
+
+      expect(compute.value).toBe("other2");
+      expect(listener.mock.calls.length).toBe(2);
+      expect(obj1.onChange.countListeners()).toBe(1);
+      expect(obj21.onChange.countListeners()).toBe(0);
+      expect(obj22.onChange.countListeners()).toBe(1);
+      expect(str1.onChange.countListeners()).toBe(0);
+      expect(str2.onChange.countListeners()).toBe(1);
+
+      obj22.value = { str: str1 };
+      expect(compute.value).toBe("string1");
+      expect(listener.mock.calls.length).toBe(3);
+      expect(obj1.onChange.countListeners()).toBe(1);
+      expect(obj21.onChange.countListeners()).toBe(0);
+      expect(obj22.onChange.countListeners()).toBe(1);
+      expect(str1.onChange.countListeners()).toBe(1);
+      expect(str2.onChange.countListeners()).toBe(0);
     });
   });
 });
