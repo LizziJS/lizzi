@@ -8,7 +8,7 @@ import {
   IReactiveEvent,
   ValueChangeEvent,
   zzReactive,
-  zzValuesObserver,
+  zzReactiveGetObserver,
 } from "./reactive";
 import { DestructorsStack, IDestructor } from "../Destructor";
 import { onStartListening, zzEvent } from "../Event";
@@ -23,7 +23,7 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
   }
 
   get value() {
-    zzValuesObserver.emit(this);
+    zzReactiveGetObserver.emit(this);
 
     if (!this.eventObserver.isWatching) {
       this._value = this._fn.apply(this);
@@ -51,28 +51,32 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
       const checkChange = () => {
         variableStack.destroy();
 
-        const valueListener = zzValuesObserver.addListener((variable) => {
-          variableStack.add(variable.onChange.addListener(checkChange));
-        });
+        let newValue: T;
 
-        let newValue = this._fn.apply(this);
+        zzReactiveGetObserver.runIsolated(
+          (variable) => {
+            variableStack.add(variable.onChange.addListener(checkChange));
+          },
+          () => {
+            newValue = this._fn.apply(this);
+          }
+        );
 
-        valueListener.remove();
-
-        if (this._value !== newValue) {
-          let ev = new ValueChangeEvent<T>(newValue, this._value, this);
-          this._value = newValue;
+        if (this._value !== newValue!) {
+          let ev = new ValueChangeEvent<T>(newValue!, this._value, this);
+          this._value = newValue!;
           this.onChange.emit(ev);
         }
       };
 
-      const valueListener = zzValuesObserver.addListener((variable) => {
-        variableStack.add(variable.onChange.addListener(checkChange));
-      });
-
-      this._value = this._fn.apply(this);
-
-      valueListener.remove();
+      zzReactiveGetObserver.runIsolated(
+        (variable) => {
+          variableStack.add(variable.onChange.addListener(checkChange));
+        },
+        () => {
+          this._value = this._fn.apply(this);
+        }
+      );
 
       for (let varOrEvent of dependencies) {
         if (varOrEvent instanceof zzEvent) {

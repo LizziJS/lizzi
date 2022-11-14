@@ -6,8 +6,7 @@
 
 import { DestructorsStack } from "../Destructor";
 import { onStartListening, zzEvent } from "../Event";
-import { zzArray } from "./array";
-import { InferReactive, zzReactive, zzValuesObserver } from "./reactive";
+import { InferReactive, zzReactive, zzReactiveGetObserver } from "./reactive";
 
 export type InferModel<Type extends object> = {
   [P in keyof Type]: InferReactive<Type[P]>;
@@ -40,7 +39,7 @@ export class zzModel<T extends object> extends zzReactive<InferModel<T>> {
   }
 
   get value(): InferModel<T> {
-    zzValuesObserver.emit(this);
+    zzReactiveGetObserver.emit(this);
 
     return this.values();
   }

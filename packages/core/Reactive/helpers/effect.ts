@@ -9,7 +9,7 @@ import {
   IReactiveEvent,
   IReactiveValue,
   zzReactive,
-  zzValuesObserver,
+  zzReactiveGetObserver,
 } from "../reactive";
 import { DestructorsStack } from "../../Destructor";
 import { onStartListening, zzEvent } from "../../Event";
@@ -24,7 +24,7 @@ export function zzObserver(
   const checkChange = () => {
     variableStack.destroy();
 
-    const valueListener = zzValuesObserver.addListener((variable) => {
+    const valueListener = zzReactiveGetObserver.addListener((variable) => {
       variableStack.add(variable.onChange.addListener(checkChange));
     });
 
@@ -81,27 +81,31 @@ export function zzValueAffect<T>(
   });
 }
 
-export class zzValueFilter<T> extends zzReactive<T> {
+export class zzValueFilter<Out, In> extends zzReactive<Out> {
   onChange;
 
-  protected readonly onChangeFn: (newValue: T) => void;
-  protected readonly source: zzReactive<T>;
+  protected readonly onChangeFn: (newValue: In) => Out | undefined;
+  protected readonly source: zzReactive<Out>;
 
-  get value(): T {
-    zzValuesObserver.emit(this);
-
+  get value(): Out {
     return this.source.value;
   }
 
-  set value(newValue: T) {
-    this.onChangeFn(newValue);
+  set value(newValue: any) {
+    const changedValue = this.onChangeFn(newValue);
+    if (changedValue !== undefined) {
+      this.source.value = changedValue;
+    }
   }
 
-  constructor(value: zzReactive<T>, onChange: (newValue: T) => void) {
+  constructor(
+    source: zzReactive<Out>,
+    onChange: (newValue: In) => Out | undefined
+  ) {
     super(null as any);
 
-    this.source = value;
-    this.onChange = value.onChange;
+    this.source = source;
+    this.onChange = source.onChange;
 
     this.onChangeFn = onChange;
   }

@@ -5,6 +5,7 @@
  */
 
 import { zzEvent } from "../Event";
+import { zzEventListener, _Event } from "../Event/events";
 
 export class ValueChangeEvent<T> {
   constructor(
@@ -28,16 +29,38 @@ export interface IReactiveValue<T> {
 
 export type IReactive<T> = IReactiveEvent<T> & IReactiveValue<T>;
 
-export const zzValuesObserver = new zzEvent<
-  (variable: zzReactive<any>) => void
->();
+class ReactiveGetEvent extends _Event<(variable: zzReactive<any>) => void> {
+  protected listenersMap = new Map<
+    (variable: zzReactive<any>) => void,
+    zzEventListener<(variable: zzReactive<any>) => void>
+  >();
+
+  runIsolated(
+    newListener: (variable: zzReactive<any>) => void,
+    isolatedFn: () => void
+  ) {
+    const oldMap = Array.from(this.listenersMap.entries());
+    this.listenersMap.clear();
+
+    this.addListener(newListener);
+
+    isolatedFn();
+
+    this.listenersMap.clear();
+    this.listenersMap = new Map(oldMap);
+  }
+}
+
+export const zzReactiveGetObserver = new ReactiveGetEvent();
+
+export const zzValuesObserverIsolator = () => {};
 
 export class zzReactive<TValue> implements IReactive<TValue> {
   readonly onChange = new zzEvent<(event: ValueChangeEvent<TValue>) => void>();
   protected _value: TValue;
 
   get value(): TValue {
-    zzValuesObserver.emit(this);
+    zzReactiveGetObserver.emit(this);
 
     return this._value;
   }
@@ -77,7 +100,7 @@ export class zzType<T> extends zzReactive<T> {
   }
 
   get value(): T {
-    zzValuesObserver.emit(this);
+    zzReactiveGetObserver.emit(this);
 
     return this._value;
   }

@@ -9,7 +9,7 @@ import {
   IReactiveEvent,
   IReactiveValue,
   zzReactive,
-  zzValuesObserver,
+  zzReactiveGetObserver,
 } from "./reactive";
 import { DestructorsStack, IDestructor } from "../Destructor";
 import { zzEvent, EventsObserver, onStartListening } from "../Event";
@@ -195,7 +195,7 @@ export class zzArray<T> extends zzReactive<T[]> implements IArray<T> {
   }
 
   toArray() {
-    zzValuesObserver.emit(this);
+    zzReactiveGetObserver.emit(this);
 
     return this._value;
   }
@@ -321,7 +321,7 @@ export class zzComputeArrayFn<T> extends zzArray<T> {
   }
 
   toArray() {
-    zzValuesObserver.emit(this);
+    zzReactiveGetObserver.emit(this);
 
     return this.sourceArray.value;
   }
@@ -393,7 +393,7 @@ export class zzArrayMap<T, NewT> extends zzArray<NewT> {
   }
 
   toArray() {
-    zzValuesObserver.emit(this);
+    zzReactiveGetObserver.emit(this);
 
     if (!this.eventObserver.isWatching) {
       this.mappedArray.replace(this.sourceArray.toArray());
@@ -491,7 +491,7 @@ export class zzArrayModel<
   readonly model: zzArray<NewT>;
 
   get value(): T[] {
-    zzValuesObserver.emit(this);
+    zzReactiveGetObserver.emit(this);
 
     return this.model.toArray().map((model) => model.value);
   }

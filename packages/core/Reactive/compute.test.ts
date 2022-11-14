@@ -144,5 +144,40 @@ describe("zzCompute", () => {
       expect(value2.onChange.countListeners()).toBe(0);
       expect(value3.onChange.countListeners()).toBe(0);
     });
+
+    it("should not add depedencies to nested computed variables", () => {
+      const listener = jest.fn();
+
+      let value1 = new zzInteger(1);
+      let value2 = new zzInteger(2);
+      let value3 = new zzInteger(3);
+
+      const computeFn1 = jest.fn(() => value1.value + value2.value);
+      const compute1 = new zzComputeFn(computeFn1);
+
+      const computeFn2 = jest.fn(() => value3.value + compute1.value);
+      const compute2 = new zzComputeFn(computeFn2);
+
+      expect(compute2.value).toBe(6);
+      expect(value1.onChange.countListeners()).toBe(0);
+      expect(value3.onChange.countListeners()).toBe(0);
+      expect(value2.onChange.countListeners()).toBe(0);
+
+      compute2.onChange.addListener(listener);
+
+      expect(listener.mock.calls.length).toBe(0);
+      expect(value1.onChange.countListeners()).toBe(1);
+      expect(value2.onChange.countListeners()).toBe(1);
+      expect(value3.onChange.countListeners()).toBe(1);
+      expect(compute2.value).toBe(6);
+
+      compute2.onChange.removeListener(listener);
+
+      expect(listener.mock.calls.length).toBe(0);
+      expect(value1.onChange.countListeners()).toBe(0);
+      expect(value2.onChange.countListeners()).toBe(0);
+      expect(value3.onChange.countListeners()).toBe(0);
+      expect(compute2.value).toBe(6);
+    });
   });
 });
