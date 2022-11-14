@@ -12,7 +12,7 @@ export class ArrayDecorator implements ISnapshotType<any> {
   protected snapshot: Snapshot;
   readonly prototype: Function;
 
-  protected arrayClass: new () => any;
+  protected arrayClass: new (values: any) => any;
 
   primaries() {
     return [];
@@ -22,7 +22,9 @@ export class ArrayDecorator implements ISnapshotType<any> {
     if (!Array.isArray(values))
       throw new Error("values isn't array for array object");
 
-    const ids = this.snapshot._getClassMap(this.arrayClass)?.primaries() ?? [];
+    const ids =
+      this.snapshot.prototypesFnClassMap.get(this.arrayClass)?.primaries() ??
+      [];
 
     if (ids.length === 0)
       throw new Error(this.arrayClass.name + " class hasn't primary id");
@@ -39,8 +41,7 @@ export class ArrayDecorator implements ISnapshotType<any> {
       });
 
       if (!item) {
-        item = new this.arrayClass();
-        this.snapshot.createValues(item!, newValue);
+        item = new this.arrayClass(newValue);
       } else {
         this.snapshot.setValues(item!, newValue);
       }
@@ -60,7 +61,7 @@ export class ArrayDecorator implements ISnapshotType<any> {
   constructor(
     snapshot: Snapshot,
     prototype: Function,
-    arrayClass: new () => any
+    arrayClass: new (values: any) => any
   ) {
     this.snapshot = snapshot;
     this.prototype = prototype;

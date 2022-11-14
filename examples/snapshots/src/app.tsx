@@ -34,8 +34,4 @@ server.setValues(appState, {
 
 Body(<TwitterApp />);
 
-server.setValues(appState, {
-  posts: [{ id: 1 }, { id: 2, title: "", post: "" }],
-});
-
 console.log(server.getValues(appState));
