@@ -99,7 +99,7 @@ export function zzCompute<T>(
 }
 
 export const zzMemo = zzCompute;
-export const zzF = zzCompute;
+export const zzC = zzCompute;
 
 export function zzComputeArray<T>(
   fn: () => Array<T>,
@@ -109,3 +109,4 @@ export function zzComputeArray<T>(
 }
 
 export const zzMemoArray = zzComputeArray;
+export const zzA = zzComputeArray;

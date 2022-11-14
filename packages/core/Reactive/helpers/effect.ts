@@ -24,13 +24,9 @@ export function zzObserver(
   const checkChange = () => {
     variableStack.destroy();
 
-    const valueListener = zzReactiveGetObserver.addListener((variable) => {
+    zzReactiveGetObserver.runIsolated((variable) => {
       variableStack.add(variable.onChange.addListener(checkChange));
-    });
-
-    fn();
-
-    valueListener.remove();
+    }, fn);
   };
 
   for (let varOrEvent of dependencies) {
