@@ -14,7 +14,7 @@ export class ViewComponent extends ViewNode {
     super();
 
     this.element = document.createTextNode("");
-    this.setNodeElements([this.element]);
+    this.setNodes([this.element]);
 
     this.append(children);
   }

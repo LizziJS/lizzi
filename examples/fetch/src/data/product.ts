@@ -1,56 +1,22 @@
-import {
-  ModelGroup,
-  zzArray,
-  zzFloat,
-  zzInteger,
-  zzModel,
-  zzString,
-} from "@lizzi/core";
-import { JSONValue } from "../lib/json";
+import { zzArray, zzFloat, zzInteger, zzModel, zzString } from "@lizzi/core";
+import { Snapshot } from "@lizzi/snapshot";
 
-const json = new ModelGroup();
+export const json = new Snapshot();
 
+@json.obj
 export class Product {
-  @json.add readonly id = new zzInteger(0);
-  @json.add readonly title = new zzString("");
-  @json.add readonly description = new zzString("");
-  @json.add readonly price = new zzFloat(0);
-  @json.add readonly discountPercentage = new zzFloat(0);
-  @json.add readonly rating = new zzFloat(0);
-  @json.add readonly stock = new zzInteger(0);
-  @json.add readonly brand = new zzString("");
-  @json.add readonly category = new zzString("");
-  @json.add readonly thumbnail = new zzString("");
-  @json.add readonly images = new zzArray<string>();
-
-  readonly jsonModel = new zzModel(json.variables(this));
-
-  fromJSON(values: JSONValue) {
-    this.jsonModel.value = values;
-  }
+  @json.pri readonly id = new zzInteger(0);
+  @json.var readonly title = new zzString("");
+  @json.var readonly description = new zzString("");
+  @json.var readonly price = new zzFloat(0);
+  @json.var readonly discountPercentage = new zzFloat(0);
+  @json.var readonly rating = new zzFloat(0);
+  @json.var readonly stock = new zzInteger(0);
+  @json.var readonly brand = new zzString("");
+  @json.var readonly category = new zzString("");
+  @json.var readonly thumbnail = new zzString("");
+  @json.var readonly images = new zzArray<string>();
 }
 
-export class Products extends zzArray<Product> {
-  fromJSON(productList: { id: number; [key: string]: any }[]) {
-    if (!Array.isArray(productList))
-      throw new TypeError(
-        productList + " is not match type " + this.constructor.name
-      );
-
-    const lastValues = this.value;
-
-    this.value = productList.map((newProductValues) => {
-      let prod = lastValues.find(
-        (prod) => prod.id.value === newProductValues.id
-      );
-
-      if (!prod) {
-        prod = new Product();
-      }
-
-      prod.fromJSON(newProductValues);
-
-      return prod;
-    });
-  }
-}
+@json.arr(Product)
+export class Products extends zzArray<Product> {}

@@ -13,12 +13,15 @@ type ViewComponentStatuses = "unmounted" | "mounted" | "in-unmount-process";
 
 export const isViewNodeConstructor = Symbol();
 
-export interface ViewClass {
+export interface IViewNode {
+  parentNode: ViewNode | null;
   mount(): void;
   unmount(): void;
 }
 
-export class ViewNode implements ViewClass {
+export interface IViewNodeNodes {}
+
+export class ViewNode implements IViewNode {
   static [isViewNodeConstructor] = true;
 
   readonly _onMount = new zzEvent<(view: ViewNode) => void>();
@@ -35,11 +38,9 @@ export class ViewNode implements ViewClass {
   protected _elements: Node[] = [];
 
   protected _appendElement(view: ViewNode, beforeViewNode: ViewNode | null) {
-    const nodes = view.getElements();
+    const nodes = view.getNodes();
     const lastElement = this._elements[0];
-    const before = beforeViewNode
-      ? beforeViewNode.getFirstElement()
-      : lastElement;
+    const before = beforeViewNode ? beforeViewNode.getFirstNode() : lastElement;
     for (let node of nodes) {
       lastElement.parentNode?.insertBefore(node, before);
     }
@@ -109,7 +110,7 @@ export class ViewNode implements ViewClass {
   }
 
   protected _removeElement(view: ViewNode) {
-    const nodes = view.getElements();
+    const nodes = view.getNodes();
     for (let node of nodes) {
       node.parentNode?.removeChild(node);
     }
@@ -190,23 +191,32 @@ export class ViewNode implements ViewClass {
     return results;
   }
 
-  getElements() {
+  getNodes() {
     let elements: Node[] = [];
 
     for (let node of this.childNodes) {
-      elements = elements.concat(node.getElements());
+      elements = elements.concat(node.getNodes());
     }
 
     return elements.concat(this._elements);
   }
 
-  getFirstElement(): Node {
+  getFirstNode(): Node {
     return this.childNodes.length > 0
-      ? this.childNodes[0].getFirstElement()
+      ? this.childNodes[0].getFirstNode()
       : this._elements[0];
   }
 
-  protected setNodeElements(elements: Node[]) {
+  getFirstElement(): Element | undefined {
+    for (const child of this.childNodes) {
+      const childElement = child.getFirstElement();
+      if (childElement) return childElement;
+    }
+
+    return this._elements.find((node) => node instanceof Element) as Element;
+  }
+
+  protected setNodes(elements: Node[]) {
     this._elements = elements;
   }
 
@@ -291,7 +301,7 @@ export class TextView extends ViewNode {
 
     if (text instanceof zzReactive) {
       const textElement = document.createTextNode("");
-      this.setNodeElements([textElement]);
+      this.setNodes([textElement]);
 
       this.onMount(() => {
         this.addToUnmount(
@@ -303,7 +313,7 @@ export class TextView extends ViewNode {
         );
       });
     } else {
-      this.setNodeElements([document.createTextNode(String(text))]);
+      this.setNodes([document.createTextNode(String(text))]);
     }
   }
 }
@@ -312,7 +322,7 @@ export class ArrayView<T extends ViewNode> extends ViewNode {
   constructor({ children }: { children: zzArray<T> | T[] }) {
     super();
 
-    this.setNodeElements([document.createTextNode("")]);
+    this.setNodes([document.createTextNode("")]);
 
     if (children instanceof zzArray) {
       this.onMount(() => {
@@ -351,7 +361,7 @@ export class ObjectView<T extends ViewNode> extends ViewNode {
   constructor({ children }: { children: zzReactive<T | null> | T }) {
     super();
 
-    this.setNodeElements([document.createTextNode("")]);
+    this.setNodes([document.createTextNode("")]);
 
     if (children instanceof zzReactive) {
       this.onMount(() => {

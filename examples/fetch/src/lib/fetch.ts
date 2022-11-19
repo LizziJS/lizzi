@@ -28,7 +28,9 @@ export class zzFetch<T extends JSONValue> {
     this.isError.value = true;
   }
 
-  async get() {
+  async fetch() {
+    if (this.isLoading.value) return;
+
     this.isLoading.value = true;
     this.isError.value = false;
     this.data.value = null;
@@ -59,7 +61,9 @@ export class zzFetch<T extends JSONValue> {
   }
 
   constructor(url: zzRoV<string> | zzUrlGetParams) {
-    this.url = 
-      url instanceof zzUrlGetParams ? url : new zzUrlGetParams(zzMakeReactive(url));
+    this.url =
+      url instanceof zzUrlGetParams
+        ? url
+        : new zzUrlGetParams(zzMakeReactive(url));
   }
 }

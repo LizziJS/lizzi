@@ -29,9 +29,9 @@ export class ArrayDecorator implements ISnapshotType<any> {
     if (ids.length === 0)
       throw new Error(this.arrayClass.name + " class hasn't primary id");
 
-    const oldArray = object.toArray();
+    const oldArray = object.toArray().slice();
 
-    const newValues = values.map((newValue: any) => {
+    for (let newValue of values) {
       let item = oldArray.find((value) => {
         for (const idName of ids) {
           if (value[idName].value !== newValue[idName]) return false;
@@ -42,14 +42,11 @@ export class ArrayDecorator implements ISnapshotType<any> {
 
       if (!item) {
         item = new this.arrayClass(newValue);
+        object.add([item]);
       } else {
         this.snapshot.setValues(item!, newValue);
       }
-
-      return item;
-    });
-
-    object.value = newValues;
+    }
   }
 
   getter(valuesArray: { [key: string]: any }[]) {

@@ -1,6 +1,6 @@
 import { Body } from "@lizzi/template";
-import { UIApp } from "./components/UIApp";
+import { FetchApp } from "./components/FetchApp";
 
 import "./app.css";
 
-Body(<UIApp />);
+Body(<FetchApp />);

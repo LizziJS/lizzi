@@ -1,6 +1,8 @@
 import { zzMakeReactive, zzModel, zzReactive, zzRoV } from "@lizzi/core";
 
-export class zzUrlGetParams<T extends { [key: string]: zzRoV<string> } = {}> {
+export class zzUrlGetParams<
+  T extends { [key: string]: zzRoV<string | number> } = {}
+> {
   readonly url: zzReactive<string>;
   readonly query: zzModel<T | {}>;
 

@@ -26,22 +26,22 @@ export class DomElementView<T extends Element = Element> extends ViewNode {
     super();
 
     this.element = element;
-    this.setNodeElements([this.element]);
+    this.setNodes([this.element]);
   }
 
   protected _appendElement(view: ViewNode, beforeViewNode: ViewNode | null) {
-    const nodes = view.getElements();
-    const before = beforeViewNode ? beforeViewNode.getFirstElement() : null;
+    const nodes = view.getNodes();
+    const before = beforeViewNode ? beforeViewNode.getFirstNode() : null;
     for (let node of nodes) {
       this.element.insertBefore(node, before);
     }
   }
 
-  getElements() {
+  getNodes() {
     return this._elements;
   }
 
-  getFirstElement(): T {
+  getFirstNode(): T {
     return this.element;
   }
 
