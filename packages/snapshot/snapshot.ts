@@ -13,6 +13,7 @@ import {
   ObjectPrimaryValueDecorator,
   ObjectRequiedValueDecorator,
   ObjectValueDecorator,
+  ArrayReplaceDecorator,
 } from "./decorators";
 
 export class Snapshot {
@@ -23,8 +24,9 @@ export class Snapshot {
   readonly pri;
   readonly var;
   readonly req;
-  readonly arr;
-  readonly obj;
+  readonly array;
+  readonly arrayReplace;
+  readonly object;
 
   _getClassMap(object: { [key: string]: any }) {
     return this.prototypesClassMap.get(object);
@@ -127,7 +129,7 @@ export class Snapshot {
       );
     }).bind(this);
 
-    this.arr = (<T extends new () => any>(arrayClass: T) => {
+    this.array = (<T extends new () => any>(arrayClass: T) => {
       return <P>(prototype: new () => P): any => {
         const fn = (values: any): P => {
           const newClass = new prototype();
@@ -143,7 +145,27 @@ export class Snapshot {
       };
     }).bind(this);
 
-    this.obj = (<P>(prototype: new () => P): any => {
+    this.arrayReplace = (<T extends new () => any>(arrayClass: T) => {
+      return <P>(prototype: new () => P): any => {
+        const fn = (values: any): P => {
+          const newClass = new prototype();
+          this._createValues(newClass, values);
+          return newClass;
+        };
+
+        const decorator = new ArrayReplaceDecorator(
+          this,
+          prototype,
+          arrayClass
+        );
+        this.prototypesFnClassMap.set(fn, decorator);
+        this._setClassMap(decorator);
+
+        return fn;
+      };
+    }).bind(this);
+
+    this.object = (<P>(prototype: new () => P): any => {
       const fn = (values: any): P => {
         const newClass = new prototype();
         this._createValues(newClass, values);

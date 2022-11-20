@@ -3,7 +3,7 @@ import { Snapshot } from "@lizzi/snapshot";
 
 export const json = new Snapshot();
 
-@json.obj
+@json.object
 export class Product {
   @json.pri readonly id = new zzInteger(0);
   @json.var readonly title = new zzString("");
@@ -18,5 +18,5 @@ export class Product {
   @json.var readonly images = new zzArray<string>();
 }
 
-@json.arr(Product)
+@json.array(Product)
 export class Products extends zzArray<Product> {}

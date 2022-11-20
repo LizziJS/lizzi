@@ -9,7 +9,7 @@ export interface IDestructor {
 }
 
 export class DestructorsStack implements IDestructor {
-  readonly onDestroy = new zzEvent<(element: IDestructor) => void>();
+  readonly onDestroy = new zzSimpleEvent<(element: IDestructor) => void>();
 
   destroy() {
     this.onDestroy.emit(this);
@@ -38,7 +38,7 @@ export class DestructorsStack implements IDestructor {
 export class zzEventListener<ListenerFuncT extends (...args: any[]) => void>
   implements IDestructor
 {
-  readonly target: _Event<ListenerFuncT>;
+  readonly target: zzSimpleEvent<ListenerFuncT>;
   readonly fn: ListenerFuncT;
   readonly willRunOnce: boolean;
 
@@ -63,7 +63,7 @@ export class zzEventListener<ListenerFuncT extends (...args: any[]) => void>
   }
 
   constructor(
-    target: _Event<any>,
+    target: zzSimpleEvent<any>,
     fn: ListenerFuncT,
     runOnce: boolean = false
   ) {
@@ -73,7 +73,7 @@ export class zzEventListener<ListenerFuncT extends (...args: any[]) => void>
   }
 }
 
-export class _Event<ListenerFuncT extends (...args: any[]) => void> {
+export class zzSimpleEvent<ListenerFuncT extends (...args: any[]) => void> {
   protected readonly listenersMap = new Map<
     ListenerFuncT,
     zzEventListener<ListenerFuncT>
@@ -120,11 +120,11 @@ export class _Event<ListenerFuncT extends (...args: any[]) => void> {
 
 export class zzEvent<
   ListenerFuncT extends (...args: any[]) => void
-> extends _Event<ListenerFuncT> {
-  readonly onAddListener = new _Event<
+> extends zzSimpleEvent<ListenerFuncT> {
+  readonly onAddListener = new zzSimpleEvent<
     (listener: zzEventListener<ListenerFuncT>) => void
   >();
-  readonly onRemoveListener = new _Event<
+  readonly onRemoveListener = new zzSimpleEvent<
     (listener: zzEventListener<ListenerFuncT>) => void
   >();
 

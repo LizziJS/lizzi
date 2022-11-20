@@ -65,3 +65,39 @@ export class ArrayDecorator implements ISnapshotType<any> {
     this.arrayClass = arrayClass;
   }
 }
+
+export class ArrayReplaceDecorator extends ArrayDecorator {
+  setter(object: zzArray<any>, values: any) {
+    if (!Array.isArray(values))
+      throw new Error("values isn't array for array object");
+
+    const ids =
+      this.snapshot.prototypesFnClassMap.get(this.arrayClass)?.primaries() ??
+      [];
+
+    if (ids.length === 0)
+      throw new Error(this.arrayClass.name + " class hasn't primary id");
+
+    const oldArray = object.toArray().slice();
+
+    object.replace(
+      values.map((newValue) => {
+        let item = oldArray.find((value) => {
+          for (const idName of ids) {
+            if (value[idName].value !== newValue[idName]) return false;
+          }
+
+          return true;
+        });
+
+        if (!item) {
+          item = new this.arrayClass(newValue);
+        } else {
+          this.snapshot.setValues(item!, newValue);
+        }
+
+        return item;
+      })
+    );
+  }
+}

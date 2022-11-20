@@ -2,7 +2,7 @@ import { zzArray, zzInteger, zzString } from "@lizzi/core";
 import { appState } from "./AppState";
 import { server } from "./ServerSnapshot";
 
-@server.obj
+@server.object
 export class Comment {
   @server.pri readonly id = new zzInteger(0);
   @server.var readonly comment = new zzString("");
@@ -17,5 +17,5 @@ export class Comment {
   );
 }
 
-@server.arr(Comment)
+@server.array(Comment)
 export class Comments extends zzArray<Comment> {}

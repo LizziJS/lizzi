@@ -86,6 +86,15 @@ export class HtmlView<
           break;
         }
         default: {
+          if (name.startsWith("on") && typeof attributes[name] === "function") {
+            console.warn(
+              `using ${name} is deprecated,\nuse 'use={[onEvent('${name
+                .toLocaleLowerCase()
+                .slice(2)}', event_function]}' instread`
+            );
+            //this.onMount(onEvent(name.toLocaleLowerCase(), attributes[name]));
+            break;
+          }
           this.onMount(AttributeLink(name, attributes[name]) as any);
         }
       }
@@ -129,6 +138,15 @@ export class SvgView<
           break;
         }
         default: {
+          if (name.startsWith("on") && typeof attributes[name] === "function") {
+            console.warn(
+              `using ${name} is deprecated, use 'use={[onEvent('${name
+                .toLocaleLowerCase()
+                .slice(2)}', event_function)]}' instread`
+            );
+            //this.onMount(onEvent(name.toLocaleLowerCase(), attributes[name]));
+            break;
+          }
           this.onMount(AttributeLink(name, attributes[name]));
         }
       }

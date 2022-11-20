@@ -18,7 +18,7 @@ export function onInput<
 >(value: zzReactive<T>, onChange?: (value: string) => void) {
   return (view: E) => {
     if (!(value instanceof zzReactive))
-      throw new Error("input variable is not zzReactive");
+      throw new Error("onInput variable is not zzReactive");
 
     const element = view.element;
     const onInputChange =
@@ -34,7 +34,7 @@ export function onInput<
       )
     )
       throw new Error(
-        "onInputFilter error: Element is not HTMLTextAreaElement | HTMLInputElement"
+        "onInput error: Element is not HTMLTextAreaElement | HTMLInputElement"
       );
 
     view.addToUnmount(
@@ -105,16 +105,27 @@ export function AutoResizeTextarea<
   };
 }
 
-export function CheckboxLink<T extends DomElementView<HTMLInputElement>>(
-  value: zzArray<string> | zzBoolean | zzString
+export function onCheckboxInput<T extends DomElementView<HTMLInputElement>>(
+  value: zzArray<string> | zzBoolean | zzString,
+  onChange?: (checked: boolean, value: string) => void
 ) {
   return (view: T) => {
     const element = view.element;
 
     if (!(element instanceof HTMLInputElement))
-      throw new Error("CheckboxLink error: Element is not HTMLInputElement");
+      throw new Error("onCheckboxInput error: Element is not HTMLInputElement");
 
     if (value instanceof zzArray) {
+      const onChangeInput =
+        onChange ??
+        ((checked: boolean, elvalue: string) => {
+          if (checked) {
+            value.add([elvalue]);
+          } else {
+            value.remove([elvalue]);
+          }
+        });
+
       view.addToUnmount(
         value.onAdd.addListener((ev) => {
           if (element.value === ev.added) {
@@ -130,16 +141,18 @@ export function CheckboxLink<T extends DomElementView<HTMLInputElement>>(
           element,
           "change",
           () => {
-            if (element.checked) {
-              value.add([element.value]);
-            } else {
-              value.remove([element.value]);
-            }
+            onChangeInput(element.checked, element.value);
           },
           false
         )
       );
     } else if (value instanceof zzBoolean) {
+      const onChangeInput =
+        onChange ??
+        ((checked: boolean, elvalue: string) => {
+          value.value = checked;
+        });
+
       view.addToUnmount(
         value.onChange.addListener(() => {
           element.checked = value.value ? true : false;
@@ -148,12 +161,24 @@ export function CheckboxLink<T extends DomElementView<HTMLInputElement>>(
           element,
           "change",
           () => {
-            value.value = element.checked;
+            onChangeInput(element.checked, element.value);
           },
           false
         )
       );
     } else if (value instanceof zzString) {
+      const onChangeInput =
+        onChange ??
+        ((checked: boolean, elvalue: string) => {
+          if (checked) {
+            value.value = elvalue;
+          } else {
+            if (value.value === elvalue) {
+              value.value = "";
+            }
+          }
+        });
+
       view.addToUnmount(
         value.onChange.addListener((ev) => {
           element.checked = value.value === element.value;
@@ -162,13 +187,7 @@ export function CheckboxLink<T extends DomElementView<HTMLInputElement>>(
           element,
           "change",
           () => {
-            if (element.checked) {
-              value.value = element.value;
-            } else {
-              if (value.value === element.value) {
-                value.value = "";
-              }
-            }
+            onChangeInput(element.checked, element.value);
           },
           false
         )

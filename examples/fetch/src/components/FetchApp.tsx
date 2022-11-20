@@ -1,8 +1,20 @@
 import { zzBoolean, zzCompute, zzInteger, zzNot } from "@lizzi/core";
 import { Else, If } from "@lizzi/template";
-import { json, Products } from "../data/product";
+import { json, Products, Product } from "../data/product";
 import { zzFetch } from "../lib/fetch";
 import { zzUrlGetParams } from "../lib/urlParams";
+
+function ProductView({ product }: { product: Product }) {
+  return (
+    <div class="w-96">
+      <div>{product.id}</div>
+      <div>
+        {product.title}, ${product.price}
+      </div>
+      <img src={product.thumbnail} alt="" />
+    </div>
+  );
+}
 
 export function FetchApp() {
   const products = new Products();
@@ -30,13 +42,7 @@ export function FetchApp() {
   productsApi.fetch();
 
   const productsMapView = products.map((product) => (
-    <div class="w-96">
-      <div>{product.id}</div>
-      <div>
-        {product.title}, ${product.price}
-      </div>
-      <img src={product.thumbnail} alt="" />
-    </div>
+    <ProductView product={product} />
   ));
 
   const lastProductView = zzCompute(() => productsMapView.toArray().at(-1));

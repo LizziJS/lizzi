@@ -29,9 +29,9 @@ export class If extends ViewComponent {
     }
 
     if (condition instanceof zzReactive) {
-      this.onMount((view) => {
-        let last: boolean | null = null;
+      let last: boolean | null = null;
 
+      this.onMount((view) => {
         const onChange = () => {
           const visible = Boolean(condition.value);
 
@@ -49,10 +49,6 @@ export class If extends ViewComponent {
         };
 
         view.addToUnmount(condition.onChange.addListener(onChange).run());
-
-        view.onceUnmount(() => {
-          this.removeAllChilds();
-        });
       });
     } else {
       if (condition) {

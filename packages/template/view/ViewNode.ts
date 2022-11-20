@@ -5,11 +5,28 @@
  */
 
 import { DestructorsStack, IDestructor } from "@lizzi/core/Destructor";
-import { zzEvent } from "@lizzi/core/Event";
 import { JSX } from "@lizzi/template/jsx-runtime";
-import { zzArray, zzComputeFn, zzObject, zzReactive } from "@lizzi/core";
+import { zzArray, zzObject, zzReactive } from "@lizzi/core";
+import { zzSimpleEvent } from "@lizzi/core/Event";
 
 type ViewComponentStatuses = "unmounted" | "mounted" | "in-unmount-process";
+
+// let unmountTimer: NodeJS.Timeout | null = null;
+// let unmountMap = new Map<ViewNode, () => void>();
+// const deferUnmount = (view: ViewNode, fn: () => void) => {
+//   unmountMap.set(view, fn);
+
+//   if (!unmountTimer) {
+//     unmountTimer = setTimeout(() => {
+//       unmountMap.forEach((fn) => fn());
+//       unmountMap.clear();
+//       unmountTimer = null;
+//     }, 0);
+//   }
+// };
+// const unsetUnmount = (view: ViewNode) => {
+//   unmountMap.delete(view);
+// };
 
 export const isViewNodeConstructor = Symbol();
 
@@ -24,9 +41,9 @@ export interface IViewNodeNodes {}
 export class ViewNode implements IViewNode {
   static [isViewNodeConstructor] = true;
 
-  readonly _onMount = new zzEvent<(view: ViewNode) => void>();
-  readonly _onUnmount = new zzEvent<(view: ViewNode) => void>();
-  readonly afterMount = new zzEvent<(view: ViewNode) => void>();
+  readonly _onMount = new zzSimpleEvent<(view: ViewNode) => void>();
+  readonly _onUnmount = new zzSimpleEvent<(view: ViewNode) => void>();
+  readonly afterMount = new zzSimpleEvent<(view: ViewNode) => void>();
 
   protected readonly eventRemoveStack = new DestructorsStack();
 

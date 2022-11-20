@@ -3,7 +3,7 @@ import { appState } from "./AppState";
 import { Comments } from "./Comment";
 import { server } from "./ServerSnapshot";
 
-@server.obj
+@server.object
 export class Post {
   @server.pri readonly id = new zzInteger(0);
   @server.req readonly title = new zzString("");
@@ -16,5 +16,5 @@ export class Post {
   );
 }
 
-@server.arr(Post)
+@server.array(Post)
 export class Posts extends zzArray<Post> {}

@@ -4,27 +4,43 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzReactive, zzCompute, zzArray, runVar } from "@lizzi/core";
+import {
+  zzReactive,
+  zzCompute,
+  zzArray,
+  runVar,
+  zzIf,
+  ValueOrReactive,
+} from "@lizzi/core";
 import { DomElementView } from "..";
 
-type InputTypes =
-  | string
-  | number
-  | zzReactive<any>
-  | Array<string | number | zzReactive<any>>
-  | zzArray<string | number | zzReactive<any>>;
+type OutputTypes<T extends any[]> = T[number] | zzReactive<T[number]>;
+type InputTypes<T extends any[]> =
+  | T[number]
+  | zzReactive<T[number]>
+  | (() => T[number]);
+type InputArrayTypes<T extends any[]> =
+  | InputTypes<T>
+  | Array<InputTypes<T>>
+  | zzArray<InputTypes<T>>;
 
-function convertInputToReactiveArray(
-  input: InputTypes
-): zzArray<string | number | zzReactive<any>> {
+function convertInputToReactiveArray<T extends any[]>(
+  input: InputArrayTypes<T>
+): zzArray<OutputTypes<T>> {
   if (typeof input === "string" || typeof input === "number") {
-    return new zzArray<string | number | zzReactive<any>>([input]);
+    return new zzArray<T | zzReactive<T>>([input]);
+  } else if (typeof input === "function") {
+    return new zzArray<T | zzReactive<T>>([zzCompute(input)]);
   } else if (Array.isArray(input)) {
-    return new zzArray(input);
+    return new zzArray<T | zzReactive<T>>(
+      input.map((value) =>
+        typeof value === "function" ? zzCompute(value) : value
+      )
+    );
   } else if (input instanceof zzArray) {
     return input;
   } else if (input instanceof zzReactive) {
-    return new zzArray<string | number | zzReactive<any>>([input]);
+    return new zzArray<T | zzReactive<T>>([input]);
   } else {
     throw new Error("wrong input type");
   }
@@ -32,7 +48,7 @@ function convertInputToReactiveArray(
 
 export function StyleLink<T extends DomElementView<HTMLElement | SVGElement>>(
   styleName: string,
-  array: InputTypes
+  array: InputArrayTypes<[string, number]>
 ) {
   return (view: T) => {
     const element = view.element;
@@ -55,10 +71,14 @@ export function StyleLink<T extends DomElementView<HTMLElement | SVGElement>>(
 
 export function AttributeLink<T extends DomElementView>(
   name: string,
-  attrvalue: boolean | InputTypes
+  attrvalue: InputArrayTypes<[string, number, boolean]>
 ) {
   return (view: T) => {
     const element = view.element;
+
+    if (attrvalue === undefined) {
+      return;
+    }
 
     if (typeof attrvalue === "string" || typeof attrvalue === "number") {
       element.setAttribute(name, String(attrvalue));
@@ -79,10 +99,14 @@ export function AttributeLink<T extends DomElementView>(
     }
 
     if (attrvalue instanceof zzArray) {
-      attrvalue = attrvalue.join();
+      attrvalue = attrvalue.join() as any;
     }
 
-    const reactiveValue = attrvalue;
+    if (typeof attrvalue === "function") {
+      attrvalue = zzCompute(attrvalue);
+    }
+
+    const reactiveValue = attrvalue as zzReactive<any>;
 
     const onChange = () => {
       const value = reactiveValue.value;
@@ -100,69 +124,55 @@ export function AttributeLink<T extends DomElementView>(
   };
 }
 
-export function ClassLink<T extends DomElementView>(array: InputTypes) {
+export function ClassLink<T extends DomElementView>(
+  array: InputArrayTypes<[string]>
+) {
   return (view: T) => {
     const classArray = convertInputToReactiveArray(array);
 
     const element = view.element;
     const classList = element.classList;
-
-    view.onceUnmount(() => {
-      for (const classNames of classArray) {
-        String(classNames instanceof zzReactive ? classNames.value : classNames)
-          .split(/\s+/)
-          .forEach(
-            (className) => className !== "" && classList.remove(className)
-          );
-      }
-    });
+    element.className = "";
 
     view.addToUnmount(
-      classArray.setItemsListener(
-        (item) => {
-          if (item instanceof zzReactive) {
-            return item.onChange
-              .addListener((event) => {
-                if (event.last) {
-                  String(event.last)
-                    .split(/\s+/)
-                    .forEach(
-                      (className) =>
-                        className !== "" && classList.remove(className)
-                    );
-                }
+      classArray.setItemsListener((item) => {
+        if (item instanceof zzReactive) {
+          return item.onChange
+            .addListener((event) => {
+              if (event.last) {
+                String(event.last)
+                  .split(/\s+/)
+                  .forEach(
+                    (className) =>
+                      className !== "" && classList.remove(className)
+                  );
+              }
 
-                if (event.value) {
-                  String(event.value)
-                    .split(/\s+/)
-                    .forEach(
-                      (className) =>
-                        className !== "" && classList.add(className)
-                    );
-                }
-              })
-              .run(runVar(item));
-          } else {
-            String(item)
-              .split(/\s+/)
-              .forEach(
-                (className) => className !== "" && classList.add(className)
-              );
-          }
-        },
-        (item) => {
-          String(item instanceof zzReactive ? item.value : item)
+              if (event.value) {
+                String(event.value)
+                  .split(/\s+/)
+                  .forEach(
+                    (className) => className !== "" && classList.add(className)
+                  );
+              }
+            })
+            .run(runVar(item));
+        } else {
+          String(item)
             .split(/\s+/)
             .forEach(
               (className) => className !== "" && classList.add(className)
             );
         }
-      )
+      })
     );
   };
 }
 
-export function cssMap(array: InputTypes, styles: { [key: string]: string }) {
+export function cssMap(
+  array: InputArrayTypes<[string]>,
+  styles: { [key: string]: string }
+) {
   const classArray = convertInputToReactiveArray(array);
 
   return classArray.map((className) => {
@@ -175,4 +185,12 @@ export function cssMap(array: InputTypes, styles: { [key: string]: string }) {
       className
     );
   });
+}
+
+export function zzCss<T>(
+  cond: ValueOrReactive<T> | (() => T),
+  isTrue: string,
+  isFalse: string = ""
+) {
+  return zzIf(cond, isTrue, isFalse);
 }

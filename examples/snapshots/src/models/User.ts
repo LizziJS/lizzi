@@ -1,7 +1,7 @@
 import { zzArray, zzEventsAffect, zzInteger, zzString } from "@lizzi/core";
 import { server } from "./ServerSnapshot";
 
-@server.obj
+@server.object
 export class User {
   @server.pri readonly id = new zzInteger(0);
   @server.var readonly name = new zzString("");
@@ -10,5 +10,5 @@ export class User {
   readonly onChange = zzEventsAffect(...server.varsArray(this));
 }
 
-@server.arr(User)
+@server.array(User)
 export class Users extends zzArray<User> {}

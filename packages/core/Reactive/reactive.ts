@@ -5,7 +5,7 @@
  */
 
 import { zzEvent } from "../Event";
-import { zzEventListener, _Event } from "../Event/events";
+import { zzEventListener, zzSimpleEvent } from "../Event/events";
 
 export class ValueChangeEvent<T> {
   constructor(
@@ -29,7 +29,9 @@ export interface IReactiveValue<T> {
 
 export type IReactive<T> = IReactiveEvent<T> & IReactiveValue<T>;
 
-class ReactiveGetEvent extends _Event<(variable: zzReactive<any>) => void> {
+class ReactiveGetEvent extends zzSimpleEvent<
+  (variable: zzReactive<any>) => void
+> {
   protected listenersMap = new Map<
     (variable: zzReactive<any>) => void,
     zzEventListener<(variable: zzReactive<any>) => void>

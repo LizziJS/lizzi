@@ -37,10 +37,14 @@ export const zzNot = <T>(value: ValueOrReactive<T>) => {
 export const zzN = zzNot;
 
 export const zzIf = <T, R>(
-  cond: ValueOrReactive<T>,
+  cond: ValueOrReactive<T> | (() => T),
   onTrue: ValueOrReactive<R>,
   onFalse: ValueOrReactive<R>
 ) => {
+  if (typeof cond === "function") {
+    cond = zzCompute<T>(cond as any);
+  }
+
   const cr = zzMakeReactive(cond);
   const tr = zzMakeReactive(onTrue);
   const fr = zzMakeReactive(onFalse);
