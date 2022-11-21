@@ -7,7 +7,7 @@
   "dependencies": {
     "@lizzi/core": "^0.0.7"
   },
-  "gitHead": "666d468eee8101b66763348444883fc056617f34",
+  "gitHead": "77c3ed614554878b2792165facacc2b5a0f7f786",
   "devDependencies": {
     "@types/jest": "^29.2.2",
     "jest": "^29.2.2",
