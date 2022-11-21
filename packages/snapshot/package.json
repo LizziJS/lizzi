@@ -3,18 +3,22 @@
   "version": "0.0.10",
   "description": "lizzi js snapshot library",
   "main": "index.js",
+  "author": "Stanislav Shishankin",
   "license": "MIT",
+  "devDependencies": {},
   "scripts": {
     "test": "jest"
   },
-  "dependencies": {
-    "@lizzi/core": "^0.0.10"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lizzi-js/lizzi.git"
   },
-  "author": "Stanislav Shishankin",
-  "devDependencies": {
-    "@types/jest": "^29.2.2",
-    "jest": "^29.2.2",
-    "ts-jest": "^29.0.3"
+  "keywords": [
+    "lizzi",
+    "snapshot"
+  ],
+  "bugs": {
+    "url": "https://github.com/lizzi-js/lizzi/issues"
   },
-  "gitHead": "35e5586b05d1f9b04c9a5f295157a0e752228f5c"
+  "homepage": "https://github.com/lizzi-js/lizzi#readme"
 }

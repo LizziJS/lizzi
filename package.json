@@ -2,8 +2,7 @@
   "name": "lizzi.lib-monorepo",
   "private": true,
   "workspaces": [
-    "packages/*",
-    "examples/*"
+    "packages/*"
   ],
   "devDependencies": {
     "lerna": "^6.0.1"
