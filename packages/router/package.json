@@ -1,12 +1,12 @@
 {
   "name": "@lizzi/router",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "lizzi js router library",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@lizzi/core": "^0.0.8",
-    "@lizzi/template": "^0.0.8"
+    "@lizzi/core": "^0.0.9",
+    "@lizzi/template": "^0.0.9"
   },
   "gitHead": "77c3ed614554878b2792165facacc2b5a0f7f786",
   "devDependencies": {
