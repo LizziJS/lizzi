@@ -8,7 +8,7 @@
     "@lizzi/core": "^0.0.7",
     "@lizzi/template": "^0.0.7"
   },
-  "gitHead": "23f74abfdad2295eb133aca858f1b0e4f77e075b",
+  "gitHead": "666d468eee8101b66763348444883fc056617f34",
   "devDependencies": {
     "@types/jest": "^29.2.2",
     "jest": "^29.2.2",
