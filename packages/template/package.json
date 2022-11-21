@@ -1,12 +1,12 @@
 {
   "name": "@lizzi/template",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "lizzi js template DOM engine",
   "main": "index.js",
   "author": "Stanislav Shishankin",
   "license": "MIT",
   "dependencies": {
-    "@lizzi/core": "^0.0.10"
+    "@lizzi/core": "^0.0.11"
   },
   "gitHead": "c182bdeec8cedfe343ad6b108c77b3c122f9cc2a",
   "devDependencies": {
@@ -26,5 +26,4 @@
     "url": "https://github.com/lizzi-js/lizzi/issues"
   },
   "homepage": "https://github.com/lizzi-js/lizzi#readme"
-
 }

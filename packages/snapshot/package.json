@@ -1,11 +1,10 @@
 {
   "name": "@lizzi/snapshot",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "lizzi js snapshot library",
   "main": "index.js",
   "author": "Stanislav Shishankin",
   "license": "MIT",
-  "devDependencies": {},
   "scripts": {
     "test": "jest"
   },
