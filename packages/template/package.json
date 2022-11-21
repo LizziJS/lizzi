@@ -1,11 +1,11 @@
 {
   "name": "@lizzi/template",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "lizzi js template DOM engine",
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@lizzi/core": "^0.0.4"
+    "@lizzi/core": "^0.0.5"
   },
   "gitHead": "77d17d1f68515476206ad95102e02b6bf150da85",
   "devDependencies": {
