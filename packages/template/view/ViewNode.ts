@@ -64,7 +64,6 @@ export class ViewNode implements IViewNode {
   }
 
   appendChild(view: ViewNode) {
-    console.log("append", view);
     if (view.parentNode !== null) {
       view.parentNode.removeNode(view);
     }
@@ -86,6 +85,8 @@ export class ViewNode implements IViewNode {
       const viewNodes = childrens.map((child) =>
         JSXChildrenToNodeMapper(child, this)
       );
+
+      console.log(viewNodes);
 
       for (let view of viewNodes) {
         if (view) {
