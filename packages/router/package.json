@@ -1,13 +1,13 @@
 {
   "name": "@lizzi/router",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "lizzi js router library",
   "main": "index.js",
   "author": "Stanislav Shishankin",
   "license": "MIT",
   "dependencies": {
     "@lizzi/core": "^0.0.12",
-    "@lizzi/template": "^0.0.14"
+    "@lizzi/template": "^0.0.15"
   },
   "gitHead": "c182bdeec8cedfe343ad6b108c77b3c122f9cc2a",
   "devDependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@lizzi/template",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "lizzi js template DOM engine",
   "main": "index.js",
   "author": "Stanislav Shishankin",
