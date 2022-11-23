@@ -86,8 +86,6 @@ export class ViewNode implements IViewNode {
         JSXChildrenToNodeMapper(child, this)
       );
 
-      console.log(viewNodes);
-
       for (let view of viewNodes) {
         if (view) {
           this.appendChild(view);

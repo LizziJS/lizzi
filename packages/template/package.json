@@ -6,7 +6,7 @@
   "author": "Stanislav Shishankin",
   "license": "MIT",
   "dependencies": {
-    "@lizzi/core": "^0.0.12"
+    "@lizzi/core": "^0.0.14"
   },
   "gitHead": "c182bdeec8cedfe343ad6b108c77b3c122f9cc2a",
   "devDependencies": {
