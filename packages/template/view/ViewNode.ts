@@ -5,7 +5,7 @@
  */
 
 import { DestructorsStack, IDestructor } from "@lizzi/core/Destructor";
-import { JSX } from "@lizzi/template/jsx-runtime";
+import { JSX } from "../jsx-runtime";
 import { zzArray, zzObject, zzReactive } from "@lizzi/core";
 import { zzSimpleEvent } from "@lizzi/core/Event";
 
@@ -64,6 +64,7 @@ export class ViewNode implements IViewNode {
   }
 
   appendChild(view: ViewNode) {
+    console.log("append", view);
     if (view.parentNode !== null) {
       view.parentNode.removeNode(view);
     }

@@ -467,6 +467,43 @@ describe("zzArray", () => {
         new ArrayAddEvent(2, 2, map)
       );
     });
+
+    it("should map update if listeners updated", () => {
+      const multiplyer = new zzInteger(0);
+      const mapFn = jest.fn((value) => {
+        return value * multiplyer.value;
+      });
+
+      const array = new zzArray([1, 2, 3, 4]);
+      const map = array.map(mapFn, multiplyer);
+      const listeners = {
+        add: jest.fn(),
+        remove: jest.fn(),
+        change: jest.fn(),
+      };
+
+      map.onAdd.addListener(listeners.add);
+      map.onRemove.addListener(listeners.remove);
+      map.onChange.addListener(listeners.change);
+
+      expect(listeners.add.mock.calls.length).toBe(0);
+      expect(listeners.remove.mock.calls.length).toBe(0);
+      expect(listeners.change.mock.calls.length).toBe(0);
+
+      expect(map.value).toEqual([0, 0, 0, 0]);
+      expect(map.toArray()).toEqual([0, 0, 0, 0]);
+      expect(listeners.add.mock.calls.length).toBe(0);
+      expect(listeners.remove.mock.calls.length).toBe(0);
+      expect(listeners.change.mock.calls.length).toBe(0);
+
+      multiplyer.value = 10;
+
+      expect(map.value).toEqual([10, 20, 30, 40]);
+      expect(map.toArray()).toEqual([10, 20, 30, 40]);
+      expect(listeners.add.mock.calls.length).toBe(4);
+      expect(listeners.remove.mock.calls.length).toBe(4);
+      expect(listeners.change.mock.calls.length).toBe(1);
+    });
   });
 
   describe("zzArray includes", () => {

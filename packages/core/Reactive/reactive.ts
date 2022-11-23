@@ -5,7 +5,7 @@
  */
 
 import { zzEvent } from "../Event";
-import { zzEventListener, zzSimpleEvent } from "../Event/events";
+import { IDestructor, zzEventListener, zzSimpleEvent } from "../Event/events";
 
 export class ValueChangeEvent<T> {
   constructor(
@@ -28,6 +28,41 @@ export interface IReactiveValue<T> {
 }
 
 export type IReactive<T> = IReactiveEvent<T> & IReactiveValue<T>;
+
+export class RGetObserverIsolator implements IDestructor {
+  protected onChange: () => void;
+  protected variableStack = new Set<zzReactive<any>>();
+
+  destroy() {
+    for (const variable of this.variableStack) {
+      variable.onChange.removeListener(this.onChange);
+    }
+  }
+
+  isolate(isolatedFn: () => void) {
+    const newVariableStack = new Set<zzReactive<any>>();
+
+    zzReactiveGetObserver.runIsolated((variable) => {
+      newVariableStack.add(variable);
+
+      if (!this.variableStack.delete(variable)) {
+        // if is new element
+        variable.onChange.addListener(this.onChange);
+      }
+    }, isolatedFn);
+
+    // left variables to remove
+    for (const variable of this.variableStack) {
+      variable.onChange.removeListener(this.onChange);
+    }
+
+    this.variableStack = newVariableStack;
+  }
+
+  constructor(onChange: () => void) {
+    this.onChange = onChange;
+  }
+}
 
 class ReactiveGetEvent extends zzSimpleEvent<
   (variable: zzReactive<any>) => void
@@ -59,6 +94,10 @@ class ReactiveGetEvent extends zzSimpleEvent<
 
       isolatedFn();
     });
+  }
+
+  createIsolator(onChange: () => void) {
+    return new RGetObserverIsolator(onChange);
   }
 }
 

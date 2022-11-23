@@ -5,7 +5,7 @@
  */
 
 import { zzCompute, zzReactive } from "@lizzi/core/index";
-import { JSX } from "@lizzi/template/jsx-runtime";
+import { JSX } from "../jsx-runtime";
 import { MapJSXChildrensToNodes } from "../view";
 import { ViewComponent } from "../view/ViewComponent";
 

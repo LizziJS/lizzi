@@ -46,40 +46,12 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
     this._fn = fn;
 
     this.eventObserver = onStartListening(() => {
-      let variableStack = new Set<zzReactive<any>>();
-
-      const eventsStack = new DestructorsStack(
-        DestructorFn(() => {
-          for (const variable of variableStack) {
-            variable.onChange.removeListener(checkChange);
-          }
-        })
-      );
-
       const checkChange = () => {
-        const newVariableStack = new Set<zzReactive<any>>();
         let newValue: T;
 
-        zzReactiveGetObserver.runIsolated(
-          (variable) => {
-            newVariableStack.add(variable);
-
-            if (!variableStack.delete(variable)) {
-              // if is new element
-              variable.onChange.addListener(checkChange);
-            }
-          },
-          () => {
-            newValue = this._fn.apply(this);
-          }
-        );
-
-        // left variables to remove
-        for (const variable of variableStack) {
-          variable.onChange.removeListener(checkChange);
-        }
-
-        variableStack = newVariableStack;
+        isolator.isolate(() => {
+          newValue = this._fn.apply(this);
+        });
 
         if (this._value !== newValue!) {
           let ev = new ValueChangeEvent<T>(newValue!, this._value, this);
@@ -88,15 +60,13 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
         }
       };
 
-      zzReactiveGetObserver.runIsolated(
-        (variable) => {
-          variableStack.add(variable);
-          variable.onChange.addListener(checkChange);
-        },
-        () => {
-          this._value = this._fn.apply(this);
-        }
-      );
+      const isolator = zzReactiveGetObserver.createIsolator(checkChange);
+
+      isolator.isolate(() => {
+        this._value = this._fn.apply(this);
+      });
+
+      const eventsStack = new DestructorsStack(isolator);
 
       for (let varOrEvent of dependencies) {
         if (varOrEvent instanceof zzEvent) {

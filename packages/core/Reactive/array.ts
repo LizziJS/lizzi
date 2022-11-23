@@ -8,6 +8,7 @@ import {
   InferReactive,
   IReactiveEvent,
   IReactiveValue,
+  RGetObserverIsolator,
   zzReactive,
   zzReactiveGetObserver,
 } from "./reactive";
@@ -496,7 +497,7 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
   }
 
   refresh() {
-    this.mappedArray.replace(this.sourceArray.value);
+    this.mappedArray.replace(this.sourceArray.toArray());
 
     return this;
   }
@@ -545,10 +546,24 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
 
         for (let varOrEvent of dependencies) {
           if (varOrEvent instanceof zzEvent) {
-            eventsStack.add(varOrEvent.addListener(() => this.refresh()));
+            eventsStack.add(
+              varOrEvent.addListener(() => {
+                this.mappedArray.removeAll();
+                this.refresh();
+                this.onChange.emit(
+                  new ValueChangeEvent(this._value, this._value, this)
+                );
+              })
+            );
           } else if (varOrEvent.onChange instanceof zzEvent) {
             eventsStack.add(
-              varOrEvent.onChange.addListener(() => this.refresh())
+              varOrEvent.onChange.addListener(() => {
+                this.mappedArray.removeAll();
+                this.refresh();
+                this.onChange.emit(
+                  new ValueChangeEvent(this._value, this._value, this)
+                );
+              })
             );
           }
         }

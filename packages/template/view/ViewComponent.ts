@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-import { JSX } from "@lizzi/template/jsx-runtime";
+import { JSX } from "../jsx-runtime";
 import { ViewNode } from "./ViewNode";
 
 export class ViewComponent extends ViewNode {
