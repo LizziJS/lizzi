@@ -37,19 +37,28 @@ class ReactiveGetEvent extends zzSimpleEvent<
     zzEventListener<(variable: zzReactive<any>) => void>
   >();
 
+  protected isolateState(isolatedFn: () => void) {
+    const oldMap = Array.from(this.listenersMap.entries());
+    this.listenersMap.clear();
+
+    isolatedFn();
+
+    this.listenersMap = new Map(oldMap);
+  }
+
   runIsolated(
     newListener: (variable: zzReactive<any>) => void,
     isolatedFn: () => void
   ) {
-    const oldMap = Array.from(this.listenersMap.entries());
-    this.listenersMap.clear();
+    this.isolateState(() => {
+      this.addListener((variable: zzReactive<any>) => {
+        this.isolateState(() => {
+          newListener(variable);
+        });
+      });
 
-    this.addListener(newListener);
-
-    isolatedFn();
-
-    this.listenersMap.clear();
-    this.listenersMap = new Map(oldMap);
+      isolatedFn();
+    });
   }
 }
 
