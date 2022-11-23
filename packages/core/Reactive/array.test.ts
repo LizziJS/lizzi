@@ -3,6 +3,7 @@ import {
   ArrayAddEvent,
   ArrayRemoveEvent,
   zzArray,
+  zzArrayInstance,
   zzArrayMap,
   zzComputeArrayFn,
 } from "./array";
@@ -184,7 +185,7 @@ describe("zzArray", () => {
       const array = new zzArray();
       const filter = array.filter(filterFn);
 
-      expect(filter).toBeInstanceOf(zzArray);
+      expect(filter).toBeInstanceOf(zzArrayInstance);
       expect(filter).toBeInstanceOf(zzComputeArrayFn);
       expect(filter.onAdd).toBeInstanceOf(zzEvent);
       expect(filter.onChange).toBeInstanceOf(zzEvent);
@@ -363,7 +364,7 @@ describe("zzArray", () => {
       const array = new zzArray();
       const map = array.map(mapFn);
 
-      expect(map).toBeInstanceOf(zzArray);
+      expect(map).toBeInstanceOf(zzArrayInstance);
       expect(map).toBeInstanceOf(zzArrayMap);
       expect(map.onAdd).toBeInstanceOf(zzEvent);
       expect(map.onChange).toBeInstanceOf(zzEvent);
@@ -422,7 +423,7 @@ describe("zzArray", () => {
       expect(map.toArray()).toEqual([2, 4, 6, 8]);
       expect(listeners.add.mock.calls.length).toBe(2);
       expect(listeners.remove.mock.calls.length).toBe(0);
-      expect(listeners.change.mock.calls.length).toBe(2);
+      expect(listeners.change.mock.calls.length).toBe(1);
 
       expect(listeners.add.mock.calls[0][0]).toEqual(
         new ArrayAddEvent(6, 2, map)
@@ -438,7 +439,7 @@ describe("zzArray", () => {
       expect(map.toArray()).toEqual([2, 6]);
       expect(listeners.add.mock.calls.length).toBe(2);
       expect(listeners.remove.mock.calls.length).toBe(2);
-      expect(listeners.change.mock.calls.length).toBe(4);
+      expect(listeners.change.mock.calls.length).toBe(2);
 
       expect(listeners.remove.mock.calls[0][0]).toEqual(
         new ArrayRemoveEvent(4, 1, map)
@@ -454,7 +455,7 @@ describe("zzArray", () => {
       expect(map.toArray()).toEqual([10, 6, 2]);
       expect(listeners.add.mock.calls.length).toBe(4);
       expect(listeners.remove.mock.calls.length).toBe(3);
-      expect(listeners.change.mock.calls.length).toBe(7);
+      expect(listeners.change.mock.calls.length).toBe(3);
 
       expect(listeners.remove.mock.calls[2][0]).toEqual(
         new ArrayRemoveEvent(2, 0, map)
@@ -690,7 +691,7 @@ describe("zzArray", () => {
       const array = new zzArray();
       const sort = array.sort(sortFn);
 
-      expect(sort).toBeInstanceOf(zzArray);
+      expect(sort).toBeInstanceOf(zzArrayInstance);
       expect(sort).toBeInstanceOf(zzComputeArrayFn);
       expect(sort.onAdd).toBeInstanceOf(zzEvent);
       expect(sort.onChange).toBeInstanceOf(zzEvent);

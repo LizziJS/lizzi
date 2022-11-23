@@ -9,30 +9,36 @@ export interface IDestructor {
 }
 
 export class DestructorsStack implements IDestructor {
-  readonly onDestroy = new zzSimpleEvent<(element: IDestructor) => void>();
+  readonly destructors = new Set<IDestructor>();
 
   destroy() {
-    this.onDestroy.emit(this);
-    this.onDestroy.removeAllListeners();
+    for (const destructor of this.destructors) {
+      destructor.destroy();
+    }
+    this.destructors.clear();
 
     return this;
   }
 
   add(...destructors: IDestructor[]) {
     for (const destructor of destructors) {
-      this.onDestroy.addListener(() => destructor.destroy());
+      this.destructors.add(destructor);
     }
 
     return this;
   }
 
-  addFunc(fn: () => void) {
-    this.onDestroy.addListener(fn);
+  addFn(...fn: (() => void)[]) {
+    this.add(...fn.map(DestructorFn));
   }
 
   constructor(...destructors: IDestructor[]) {
     this.add(...destructors);
   }
+}
+
+export function DestructorFn(destroy: () => void): IDestructor {
+  return { destroy };
 }
 
 export class zzEventListener<ListenerFuncT extends (...args: any[]) => void>

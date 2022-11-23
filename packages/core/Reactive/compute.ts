@@ -13,6 +13,7 @@ import {
 import { DestructorsStack, IDestructor } from "../Destructor";
 import { onStartListening, zzEvent } from "../Event";
 import { zzComputeArrayFn } from "./array";
+import { DestructorFn } from "../Event/events";
 
 export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
   protected _fn: () => T;
@@ -45,22 +46,40 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
     this._fn = fn;
 
     this.eventObserver = onStartListening(() => {
-      const variableStack = new DestructorsStack();
-      const eventsStack = new DestructorsStack(variableStack);
+      let variableStack = new Set<zzReactive<any>>();
+
+      const eventsStack = new DestructorsStack(
+        DestructorFn(() => {
+          for (const variable of variableStack) {
+            variable.onChange.removeListener(checkChange);
+          }
+        })
+      );
 
       const checkChange = () => {
-        variableStack.destroy();
-
+        const newVariableStack = new Set<zzReactive<any>>();
         let newValue: T;
 
         zzReactiveGetObserver.runIsolated(
           (variable) => {
-            variableStack.add(variable.onChange.addListener(checkChange));
+            newVariableStack.add(variable);
+
+            if (!variableStack.delete(variable)) {
+              // if is new element
+              variable.onChange.addListener(checkChange);
+            }
           },
           () => {
             newValue = this._fn.apply(this);
           }
         );
+
+        // left variables to remove
+        for (const variable of variableStack) {
+          variable.onChange.removeListener(checkChange);
+        }
+
+        variableStack = newVariableStack;
 
         if (this._value !== newValue!) {
           let ev = new ValueChangeEvent<T>(newValue!, this._value, this);
@@ -71,7 +90,8 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
 
       zzReactiveGetObserver.runIsolated(
         (variable) => {
-          variableStack.add(variable.onChange.addListener(checkChange));
+          variableStack.add(variable);
+          variable.onChange.addListener(checkChange);
         },
         () => {
           this._value = this._fn.apply(this);
