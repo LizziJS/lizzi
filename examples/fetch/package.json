@@ -1,6 +1,6 @@
 {
   "name": "example.fetch.app",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "main": "index.js",
   "license": "MIT",
   "private": true,
@@ -9,9 +9,9 @@
     "build": "npx webpack --config webpack.prod.js"
   },
   "dependencies": {
-    "@lizzi/core": "^0.0.11",
-    "@lizzi/template": "^0.0.11",
-    "@lizzi/snapshot": "^0.0.11"
+    "@lizzi/core": "^0.0.12",
+    "@lizzi/snapshot": "^0.0.12",
+    "@lizzi/template": "^0.0.12"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",
