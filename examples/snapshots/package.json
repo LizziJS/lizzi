@@ -1,6 +1,6 @@
 {
   "name": "example.snapshots.app",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "main": "index.js",
   "license": "MIT",
   "private": true,
@@ -11,7 +11,7 @@
   "dependencies": {
     "@lizzi/core": "^0.0.12",
     "@lizzi/snapshot": "^0.0.12",
-    "@lizzi/template": "^0.0.13"
+    "@lizzi/template": "^0.0.14"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",
