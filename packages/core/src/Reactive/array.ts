@@ -5,17 +5,15 @@
  */
 
 import {
-  InferReactive,
   IReactiveEvent,
   IReactiveValue,
-  RGetObserverIsolator,
   zzReactive,
   zzReactiveGetObserver,
-} from "./reactive";
+} from "./Reactive";
 import { DestructorsStack, IDestructor } from "../Destructor";
 import { zzEvent, EventsObserver, onStartListening } from "../Event";
-import { ValueChangeEvent } from "./reactive";
-import { zzMakeReactive, ValueOrReactive, runVar } from "./helpers";
+import { ValueChangeEvent } from "./Reactive";
+import { zzMakeReactive, ValueOrReactive } from "./helpers";
 import { zzCompute, zzComputeFn } from "./compute";
 
 export class ArrayAddEvent<T> {
@@ -95,6 +93,12 @@ export class zzArrayInstance<T>
 {
   readonly onAdd = new zzEvent<(event: ArrayAddEvent<T>) => void>();
   readonly onRemove = new zzEvent<(event: ArrayRemoveEvent<T>) => void>();
+
+  *[Symbol.iterator]() {
+    for (let el of this.toArray()) {
+      yield el;
+    }
+  }
 
   toArray() {
     zzReactiveGetObserver.emit(this);
@@ -329,12 +333,6 @@ export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
     this.onChange.emit(new ValueChangeEvent(this._value, this._value, this));
 
     return this;
-  }
-
-  *[Symbol.iterator]() {
-    for (let el of this.toArray()) {
-      yield el;
-    }
   }
 
   toArray() {

@@ -4,10 +4,10 @@
  * This source code is licensed under the MIT license.
  */
 
-import { DestructorsStack, IDestructor } from "@lizzi/core/Destructor";
+import { DestructorsStack, IDestructor, zzArrayInstance } from "@lizzi/core";
 import { JSX } from "../jsx-runtime";
 import { zzArray, zzObject, zzReactive } from "@lizzi/core";
-import { zzSimpleEvent } from "@lizzi/core/Event";
+import { zzSimpleEvent } from "@lizzi/core";
 
 type ViewComponentStatuses = "unmounted" | "mounted" | "in-unmount-process";
 
@@ -313,7 +313,7 @@ export class TextView extends ViewNode {
     super();
 
     const text = Array.isArray(children)
-      ? (new zzArray(children).join("") as zzReactive<any>)
+      ? (new zzArrayInstance(children).join("") as zzReactive<any>)
       : children;
 
     if (text instanceof zzReactive) {
@@ -336,12 +336,12 @@ export class TextView extends ViewNode {
 }
 
 export class ArrayView<T extends ViewNode> extends ViewNode {
-  constructor({ children }: { children: zzArray<T> | T[] }) {
+  constructor({ children }: { children: zzArrayInstance<T> | T[] }) {
     super();
 
     this.setNodes([document.createTextNode("")]);
 
-    if (children instanceof zzArray) {
+    if (children instanceof zzArrayInstance) {
       this.onMount(() => {
         const mapArray: T[] = [];
 
@@ -412,7 +412,7 @@ export const JSXChildrenToNodeMapper = (
   children: JSX.Children<any>,
   parentNode: ViewNode
 ): ViewNode => {
-  if (children instanceof zzArray || Array.isArray(children)) {
+  if (children instanceof zzArrayInstance || Array.isArray(children)) {
     return new ArrayView({ children });
   }
 

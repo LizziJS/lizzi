@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-import { ValueChangeEvent, zzType } from "./reactive";
+import { ValueChangeEvent, zzType } from "./Reactive";
 import { IDestructor } from "../Destructor";
 import { zzCompute } from "./compute";
 

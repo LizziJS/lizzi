@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzType } from "./reactive";
+import { zzType } from "./Reactive";
 
 export class zzNumber<NumberType = number> extends zzType<NumberType> {
   checkType(value: NumberType) {

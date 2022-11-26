@@ -2,12 +2,20 @@
   "name": "@lizzi/core",
   "version": "0.0.14",
   "description": "lizzi js reactive library",
-  "main": "index.js",
   "author": "Stanislav Shishankin",
   "license": "MIT",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "rm -rf dist/ && npm test && npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc",
+    "build:cjs": "tsc --module CommonJS --outDir dist/cjs"
   },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["dist", "*.d.ts"],
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "devDependencies": {
     "@types/jest": "^29.2.2",
     "jest": "^29.2.2",

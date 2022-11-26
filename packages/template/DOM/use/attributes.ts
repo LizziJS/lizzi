@@ -11,6 +11,7 @@ import {
   runVar,
   zzIf,
   ValueOrReactive,
+  zzArrayInstance,
 } from "@lizzi/core";
 import { DomElementView } from "..";
 
@@ -22,11 +23,11 @@ type InputTypes<T extends any[]> =
 type InputArrayTypes<T extends any[]> =
   | InputTypes<T>
   | Array<InputTypes<T>>
-  | zzArray<InputTypes<T>>;
+  | zzArrayInstance<InputTypes<T>>;
 
 function convertInputToReactiveArray<T extends any[]>(
   input: InputArrayTypes<T>
-): zzArray<OutputTypes<T>> {
+): zzArrayInstance<OutputTypes<T>> {
   if (typeof input === "string" || typeof input === "number") {
     return new zzArray<T | zzReactive<T>>([input]);
   } else if (typeof input === "function") {
@@ -37,7 +38,7 @@ function convertInputToReactiveArray<T extends any[]>(
         typeof value === "function" ? zzCompute(value) : value
       )
     );
-  } else if (input instanceof zzArray) {
+  } else if (input instanceof zzArrayInstance) {
     return input;
   } else if (input instanceof zzReactive) {
     return new zzArray<T | zzReactive<T>>([input]);
@@ -98,7 +99,7 @@ export function AttributeLink<T extends DomElementView>(
       attrvalue = new zzArray(attrvalue);
     }
 
-    if (attrvalue instanceof zzArray) {
+    if (attrvalue instanceof zzArrayInstance) {
       attrvalue = attrvalue.join() as any;
     }
 

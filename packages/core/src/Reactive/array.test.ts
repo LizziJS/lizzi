@@ -8,7 +8,7 @@ import {
   zzComputeArrayFn,
 } from "./array";
 import { zzComputeFn } from "./compute";
-import { ValueChangeEvent } from "./reactive";
+import { ValueChangeEvent } from "./Reactive";
 import { zzInteger } from "./vars";
 
 describe("zzArray", () => {

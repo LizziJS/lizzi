@@ -1,5 +1,5 @@
 import { zzArray, zzBoolean, zzReactive, zzString } from "@lizzi/core";
-import { Debounce, EventWrapper } from "@lizzi/core/Event";
+import { Debounce, EventWrapper } from "@lizzi/core";
 import { DomElementView } from "..";
 
 export function onInput<

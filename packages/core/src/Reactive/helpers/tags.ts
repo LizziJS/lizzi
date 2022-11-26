@@ -6,7 +6,7 @@
 
 import { zzEvent } from "../../Event";
 import { zzCompute, zzComputeFn } from "../compute";
-import { zzReactive } from "../reactive";
+import { zzReactive } from "../Reactive";
 
 export const zzS = (strings: TemplateStringsArray, ...values: any) => {
   const concatArrayString: any[] = [];

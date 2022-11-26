@@ -6,7 +6,7 @@
 
 import { DestructorsStack } from "../Destructor";
 import { onStartListening, zzEvent } from "../Event";
-import { InferReactive, zzReactive, zzReactiveGetObserver } from "./reactive";
+import { InferReactive, zzReactive, zzReactiveGetObserver } from "./Reactive";
 
 export type InferModel<Type extends object> = {
   [P in keyof Type]: InferReactive<Type[P]>;

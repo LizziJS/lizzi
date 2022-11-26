@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-export * from "./reactive";
+export * from "./Reactive";
 export * from "./vars";
 export * from "./object";
 export * from "./array";

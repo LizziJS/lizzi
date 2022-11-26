@@ -9,11 +9,10 @@ import {
   ValueChangeEvent,
   zzReactive,
   zzReactiveGetObserver,
-} from "./reactive";
+} from "./Reactive";
 import { DestructorsStack, IDestructor } from "../Destructor";
 import { onStartListening, zzEvent } from "../Event";
 import { zzComputeArrayFn } from "./array";
-import { DestructorFn } from "../Event/events";
 
 export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
   protected _fn: () => T;

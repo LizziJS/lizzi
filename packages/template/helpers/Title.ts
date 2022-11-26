@@ -5,7 +5,7 @@
  */
 
 import { zzMakeReactive, ValueOrReactive, zzReactive } from "@lizzi/core";
-import { zzEvent } from "@lizzi/core/Event";
+import { zzEvent } from "@lizzi/core";
 import { JSX } from "../jsx-runtime";
 import { ViewComponent } from "../view/ViewComponent";
 

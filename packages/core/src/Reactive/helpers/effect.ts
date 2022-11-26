@@ -10,7 +10,7 @@ import {
   IReactiveValue,
   zzReactive,
   zzReactiveGetObserver,
-} from "../reactive";
+} from "../Reactive";
 import { DestructorsStack } from "../../Destructor";
 import { onStartListening, zzEvent } from "../../Event";
 

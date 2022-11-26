@@ -1,4 +1,4 @@
-import { EventWrapper } from "@lizzi/core/Event";
+import { EventWrapper } from "@lizzi/core";
 import { DomElementView } from "..";
 
 export function on<T extends DomElementView>(
