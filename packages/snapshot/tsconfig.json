@@ -3,8 +3,6 @@
     "allowSyntheticDefaultImports": true,
     "declaration": true,
     "esModuleInterop": true,
-    "jsx": "react-jsx",
-    "jsxImportSource": "@lizzi/template",
     "lib": ["dom", "dom.iterable", "esnext"],
     "types": ["node", "jest", "express"],
     "module": "esnext",
