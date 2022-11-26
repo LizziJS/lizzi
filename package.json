@@ -8,7 +8,7 @@
   "scripts": {
     "clean": "npx lerna run clean",
     "build": "npx lerna run build",
-    "version": "npm run build && npx lerna publish && npx run clean"
+    "pub": "npm run build && npx lerna publish && npx run clean"
   },
   "devDependencies": {
     "lerna": "^6.0.1"
