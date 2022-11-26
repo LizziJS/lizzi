@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzReactive } from "@lizzi/core";
+import { zzArray, zzArrayInstance, zzReactive } from "@lizzi/core";
 import { Snapshot } from "../snapshot";
 import { ISnapshotType, ISnapshotValue } from "./interfaces";
 
@@ -47,6 +47,12 @@ export class ObjectDecorator implements ISnapshotType<any> {
         this.snapshot.setValues(rvalue, values[name]);
 
         continue;
+      } else if (rvalue instanceof zzArray) {
+        throw Error(
+          `.array(...) decorator for class ${
+            Object.getPrototypeOf(rvalue).constructor.name
+          } should be set`
+        );
       }
 
       if (rvalue instanceof zzReactive) {

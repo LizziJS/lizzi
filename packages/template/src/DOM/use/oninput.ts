@@ -1,4 +1,4 @@
-import { zzArray, zzBoolean, zzReactive, zzString } from "@lizzi/core";
+import { zzArray, zzBoolean, zzReactive, zzStringType } from "@lizzi/core";
 import { Debounce, EventWrapper } from "@lizzi/core";
 import { DomElementView } from "..";
 
@@ -106,7 +106,7 @@ export function AutoResizeTextarea<
 }
 
 export function onCheckboxInput<T extends DomElementView<HTMLInputElement>>(
-  value: zzArray<string> | zzBoolean | zzString,
+  value: zzArray<string> | zzBoolean | zzStringType,
   onChange?: (checked: boolean, value: string) => void
 ) {
   return (view: T) => {
@@ -166,7 +166,7 @@ export function onCheckboxInput<T extends DomElementView<HTMLInputElement>>(
           false
         )
       );
-    } else if (value instanceof zzString) {
+    } else if (value instanceof zzStringType) {
       const onChangeInput =
         onChange ??
         ((checked: boolean, elvalue: string) => {

@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzCompute, zzReactive } from "@lizzi/core/index";
+import { zzCompute, zzReactive } from "@lizzi/core";
 import { JSX } from "../jsx-runtime";
 import { MapJSXChildrensToNodes } from "../view";
 import { ViewComponent } from "../view/ViewComponent";
@@ -23,6 +23,8 @@ export class If extends ViewComponent {
 
     const elseNodes = nodes.filter((node) => node instanceof Else);
     const condNodes = nodes.filter((node) => !(node instanceof Else));
+
+    console.log("condition", condition, condition instanceof zzReactive);
 
     if (typeof condition === "function") {
       condition = zzCompute(condition);

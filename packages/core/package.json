@@ -5,8 +5,9 @@
   "author": "Stanislav Shishankin",
   "license": "MIT",
   "scripts": {
+    "clean": "rm -rf dist/",
     "test": "jest",
-    "build": "rm -rf dist/ && npm test && npm run build:esm && npm run build:cjs",
+    "build": "npm run clean && npm test && npm run build:esm && npm run build:cjs",
     "build:esm": "tsc",
     "build:cjs": "tsc --module CommonJS --outDir dist/cjs"
   },

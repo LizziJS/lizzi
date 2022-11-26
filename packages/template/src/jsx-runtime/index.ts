@@ -1,8 +1,8 @@
 export * from "./namespace";
 
-import { isViewNodeConstructor, IViewNode, ViewNode } from "../view/ViewNode";
+import { isViewNodeConstructor, ViewNode } from "../view/ViewNode";
+import { HtmlView, SvgView } from "..";
 import { isSvgTag } from "../DOM/SvgTags";
-import { HtmlView, SvgView } from "../DOM";
 import { JSX } from "./namespace";
 import { ViewComponent } from "../view";
 

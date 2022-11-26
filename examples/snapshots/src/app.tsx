@@ -3,7 +3,9 @@ import { Body } from "@lizzi/template";
 import { TwitterApp } from "./components/TwitterApp";
 
 import "./app.css";
-import { appState } from "./models/AppState";
+import { AppState } from "./models/AppState";
+
+const appState = new AppState();
 
 server.setValues(appState, {
   posts: [
@@ -32,6 +34,6 @@ server.setValues(appState, {
   ],
 });
 
-Body(<TwitterApp />);
+Body(<TwitterApp appState={appState} />);
 
 console.log(server.getValues(appState));

@@ -13,19 +13,19 @@ type SaveDataType = {
   data: SyncJSONType;
 }[];
 
-export class zzSyncSerializer<ObjectType extends object> {
+export class zzSyncSerializer<IObject extends object> {
   readonly sync;
   readonly factory;
 
-  save(getValuesFn: (item: ObjectType) => any): SaveDataType {
+  save(): SaveDataType {
     let result: SaveDataType = [];
-    this.sync.items.forEach((id, item) => {
-      const type = this.factory.findType(item);
+    this.sync.items.forEach((id, obj) => {
+      const type = this.factory.findType(obj);
       if (type) {
         result.push({
           id,
           type,
-          data: this.sync.serialize(getValuesFn(item)),
+          data: this.sync.serialize(this.factory.get(obj)),
         });
       }
     });
@@ -34,7 +34,7 @@ export class zzSyncSerializer<ObjectType extends object> {
   }
 
   create(loadData: SaveDataType) {
-    const result: ObjectType[] = [];
+    const result: IObject[] = [];
 
     for (let item of loadData) {
       const newItem = this.factory.create(item.type);
@@ -47,14 +47,11 @@ export class zzSyncSerializer<ObjectType extends object> {
     return result;
   }
 
-  update(
-    loadData: SaveDataType,
-    updateFn: (item: ObjectType, values: any) => void
-  ) {
+  update(loadData: SaveDataType) {
     for (let item of loadData) {
       const foundItem = this.sync.get(item.id);
       if (foundItem) {
-        updateFn(foundItem, this.sync.unserialize(item.data));
+        this.factory.update(foundItem, this.sync.unserialize(item.data));
       }
     }
   }
@@ -68,17 +65,14 @@ export class zzSyncSerializer<ObjectType extends object> {
     }
   }
 
-  load(
-    loadData: SaveDataType,
-    updateFn: (item: ObjectType, values: any) => void
-  ) {
+  load(loadData: SaveDataType) {
     const items = this.create(loadData);
-    this.update(loadData, updateFn);
+    this.update(loadData);
 
     return items;
   }
 
-  constructor(sync: zzSync<ObjectType>, factory: zzSyncFactory<ObjectType>) {
+  constructor(sync: zzSync<IObject>, factory: zzSyncFactory<IObject>) {
     this.sync = sync;
     this.factory = factory;
   }

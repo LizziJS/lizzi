@@ -9,7 +9,7 @@
     "test": "jest"
   },
   "dependencies": {
-    "@lizzi/core": "^0.0.12"
+    "@lizzi/core": "^0.0.15"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",

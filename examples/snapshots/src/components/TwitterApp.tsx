@@ -1,7 +1,7 @@
 import { zzCompute } from "@lizzi/core";
-import { appState } from "../models/AppState";
+import { AppState } from "../models/AppState";
 
-export function TwitterApp() {
+export function TwitterApp({ appState }: { appState: AppState }) {
   return (
     <div class="m-4">
       {appState.posts.map((post) => (

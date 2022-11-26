@@ -5,6 +5,11 @@
     "packages/*",
     "examples/*"
   ],
+  "scripts": {
+    "clean": "npx lerna run clean",
+    "build": "npx lerna run build",
+    "publish": "npm run build && npx lerna publish && npx run clean"
+  },
   "devDependencies": {
     "lerna": "^6.0.1"
   }

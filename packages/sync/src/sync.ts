@@ -4,8 +4,8 @@
  * This source code is licensed under the MIT license.
  */
 
-import { IDestructor } from "@lizzi/core/Destructor";
-import { zzEvent } from "@lizzi/core/Event";
+import { IDestructor } from "@lizzi/core";
+import { zzEvent } from "@lizzi/core";
 
 export type SyncID = string;
 
@@ -29,6 +29,10 @@ export class zzSync<OType extends object> implements IDestructor {
 
   readonly items: Map<OType, SyncID>;
   readonly ids: Map<SyncID, OType>;
+
+  get size() {
+    return this.items.size;
+  }
 
   destroy() {
     this.clear();
@@ -125,7 +129,7 @@ export class zzSync<OType extends object> implements IDestructor {
       return result;
     }
 
-    return null;
+    return data;
   }
 
   constructor() {

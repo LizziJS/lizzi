@@ -2,10 +2,22 @@
   "name": "@lizzi/sync",
   "version": "0.0.12",
   "description": "lizzi js sync library",
-  "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "clean": "rm -rf dist/",
+    "test": "echo no tests",
+    "build": "npm run clean && npm test && npm run build:esm && npm run build:cjs",
+    "build:esm": "tsc",
+    "build:cjs": "tsc --module CommonJS --outDir dist/cjs"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["dist", "*.d.ts"],
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
   "dependencies": {
-    "@lizzi/core": "^0.0.12"
+    "@lizzi/core": "^0.0.15"
   },
   "gitHead": "c182bdeec8cedfe343ad6b108c77b3c122f9cc2a",
   "devDependencies": {

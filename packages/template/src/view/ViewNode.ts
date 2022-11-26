@@ -6,7 +6,7 @@
 
 import { DestructorsStack, IDestructor, zzArrayInstance } from "@lizzi/core";
 import { JSX } from "../jsx-runtime";
-import { zzArray, zzObject, zzReactive } from "@lizzi/core";
+import { zzObject, zzReactive } from "@lizzi/core";
 import { zzSimpleEvent } from "@lizzi/core";
 
 type ViewComponentStatuses = "unmounted" | "mounted" | "in-unmount-process";

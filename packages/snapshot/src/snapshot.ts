@@ -55,7 +55,12 @@ export class Snapshot {
       Object.getPrototypeOf(object).constructor
     );
 
-    if (!converter) return;
+    if (!converter)
+      throw new Error(
+        `not set snapshot decorator for ${
+          Object.getPrototypeOf(object).constructor.name
+        }`
+      );
 
     converter.setter(object, values, false);
   }
@@ -67,7 +72,12 @@ export class Snapshot {
       Object.getPrototypeOf(object).constructor
     );
 
-    if (!converter) return;
+    if (!converter)
+      throw new Error(
+        `not set snapshot decorator for ${
+          Object.getPrototypeOf(object).constructor.name
+        }`
+      );
 
     converter.setter(object, values, true);
   }
@@ -129,45 +139,29 @@ export class Snapshot {
       );
     }).bind(this);
 
-    this.array = (<T extends new () => any>(arrayClass: T) => {
-      return <P>(prototype: new () => P): any => {
-        const fn = (values: any): P => {
-          const newClass = new prototype();
-          this._createValues(newClass, values);
-          return newClass;
-        };
-
-        const decorator = new ArrayDecorator(this, prototype, arrayClass);
-        this.prototypesFnClassMap.set(fn, decorator);
+    this.array = (<ItemT extends new (values: any) => any>(itemType: ItemT) => {
+      return <P>(prototype: new (...any: any) => P): any => {
+        const decorator = new ArrayDecorator(this, prototype, itemType);
         this._setClassMap(decorator);
-
-        return fn;
       };
     }).bind(this);
 
     this.arrayReplace = (<T extends new () => any>(arrayClass: T) => {
-      return <P>(prototype: new () => P): any => {
-        const fn = (values: any): P => {
-          const newClass = new prototype();
-          this._createValues(newClass, values);
-          return newClass;
-        };
-
+      return <P>(prototype: new (...any: any) => P): any => {
         const decorator = new ArrayReplaceDecorator(
           this,
           prototype,
           arrayClass
         );
-        this.prototypesFnClassMap.set(fn, decorator);
         this._setClassMap(decorator);
-
-        return fn;
       };
     }).bind(this);
 
-    this.object = (<P>(prototype: new () => P): any => {
-      const fn = (values: any): P => {
-        const newClass = new prototype();
+    this.object = (<P, C extends object>(
+      prototype: new (parent: C) => P
+    ): any => {
+      const fn = (values: any, parent: C): P => {
+        const newClass = new prototype(parent);
         this._createValues(newClass, values);
         return newClass;
       };

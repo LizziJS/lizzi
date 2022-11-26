@@ -12,7 +12,7 @@ export class ArrayDecorator implements ISnapshotType<any> {
   protected snapshot: Snapshot;
   readonly prototype: Function;
 
-  protected arrayClass: new (values: any) => any;
+  protected arrayClass: new (values: any, object: any) => any;
 
   primaries() {
     return [];
@@ -41,7 +41,7 @@ export class ArrayDecorator implements ISnapshotType<any> {
       });
 
       if (!item) {
-        item = new this.arrayClass(newValue);
+        item = new this.arrayClass(newValue, object);
         object.add([item]);
       } else {
         this.snapshot.setValues(item!, newValue);
@@ -58,7 +58,7 @@ export class ArrayDecorator implements ISnapshotType<any> {
   constructor(
     snapshot: Snapshot,
     prototype: Function,
-    arrayClass: new (values: any) => any
+    arrayClass: new (values: any, object: any) => any
   ) {
     this.snapshot = snapshot;
     this.prototype = prototype;
@@ -91,7 +91,7 @@ export class ArrayReplaceDecorator extends ArrayDecorator {
         });
 
         if (!item) {
-          item = new this.arrayClass(newValue);
+          item = new this.arrayClass(newValue, object);
         } else {
           this.snapshot.setValues(item!, newValue);
         }

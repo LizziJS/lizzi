@@ -20,6 +20,10 @@ export class zzInteger extends zzNumber {
   checkType(value: number) {
     return Number.isInteger(value);
   }
+
+  constructor(value: number = 0) {
+    super(value);
+  }
 }
 
 export const zzInt = zzInteger;
@@ -28,11 +32,23 @@ export class zzFloat extends zzNumber {
   checkType(value: number) {
     return typeof value === "number" && !Number.isNaN(value);
   }
+
+  constructor(value: number = 0) {
+    super(value);
+  }
 }
 
-export class zzString<StringType = string> extends zzType<StringType> {
+export class zzStringType<
+  StringType extends string = any
+> extends zzType<StringType> {
   checkType(value: StringType) {
     return typeof value === "string";
+  }
+}
+
+export class zzString extends zzStringType<string> {
+  constructor(value: string = "") {
+    super(value);
   }
 }
 
@@ -41,6 +57,10 @@ export const zzStr = zzString;
 export class zzBoolean extends zzType<boolean> {
   checkType(value: boolean) {
     return typeof value === "boolean";
+  }
+
+  constructor(value: boolean = false) {
+    super(value);
   }
 }
 

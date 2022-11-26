@@ -1,6 +1,7 @@
 import { zzEvent } from "../Event";
 import { zzComputeFn } from "./compute";
 import { zzObject } from "./object";
+import { zzReactive } from "./Reactive";
 import { zzBoolean, zzInteger, zzString } from "./vars";
 
 describe("zzCompute", () => {
@@ -9,6 +10,7 @@ describe("zzCompute", () => {
       expect(zzComputeFn).toBeInstanceOf(Function);
       const compute = new zzComputeFn(() => false);
 
+      expect(compute).toBeInstanceOf(zzReactive);
       expect(compute.onChange).toBeInstanceOf(zzEvent);
     });
 

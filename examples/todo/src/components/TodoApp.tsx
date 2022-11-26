@@ -8,11 +8,11 @@ import { TodoView } from "./TodoView";
 export function TodoApp({ todos }: { todos: zzArray<Todo> }) {
   const searchComponent = (<SearchComponent />) as SearchComponent;
 
-  const filteredTodos = todos.filter((todo) =>
-    todo.todo.value
+  const filteredTodos = todos.filter((todo) => {
+    return todo.todo.value
       .toLocaleLowerCase()
-      .startsWith(searchComponent.search.value.toLocaleLowerCase())
-  );
+      .startsWith(searchComponent.search.value.toLocaleLowerCase());
+  });
 
   const isEmptyTodos = zzCompute(() => todos.length === 0);
   const isEmptyResults = zzCompute(() => filteredTodos.length === 0);
