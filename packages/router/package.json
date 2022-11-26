@@ -9,7 +9,7 @@
     "@lizzi/core": "^0.0.12",
     "@lizzi/template": "^0.0.16"
   },
-  "gitHead": "c182bdeec8cedfe343ad6b108c77b3c122f9cc2a",
+  "gitHead": "d6d78e384d48a1af81ff8e34d7407001ade9014c",
   "devDependencies": {
     "@types/jest": "^29.2.2",
     "jest": "^29.2.2",

@@ -27,5 +27,6 @@
   "bugs": {
     "url": "https://github.com/lizzi-js/lizzi/issues"
   },
-  "homepage": "https://github.com/lizzi-js/lizzi#readme"
+  "homepage": "https://github.com/lizzi-js/lizzi#readme",
+  "gitHead": "d6d78e384d48a1af81ff8e34d7407001ade9014c"
 }
