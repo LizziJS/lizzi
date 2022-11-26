@@ -63,7 +63,7 @@ export class RouterComponent extends ViewComponent {
 export class Route extends RouterComponent {
   readonly regexp: RegExp;
   readonly paramNames: zzReactive<any>[];
-  readonly childrens?: JSX.Childrens;
+  readonly childrens;
   protected isOpened: zzBoolean;
 
   check(path: string) {
@@ -110,7 +110,7 @@ export class Route extends RouterComponent {
     children,
   }: {
     route: Array<string | zzReactive<any>>;
-    children?: JSX.Childrens;
+    children: JSX.Childrens;
   }) {
     super({});
 
