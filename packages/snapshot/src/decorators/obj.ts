@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzArray, zzArrayInstance, zzReactive } from "@lizzi/core";
+import { zzArray, zzReactive } from "@lizzi/core";
 import { Snapshot } from "../snapshot";
 import { ISnapshotType, ISnapshotValue } from "./interfaces";
 
@@ -68,7 +68,7 @@ export class ObjectDecorator implements ISnapshotType<any> {
 
     if (!mapValues) return null;
 
-    for (const [name, valueChecker] of mapValues) {
+    for (const name of mapValues.keys()) {
       const rvalue = object[name];
 
       const proto = this.snapshot._getClassMap(
