@@ -1,6 +1,6 @@
 {
   "name": "example.snapshots.app",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "main": "index.js",
   "license": "MIT",
   "private": true,
@@ -8,9 +8,9 @@
     "dev": "npx webpack serve --config webpack.dev.js"
   },
   "dependencies": {
-    "@lizzi/core": "^0.0.18",
-    "@lizzi/snapshot": "^0.0.15",
-    "@lizzi/template": "^0.0.18"
+    "@lizzi/core": "^0.0.19",
+    "@lizzi/snapshot": "^0.0.16",
+    "@lizzi/template": "^0.0.19"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",
