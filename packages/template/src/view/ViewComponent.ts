@@ -7,10 +7,21 @@
 import { JSX } from "@lizzi/jsx-runtime";
 import { ViewNode } from "./ViewNode";
 
+export type NodeProp<T extends ViewNode = ViewNode> = JSX.Children<T>;
+
+export type NodesProp<T extends ViewNode = ViewNode> = JSX.Childrens<T>;
+
+export type PropsWithChildrens<
+  P extends object = {},
+  T extends ViewNode = ViewNode
+> = P & {
+  children: NodesProp<T>;
+};
+
 export class ViewComponent extends ViewNode {
   readonly element: Node;
 
-  constructor({ children }: { children?: JSX.Childrens<any> } = {}) {
+  constructor({ children }: { children?: NodesProp<any> } = {}) {
     super();
 
     this.element = document.createTextNode("");
