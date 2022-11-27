@@ -27,7 +27,5 @@ export class Comments extends zzArray<Comment> {
 
   constructor(public readonly post: Post) {
     super();
-
-    console.log(this.post, this.post.appState);
   }
 }

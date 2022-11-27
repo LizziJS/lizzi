@@ -6,7 +6,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "types": ["node", "jest", "express"],
     "module": "esnext",
-    "moduleResolution": "Node16",
+    "moduleResolution": "Node",
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "outDir": "dist/esm",

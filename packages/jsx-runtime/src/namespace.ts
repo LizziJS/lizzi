@@ -1,6 +1,5 @@
 import { zzReactive } from "@lizzi/core";
-import { ViewNode } from "../view/ViewNode";
-import { DomElementView } from "../DOM";
+import { ViewNode, DomElementView } from "@lizzi/template";
 
 type AllElementsTagName = HTMLElementTagNameMap & SVGElementTagNameMap;
 

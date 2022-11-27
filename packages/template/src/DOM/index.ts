@@ -7,7 +7,7 @@
 import { zzReactive } from "@lizzi/core";
 import { AttributeLink, ClassLink, StyleLink } from "./use/attributes";
 import { ViewNode } from "../view/ViewNode";
-import { JSX } from "../jsx-runtime";
+import { JSX } from "@lizzi/jsx-runtime";
 
 export * from "./use";
 

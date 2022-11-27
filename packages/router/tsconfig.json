@@ -4,7 +4,7 @@
     "declaration": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
-    "jsxImportSource": "@lizzi/template",
+    "jsxImportSource": "@lizzi",
     "lib": ["dom", "dom.iterable", "esnext"],
     "types": ["node", "jest", "express"],
     "module": "esnext",

@@ -7,7 +7,7 @@
 import { zzBoolean, zzReactive } from "@lizzi/core";
 import { RouteState, zzRouter } from "./router";
 import { ViewComponent } from "@lizzi/template";
-import { JSX } from "@lizzi/template/jsx-runtime";
+import { JSX } from "@lizzi/jsx-runtime";
 
 export class RouterComponent extends ViewComponent {
   parentRouter: RouterComponent | null = null;

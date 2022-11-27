@@ -35,5 +35,3 @@ server.setValues(appState, {
 });
 
 Body(<TwitterApp appState={appState} />);
-
-console.log(server.getValues(appState));

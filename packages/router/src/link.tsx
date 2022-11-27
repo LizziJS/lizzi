@@ -6,7 +6,7 @@
 
 import { zzMakeReactive, zzRoV } from "@lizzi/core";
 import { onClick, ViewComponent } from "@lizzi/template";
-import { JSX } from "@lizzi/template/jsx-runtime";
+import { JSX } from "@lizzi/jsx-runtime";
 import { Router } from "./view";
 
 export class Link extends ViewComponent {

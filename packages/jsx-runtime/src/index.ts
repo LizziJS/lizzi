@@ -1,10 +1,14 @@
 export * from "./namespace";
 
-import { isViewNodeConstructor, ViewNode } from "../view/ViewNode";
-import { HtmlView, SvgView } from "..";
-import { isSvgTag } from "../DOM/SvgTags";
 import { JSX } from "./namespace";
-import { ViewComponent } from "../view";
+import {
+  isViewNodeConstructor,
+  ViewNode,
+  HtmlView,
+  SvgView,
+  ViewComponent,
+} from "@lizzi/template";
+import { isSvgTag } from "./SvgTags";
 
 export const jsx = <T extends ViewNode>(
   type: string | T,

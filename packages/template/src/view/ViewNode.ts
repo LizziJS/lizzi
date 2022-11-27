@@ -5,7 +5,7 @@
  */
 
 import { DestructorsStack, IDestructor, zzArrayInstance } from "@lizzi/core";
-import { JSX } from "../jsx-runtime";
+import { JSX } from "@lizzi/jsx-runtime";
 import { zzObject, zzReactive } from "@lizzi/core";
 import { zzSimpleEvent } from "@lizzi/core";
 

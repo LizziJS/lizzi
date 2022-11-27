@@ -280,6 +280,70 @@ describe("zzArray", () => {
       );
     });
 
+    it("should filter items with parameter w/o listeners", () => {
+      const less = new zzInteger(5);
+      const array = new zzArray([1, 2, 3, 4]);
+
+      const filterFn = jest.fn((item) => item < less.value);
+      const filter = array.filter(filterFn);
+
+      expect(filter.value).toEqual([1, 2, 3, 4]);
+      expect(filterFn.mock.calls.length).toBe(4);
+
+      less.value = 0;
+      expect(filter.value).toEqual([]);
+      expect(filterFn.mock.calls.length).toBe(8);
+
+      less.value = 5;
+      expect(filter.value).toEqual([1, 2, 3, 4]);
+      expect(filterFn.mock.calls.length).toBe(12);
+    });
+
+    it("should filter items with parameter with listeners", () => {
+      const less = new zzInteger(5);
+      const array = new zzArray([1, 2, 3, 4]);
+
+      const filterFn = jest.fn((item) => item < less.value);
+      const filter = array.filter(filterFn);
+      const listeners = {
+        add: jest.fn(),
+        remove: jest.fn(),
+        change: jest.fn(),
+      };
+
+      expect(less.onChange.countListeners()).toBe(0);
+
+      filter.onAdd.addListener(listeners.add);
+      filter.onRemove.addListener(listeners.remove);
+      filter.onChange.addListener(listeners.change);
+
+      expect(less.onChange.countListeners()).toBe(1);
+
+      expect(filter.value).toEqual([1, 2, 3, 4]);
+      expect(filterFn.mock.calls.length).toBe(8);
+      expect(less.onChange.countListeners()).toBe(1);
+
+      less.value = 0;
+      expect(filter.value).toEqual([]);
+      expect(filterFn.mock.calls.length).toBe(12);
+      expect(less.onChange.countListeners()).toBe(1);
+
+      less.value = 5;
+      expect(filter.value).toEqual([1, 2, 3, 4]);
+      expect(filterFn.mock.calls.length).toBe(16);
+      expect(less.onChange.countListeners()).toBe(1);
+
+      less.value = 2;
+      expect(filter.value).toEqual([1]);
+      expect(filterFn.mock.calls.length).toBe(20);
+      expect(less.onChange.countListeners()).toBe(1);
+
+      filter.onAdd.removeListener(listeners.add);
+      filter.onRemove.removeListener(listeners.remove);
+      filter.onChange.removeListener(listeners.change);
+      expect(less.onChange.countListeners()).toBe(0);
+    });
+
     it("should add listeners to sub-items", () => {
       const array = new zzArray(
         [1, 2, 3, 4, 5, 6, 7, 8, 9].map<{ id: zzInteger }>((value) => ({

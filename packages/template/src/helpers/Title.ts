@@ -6,7 +6,7 @@
 
 import { zzMakeReactive, ValueOrReactive, zzReactive } from "@lizzi/core";
 import { zzEvent } from "@lizzi/core";
-import { JSX } from "../jsx-runtime";
+import { JSX } from "@lizzi/jsx-runtime";
 import { ViewComponent } from "../view/ViewComponent";
 
 export class Title extends ViewComponent {

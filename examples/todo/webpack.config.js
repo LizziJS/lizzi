@@ -3,6 +3,7 @@ const CopyPlugin = require("copy-webpack-plugin");
 const HTMLWebpackPlugin = require("html-webpack-plugin");
 
 module.exports = {
+  target: 'web',
   context: path.resolve(__dirname, "src"),
   entry: {
     main: "./app",
