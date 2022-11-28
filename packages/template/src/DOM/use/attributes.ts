@@ -13,7 +13,7 @@ import {
   ValueOrReactive,
   zzArrayInstance,
 } from "@lizzi/core";
-import { DomElementView } from "..";
+import { ViewElement } from "..";
 
 type TValueReact<T> = T | zzReactive<T>;
 type TValueReactFunc<T> = TValueReact<T> | (() => T);
@@ -42,7 +42,7 @@ function convertInputToReactiveArray<T>(
   }
 }
 
-export function StyleLink<T extends DomElementView<HTMLElement | SVGElement>>(
+export function StyleLink<T extends ViewElement<HTMLElement | SVGElement>>(
   styleName: string,
   array: ValueOrArrayType<TValueReactFunc<string | number>>
 ) {
@@ -65,7 +65,7 @@ export function StyleLink<T extends DomElementView<HTMLElement | SVGElement>>(
   };
 }
 
-export function AttributeLink<T extends DomElementView>(
+export function AttributeLink<T extends ViewElement>(
   name: string,
   attrvalue: ValueOrArrayType<
     TValueReactFunc<string> | TValueReactFunc<number> | TValueReactFunc<boolean>
@@ -124,7 +124,7 @@ export function AttributeLink<T extends DomElementView>(
   };
 }
 
-export function ClassLink<T extends DomElementView>(
+export function ClassLink<T extends ViewElement>(
   array: ValueOrArrayType<TValueReactFunc<string>>
 ) {
   return (view: T) => {

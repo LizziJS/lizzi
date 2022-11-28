@@ -4,13 +4,13 @@
  * This source code is licensed under the MIT license.
  */
 
-import { DomElementView } from "../DOM";
+import { ViewElement } from "../DOM";
 import { ViewNode } from "../view/ViewNode";
 
 export const AppendToElement = (element: HTMLElement, children: ViewNode) => {
-  return new DomElementView(element).append([children]);
+  return new ViewElement(element).append([children]);
 };
 
 export const Body = (children: ViewNode) => {
-  return new DomElementView(document.body).append([children]).mount();
+  return new ViewElement(document.body).append([children]).mount();
 };

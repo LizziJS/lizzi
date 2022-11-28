@@ -1,5 +1,5 @@
 import { zzReactive } from "@lizzi/core";
-import { ViewNode, DomElementView } from "@lizzi/template";
+import { ViewNode, ViewElement } from "@lizzi/template";
 
 type AllElementsTagName = HTMLElementTagNameMap & SVGElementTagNameMap;
 
@@ -15,7 +15,7 @@ export declare namespace JSX {
         | number
         | zzReactive<any>;
     };
-    use?: Array<(view: DomElementView<AllElementsTagName[T]>) => void>;
+    use?: Array<(view: ViewElement<AllElementsTagName[T]>) => void>;
     [key: string]: any;
   }
 

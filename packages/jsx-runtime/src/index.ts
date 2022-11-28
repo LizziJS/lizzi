@@ -4,8 +4,8 @@ import { JSX } from "./namespace";
 import {
   isViewNodeConstructor,
   ViewNode,
-  HtmlView,
-  SvgView,
+  ViewHTMLElement,
+  ViewSVGElement,
   ViewComponent,
 } from "@lizzi/template";
 import { isSvgTag } from "./SvgTags";
@@ -30,10 +30,10 @@ export const jsxs = <T extends ViewNode>(
 ) => {
   if (typeof type === "string") {
     if (isSvgTag.has(type as any) || props.svg) {
-      return new SvgView(type as any, props);
+      return new ViewSVGElement(type as any, props);
     }
 
-    return new HtmlView(type as any, props);
+    return new ViewHTMLElement(type as any, props);
   } else if (typeof type === "function") {
     if (type[isViewNodeConstructor]) {
       return new (type as new (props: object) => T)(props);

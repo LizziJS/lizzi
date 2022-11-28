@@ -1,20 +1,20 @@
 import { zzArray, zzBoolean, zzReactive, zzStringType } from "@lizzi/core";
 import { Debounce, EventWrapper } from "@lizzi/core";
-import { DomElementView } from "..";
+import { ViewElement } from "..";
 
 export function onInput<
-  E extends DomElementView<HTMLTextAreaElement | HTMLInputElement>
+  E extends ViewElement<HTMLTextAreaElement | HTMLInputElement>
 >(
   value: zzReactive<string>,
   onChange?: (value: string) => void
 ): (view: E) => void;
 export function onInput<
   T,
-  E extends DomElementView<HTMLTextAreaElement | HTMLInputElement>
+  E extends ViewElement<HTMLTextAreaElement | HTMLInputElement>
 >(value: zzReactive<T>, onChange: (value: string) => void): (view: E) => void;
 export function onInput<
   T,
-  E extends DomElementView<HTMLTextAreaElement | HTMLInputElement>
+  E extends ViewElement<HTMLTextAreaElement | HTMLInputElement>
 >(value: zzReactive<T>, onChange?: (value: string) => void) {
   return (view: E) => {
     if (!(value instanceof zzReactive))
@@ -69,9 +69,9 @@ export function onInput<
   };
 }
 
-export function AutoResizeTextarea<
-  T extends DomElementView<HTMLTextAreaElement>
->(value: zzReactive<any>) {
+export function AutoResizeTextarea<T extends ViewElement<HTMLTextAreaElement>>(
+  value: zzReactive<any>
+) {
   return (view: T) => {
     const textElement = view.element;
 
@@ -105,7 +105,7 @@ export function AutoResizeTextarea<
   };
 }
 
-export function onCheckboxInput<T extends DomElementView<HTMLInputElement>>(
+export function onCheckboxInput<T extends ViewElement<HTMLInputElement>>(
   value: zzArray<string> | zzBoolean | zzStringType,
   onChange?: (checked: boolean, value: string) => void
 ) {

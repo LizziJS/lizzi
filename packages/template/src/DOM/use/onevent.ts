@@ -1,7 +1,7 @@
 import { EventWrapper } from "@lizzi/core";
-import { DomElementView } from "..";
+import { ViewElement } from "..";
 
-export function on<T extends DomElementView>(
+export function on<T extends ViewElement>(
   eventName: Parameters<T["element"]["addEventListener"]>[0],
   fn: (...args: any) => any,
   options: boolean = false

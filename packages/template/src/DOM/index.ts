@@ -11,7 +11,7 @@ import { JSX } from "@lizzi/jsx-runtime";
 
 export * from "./use";
 
-export type DOMAttributes<T extends DomElementView> = {
+export type ElementAttributes<T extends ViewElement> = {
   class?: Array<string | zzReactive<any>>;
   style?: { [key: string]: Array<string | zzReactive<any>> };
   use?: Array<(view: T) => void>;
@@ -19,7 +19,7 @@ export type DOMAttributes<T extends DomElementView> = {
   [key: string]: any;
 };
 
-export class DomElementView<T extends Element = Element> extends ViewNode {
+export class ViewElement<T extends Element = Element> extends ViewNode {
   readonly element: T;
 
   constructor(element: T) {
@@ -50,10 +50,10 @@ export class DomElementView<T extends Element = Element> extends ViewNode {
   }
 }
 
-export class HtmlView<
+export class ViewHTMLElement<
   T extends keyof HTMLElementTagNameMap
-> extends DomElementView<HTMLElementTagNameMap[T]> {
-  constructor(tagName: T, attributes: DOMAttributes<HtmlView<T>>) {
+> extends ViewElement<HTMLElementTagNameMap[T]> {
+  constructor(tagName: T, attributes: ElementAttributes<ViewHTMLElement<T>>) {
     super(document.createElement(tagName));
 
     this.append(attributes.children);
@@ -61,7 +61,7 @@ export class HtmlView<
     this._initAttributes(attributes);
   }
 
-  protected _initAttributes(attributes: DOMAttributes<HtmlView<T>>) {
+  protected _initAttributes(attributes: ElementAttributes<ViewHTMLElement<T>>) {
     for (let name in attributes) {
       switch (name.toLocaleLowerCase()) {
         case "children": {
@@ -102,10 +102,10 @@ export class HtmlView<
   }
 }
 
-export class SvgView<
+export class ViewSVGElement<
   T extends keyof SVGElementTagNameMap
-> extends DomElementView<SVGElementTagNameMap[T]> {
-  constructor(tagName: T, attributes: DOMAttributes<SvgView<T>>) {
+> extends ViewElement<SVGElementTagNameMap[T]> {
+  constructor(tagName: T, attributes: ElementAttributes<ViewSVGElement<T>>) {
     super(document.createElementNS("http://www.w3.org/2000/svg", tagName));
 
     this.append(attributes.children);
@@ -113,7 +113,7 @@ export class SvgView<
     this._initAttributes(attributes);
   }
 
-  protected _initAttributes(attributes: DOMAttributes<SvgView<T>>) {
+  protected _initAttributes(attributes: ElementAttributes<ViewSVGElement<T>>) {
     for (let name in attributes) {
       switch (name.toLocaleLowerCase()) {
         case "children": {

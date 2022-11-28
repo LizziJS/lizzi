@@ -194,18 +194,22 @@ export class ViewNode implements IViewNode {
     return parentView;
   }
 
-  filterChilds<T extends ViewNode>(findFn: (view: ViewNode) => boolean): T[] {
-    let results: T[] = [];
-
+  *findChilds<T extends ViewNode>(
+    findFn: (view: ViewNode) => boolean
+  ): Generator<T> {
     for (let child of this.childNodes) {
       if (findFn(child)) {
-        results.push(child as T);
+        yield child as T;
       } else {
-        results = results.concat(child.filterChilds(findFn));
+        yield* child.findChilds(findFn);
       }
     }
+  }
 
-    return results;
+  *findNodes<T extends ViewNode>(
+    findInstance: new (...args: any) => T
+  ): Generator<T> {
+    yield* this.findChilds<T>((node) => node instanceof findInstance);
   }
 
   getNodes() {
