@@ -212,6 +212,14 @@ export class ViewNode implements IViewNode {
     yield* this.findChilds<T>((node) => node instanceof findInstance);
   }
 
+  findChildNodes<T extends ViewNode>(
+    findInstance: new (...args: any) => T
+  ): T[] {
+    return Array.from(
+      this.findChilds<T>((node) => node instanceof findInstance)
+    );
+  }
+
   getNodes() {
     let elements: Node[] = [];
 
