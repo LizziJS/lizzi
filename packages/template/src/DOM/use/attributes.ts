@@ -15,28 +15,33 @@ import {
 } from "@lizzi/core";
 import { ViewElement } from "..";
 
-type TValueReact<T> = T | zzReactive<T>;
-type TValueReactFunc<T> = TValueReact<T> | (() => T);
+type OutputTypes<T extends any[]> = T[number] | zzReactive<T[number]>;
+type InputTypes<T extends any[]> =
+  | T[number]
+  | zzReactive<T[number]>
+  | (() => T[number]);
+type InputArrayTypes<T extends any[]> =
+  | InputTypes<T>
+  | Array<InputTypes<T>>
+  | zzArrayInstance<InputTypes<T>>;
 
-type ValueOrArrayType<T> = T | Array<T> | zzArrayInstance<T>;
-
-function convertInputToReactiveArray<T>(
-  input: ValueOrArrayType<TValueReactFunc<T>>
-): zzArrayInstance<TValueReact<T>> {
+function convertInputToReactiveArray<T extends any[]>(
+  input: InputArrayTypes<T>
+): zzArrayInstance<OutputTypes<T>> {
   if (typeof input === "string" || typeof input === "number") {
-    return new zzArray<TValueReact<T>>([input]);
+    return new zzArray<T | zzReactive<T>>([input]);
   } else if (typeof input === "function") {
-    return new zzArray<TValueReact<T>>([zzCompute(input as () => T)]);
+    return new zzArray<T | zzReactive<T>>([zzCompute(input)]);
   } else if (Array.isArray(input)) {
-    return new zzArray<TValueReact<T>>(
+    return new zzArray<T | zzReactive<T>>(
       input.map((value) =>
-        typeof value === "function" ? zzCompute(value as () => T) : value
+        typeof value === "function" ? zzCompute(value) : value
       )
     );
   } else if (input instanceof zzArrayInstance) {
-    return input as any;
+    return input;
   } else if (input instanceof zzReactive) {
-    return new zzArray<TValueReact<T>>([input]);
+    return new zzArray<T | zzReactive<T>>([input]);
   } else {
     throw new Error("wrong input type");
   }
@@ -44,7 +49,7 @@ function convertInputToReactiveArray<T>(
 
 export function StyleLink<T extends ViewElement<HTMLElement | SVGElement>>(
   styleName: string,
-  array: ValueOrArrayType<TValueReactFunc<string | number>>
+  array: InputArrayTypes<[string, number]>
 ) {
   return (view: T) => {
     const element = view.element;
@@ -67,9 +72,7 @@ export function StyleLink<T extends ViewElement<HTMLElement | SVGElement>>(
 
 export function AttributeLink<T extends ViewElement>(
   name: string,
-  attrvalue: ValueOrArrayType<
-    TValueReactFunc<string> | TValueReactFunc<number> | TValueReactFunc<boolean>
-  >
+  attrvalue: InputArrayTypes<[string, number, boolean]>
 ) {
   return (view: T) => {
     const element = view.element;
@@ -101,9 +104,7 @@ export function AttributeLink<T extends ViewElement>(
     }
 
     if (typeof attrvalue === "function") {
-      attrvalue = zzCompute<string | number | boolean>(
-        attrvalue
-      ) as zzReactive<any>;
+      attrvalue = zzCompute(attrvalue);
     }
 
     const reactiveValue = attrvalue as zzReactive<any>;
@@ -125,7 +126,7 @@ export function AttributeLink<T extends ViewElement>(
 }
 
 export function ClassLink<T extends ViewElement>(
-  array: ValueOrArrayType<TValueReactFunc<string>>
+  array: InputArrayTypes<[string]>
 ) {
   return (view: T) => {
     const classArray = convertInputToReactiveArray(array);
@@ -170,7 +171,7 @@ export function ClassLink<T extends ViewElement>(
 }
 
 export function cssMap(
-  array: ValueOrArrayType<TValueReactFunc<string>>,
+  array: InputArrayTypes<[string]>,
   styles: { [key: string]: string }
 ) {
   const classArray = convertInputToReactiveArray(array);
