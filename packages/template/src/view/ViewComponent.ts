@@ -10,7 +10,7 @@ import { ViewNode } from "./ViewNode";
 export class ViewComponent extends ViewNode {
   readonly element: Node;
 
-  constructor({ children }: { children?: JSX.Childrens<any> } = {}) {
+  constructor({ children }: { children?: JSX.Childrens } = {}) {
     super();
 
     this.element = document.createTextNode("");

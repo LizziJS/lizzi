@@ -22,10 +22,6 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "source": "src/index.ts",
-  "exports": {
-    "import": "./dist/esm/index.js",
-    "require": "./dist/cjs/index.js"
-  },
   "dependencies": {
     "@lizzi/core": "^0.0.20",
     "@lizzi/jsx-runtime": "^0.0.25"

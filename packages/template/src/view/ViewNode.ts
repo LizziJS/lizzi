@@ -80,10 +80,10 @@ export class ViewNode implements IViewNode {
     return this;
   }
 
-  append(childrens?: JSX.Childrens<this>) {
+  append(childrens?: JSX.Childrens) {
     if (Array.isArray(childrens)) {
       const viewNodes = childrens.map((child) =>
-        JSXChildrenToNodeMapper(child, this)
+        JSXChildrenToNodeMapper(child)
       );
 
       for (let view of viewNodes) {
@@ -92,7 +92,7 @@ export class ViewNode implements IViewNode {
         }
       }
     } else if (childrens) {
-      const view = JSXChildrenToNodeMapper(childrens, this);
+      const view = JSXChildrenToNodeMapper(childrens);
       if (view) {
         this.appendChild(view);
       }
@@ -303,11 +303,8 @@ export class ViewNode implements IViewNode {
     return this;
   }
 
-  // init constructor helper
-  init(fn: (view: this) => void) {
-    fn.call(this, this);
-
-    return this;
+  callChildren(childrens: JSX.FuncChildrens<any>) {
+    return typeof childrens === "function" ? childrens(this) : childrens;
   }
 }
 
@@ -420,10 +417,7 @@ export class ObjectView<T extends ViewNode> extends ViewNode {
   }
 }
 
-export const JSXChildrenToNodeMapper = (
-  children: JSX.Children<any>,
-  parentNode: ViewNode
-): ViewNode => {
+export const JSXChildrenToNodeMapper = (children: JSX.Children): ViewNode => {
   if (children instanceof zzArrayInstance || Array.isArray(children)) {
     return new ArrayView({ children });
   }
@@ -442,23 +436,22 @@ export const JSXChildrenToNodeMapper = (
   }
 
   if (typeof children === "function") {
-    return children(parentNode);
+    throw Error(
+      "To use children function you should use this.callChildren(children) in Component"
+    );
   }
 
   return children;
 };
 
 export const MapJSXChildrensToNodes = (
-  childrens: JSX.Childrens<any>,
-  parentNode: ViewNode
+  childrens: JSX.Childrens
 ): ViewNode[] => {
   if (Array.isArray(childrens)) {
     return childrens
-      .map((child) => JSXChildrenToNodeMapper(child, parentNode))
+      .map((child) => JSXChildrenToNodeMapper(child))
       .filter((view) => view);
   }
 
-  return [JSXChildrenToNodeMapper(childrens, parentNode)].filter(
-    (view) => view
-  );
+  return [JSXChildrenToNodeMapper(childrens)].filter((view) => view);
 };

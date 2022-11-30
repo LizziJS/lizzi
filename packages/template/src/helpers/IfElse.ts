@@ -15,11 +15,11 @@ export class If extends ViewComponent {
     children,
   }: {
     condition: zzReactive<any> | (() => boolean) | any;
-    children: JSX.Childrens<If>;
+    children: JSX.Childrens;
   }) {
     super();
 
-    const nodes = MapJSXChildrensToNodes(children, this);
+    const nodes = MapJSXChildrensToNodes(children);
 
     const elseNodes = nodes.filter((node) => node instanceof Else);
     const condNodes = nodes.filter((node) => !(node instanceof Else));

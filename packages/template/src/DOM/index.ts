@@ -50,10 +50,10 @@ export class ViewElement<T extends Element = Element> extends ViewNode {
   }
 }
 
-export class ViewHTMLElement<
+export class ViewHtmlElement<
   T extends keyof HTMLElementTagNameMap
 > extends ViewElement<HTMLElementTagNameMap[T]> {
-  constructor(tagName: T, attributes: ElementAttributes<ViewHTMLElement<T>>) {
+  constructor(tagName: T, attributes: ElementAttributes<ViewHtmlElement<T>>) {
     super(document.createElement(tagName));
 
     this.append(attributes.children);
@@ -61,7 +61,7 @@ export class ViewHTMLElement<
     this._initAttributes(attributes);
   }
 
-  protected _initAttributes(attributes: ElementAttributes<ViewHTMLElement<T>>) {
+  protected _initAttributes(attributes: ElementAttributes<ViewHtmlElement<T>>) {
     for (let name in attributes) {
       switch (name.toLocaleLowerCase()) {
         case "children": {
@@ -102,10 +102,10 @@ export class ViewHTMLElement<
   }
 }
 
-export class ViewSVGElement<
+export class ViewSvgElement<
   T extends keyof SVGElementTagNameMap
 > extends ViewElement<SVGElementTagNameMap[T]> {
-  constructor(tagName: T, attributes: ElementAttributes<ViewSVGElement<T>>) {
+  constructor(tagName: T, attributes: ElementAttributes<ViewSvgElement<T>>) {
     super(document.createElementNS("http://www.w3.org/2000/svg", tagName));
 
     this.append(attributes.children);
@@ -113,7 +113,7 @@ export class ViewSVGElement<
     this._initAttributes(attributes);
   }
 
-  protected _initAttributes(attributes: ElementAttributes<ViewSVGElement<T>>) {
+  protected _initAttributes(attributes: ElementAttributes<ViewSvgElement<T>>) {
     for (let name in attributes) {
       switch (name.toLocaleLowerCase()) {
         case "children": {

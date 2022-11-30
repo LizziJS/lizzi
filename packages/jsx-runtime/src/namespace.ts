@@ -19,26 +19,17 @@ export declare namespace JSX {
     [key: string]: any;
   }
 
-  type Children<T extends ViewNode = ViewNode> =
-    | ViewNode
-    | string
-    | number
-    | boolean
-    | zzReactive<any>
-    | ((view: T) => ViewNode);
+  type Children = ViewNode | string | number | boolean | zzReactive<any>;
 
-  type Childrens<T extends ViewNode = ViewNode> =
-    | Array<Children<T>>
-    | Children<T>;
+  type Childrens = Array<Children> | Children;
 
-  type ChildrenProps<T extends ViewNode = ViewNode> = {
-    children: Childrens<T>;
+  type FuncChildrens<T extends ViewNode> = Childrens | ((node: T) => ViewNode);
+
+  type ChildrenProps = {
+    children: Childrens;
   };
 
-  type PropsWithChildren<
-    P extends object = {},
-    T extends ViewNode = ViewNode
-  > = P & ChildrenProps<T>;
+  type PropsWithChildren<P extends object = {}> = P & ChildrenProps;
 
   interface ElementClass extends ViewNode {}
   interface ElementChildrenAttribute {
