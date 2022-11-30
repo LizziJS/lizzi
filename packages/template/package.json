@@ -1,6 +1,6 @@
 {
   "name": "@lizzi/template",
-  "version": "0.0.26",
+  "version": "0.0.27",
   "description": "lizzi js template DOM engine",
   "author": "Stanislav Shishankin",
   "license": "MIT",
@@ -24,7 +24,7 @@
   "source": "src/index.ts",
   "dependencies": {
     "@lizzi/core": "^0.0.20",
-    "@lizzi/jsx-runtime": "^0.0.26"
+    "@lizzi/jsx-runtime": "^0.0.27"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",
