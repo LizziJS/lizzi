@@ -303,7 +303,7 @@ export class ViewNode implements IViewNode {
     return this;
   }
 
-  callChildren(childrens: JSX.FuncChildrens<any>) {
+  callChildrenFunc(childrens: JSX.FuncChildrens<this>) {
     return typeof childrens === "function" ? childrens(this) : childrens;
   }
 }
@@ -437,7 +437,7 @@ export const JSXChildrenToNodeMapper = (children: JSX.Children): ViewNode => {
 
   if (typeof children === "function") {
     throw Error(
-      "To use children function you should use this.callChildren(children) in Component"
+      "To pass function to children you have to use this.callChildrenFunc(children) inside the Component"
     );
   }
 
