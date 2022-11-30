@@ -1,6 +1,6 @@
 {
   "name": "example.fetch.app",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "main": "index.js",
   "license": "MIT",
   "private": true,
@@ -10,7 +10,7 @@
   "dependencies": {
     "@lizzi/core": "^0.0.20",
     "@lizzi/snapshot": "^0.0.17",
-    "@lizzi/template": "^0.0.25"
+    "@lizzi/template": "^0.0.26"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",

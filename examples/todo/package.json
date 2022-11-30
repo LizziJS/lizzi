@@ -1,6 +1,6 @@
 {
   "name": "example.todo.app",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "main": "index.js",
   "license": "MIT",
   "private": true,
@@ -8,7 +8,7 @@
     "dev": "npx webpack serve --config webpack.dev.js"
   },
   "dependencies": {
-    "@lizzi/template": "^0.0.25"
+    "@lizzi/template": "^0.0.26"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",
