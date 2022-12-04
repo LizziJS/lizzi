@@ -142,8 +142,12 @@ export function Examples() {
 
         <Header2 name="Event basics:" />
         <Example
-          name="1. Add / remove listener"
+          name="1. Add listener"
           embed="https://codesandbox.io/embed/lizzi-events-2-08xtys"
+        />
+        <Example
+          name="2. Remove listener"
+          embed="https://codesandbox.io/embed/lizzi-events-2-b-cqj88l"
         />
         <Header1 name="Lizzi templates" />
         <Header2 name="Template basics:" />
