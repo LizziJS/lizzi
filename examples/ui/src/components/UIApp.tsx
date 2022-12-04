@@ -1,28 +1,26 @@
 import {
-  zzArray,
   zzBoolean,
   zzMakeReactive,
   zzReactive,
-  zzRoV,
+  zzRV,
   zzString,
 } from "@lizzi/core";
-import { EventWrapper, zzEvent } from "@lizzi/core/Event";
+import { EventWrapper, zzEvent } from "@lizzi/core";
 import {
   on,
   ViewComponent,
   If,
   onInput,
-  DomElementView,
   onClick,
+  ViewElement,
+  ref,
 } from "@lizzi/template";
-import { JSX } from "@lizzi/template/jsx-runtime";
+import { JSX } from "@lizzi/jsx-runtime";
 import { names, People } from "../data/people";
 
 class ComboboxOptions extends ViewComponent {
   getOptionAfter(afterValue: any) {
-    const options = this.filterChilds<ComboboxOption<any>>(
-      (view) => view instanceof ComboboxOption
-    );
+    const options = this.findChildNodes(ComboboxOption);
 
     const index = options.findIndex((option) => option.value === afterValue);
 
@@ -32,9 +30,7 @@ class ComboboxOptions extends ViewComponent {
   }
 
   getOptionBefore(beforeValue: any) {
-    const options = this.filterChilds<ComboboxOption<any>>(
-      (view) => view instanceof ComboboxOption
-    );
+    const options = this.findChildNodes(ComboboxOption);
 
     const index = options.findIndex((option) => option.value === beforeValue);
 
@@ -104,22 +100,23 @@ class ComboboxInput extends ViewComponent {
   constructor({ use, ...args }: JSX.Attributes<"input">) {
     super();
 
-    const inputView = (
+    let inputView: HTMLInputElement | undefined;
+
+    this.append(
       <input
         {...args}
         use={[
           ...(use ?? []),
+          ref((el) => (inputView = el)),
           on("focus", () => {
             const comboBox = this.parentContext(Combobox);
             comboBox.openOptions();
 
-            inputView.element.select();
+            inputView?.select();
           }),
         ]}
       />
-    ) as DomElementView<HTMLInputElement>;
-
-    this.append(inputView);
+    );
   }
 }
 
@@ -154,14 +151,14 @@ class Combobox<T> extends ViewComponent {
     children,
     defaultValue,
     onSelect,
-  }: JSX.PropsWithChildren<
-    {
-      defaultValue: zzRoV<T | null>;
-      onSelect?: (value: T) => void;
-    },
-    Combobox<T>
-  >) {
-    super({ children });
+  }: JSX.PropsWithChildren<{
+    defaultValue: zzRV<T | null>;
+    onSelect?: (value: T) => void;
+    children: JSX.FuncChildrens<Combobox<T>>;
+  }>) {
+    super();
+
+    this.append(this.callChildrenFunc(children));
 
     this.selected = new zzReactive<T | null>(null);
     this.active = new zzReactive<T | null>(zzMakeReactive(defaultValue).value);

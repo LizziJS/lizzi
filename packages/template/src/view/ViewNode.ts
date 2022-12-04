@@ -41,11 +41,10 @@ export interface IViewNodeNodes {}
 export class ViewNode implements IViewNode {
   static [isViewNodeConstructor] = true;
 
-  readonly _onMount = new zzSimpleEvent<(view: ViewNode) => void>();
-  readonly _onUnmount = new zzSimpleEvent<(view: ViewNode) => void>();
-  readonly afterMount = new zzSimpleEvent<(view: ViewNode) => void>();
-
-  protected readonly eventRemoveStack = new DestructorsStack();
+  readonly _onMount = new zzSimpleEvent<
+    <T extends ViewNode>(view: T) => void
+  >();
+  protected readonly _unmountStack = new DestructorsStack();
 
   parentNode: ViewNode | null = null;
   readonly childNodes: ViewNode[] = [];
@@ -263,9 +262,6 @@ export class ViewNode implements IViewNode {
       for (let view of this.childNodes.slice()) {
         view.mount();
       }
-
-      //afterChilds mount
-      this.afterMount.emit(this);
     }
   }
 
@@ -277,9 +273,7 @@ export class ViewNode implements IViewNode {
         view.unmount();
       }
 
-      this._onUnmount.emit(this);
-
-      this.eventRemoveStack.destroy();
+      this._unmountStack.destroy();
 
       this._viewState = "unmounted";
     }
@@ -291,14 +285,14 @@ export class ViewNode implements IViewNode {
     return this;
   }
 
-  onceUnmount(fn: (view: this) => void) {
-    this._onUnmount.addListenerOnce(fn as any);
+  onceUnmount(fn: () => void) {
+    this._unmountStack.addFn(fn);
 
     return this;
   }
 
   addToUnmount(...eventListeners: IDestructor[]) {
-    eventListeners.forEach((listener) => this.eventRemoveStack.add(listener));
+    this._unmountStack.add(...eventListeners);
 
     return this;
   }
@@ -331,12 +325,12 @@ export class TextView extends ViewNode {
 
       this.onMount(() => {
         this.addToUnmount(
-          text.onChange
-            .addListener(() => {
-              textElement.data = text.value;
-            })
-            .run()
+          text.onChange.addListener(() => {
+            textElement.data = text.value;
+          })
         );
+
+        textElement.data = text.value;
       });
     } else {
       this.setNodes([document.createTextNode(String(text))]);

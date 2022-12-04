@@ -25,6 +25,7 @@ export class Snapshot {
   readonly var;
   readonly req;
   readonly array;
+  readonly arrayFactory;
   readonly arrayReplace;
   readonly object;
 
@@ -121,6 +122,8 @@ export class Snapshot {
   }
 
   constructor() {
+    const that = this;
+
     this.var = ((prototype: object, valueName: string) => {
       this._setValueMap(
         new ObjectValueDecorator(this, prototype.constructor, valueName)
@@ -139,19 +142,36 @@ export class Snapshot {
       );
     }).bind(this);
 
-    this.array = (<ItemT extends new (values: any) => any>(itemType: ItemT) => {
+    this.array = (<ItemT extends new (values: any, object: any) => any>(
+      itemType: ItemT
+    ) => {
+      return <P>(prototype: new (...any: any) => P): any => {
+        const decorator = new ArrayDecorator(this, prototype, () => itemType);
+        this._setClassMap(decorator);
+      };
+    }).bind(this);
+
+    this.arrayFactory = (<
+      ItemT extends (
+        values: any
+      ) => new (values: any, object: any) => any | void
+    >(
+      itemType: ItemT
+    ) => {
       return <P>(prototype: new (...any: any) => P): any => {
         const decorator = new ArrayDecorator(this, prototype, itemType);
         this._setClassMap(decorator);
       };
     }).bind(this);
 
-    this.arrayReplace = (<T extends new () => any>(arrayClass: T) => {
+    this.arrayReplace = (<ItemT extends new (values: any, object: any) => any>(
+      itemType: ItemT
+    ) => {
       return <P>(prototype: new (...any: any) => P): any => {
         const decorator = new ArrayReplaceDecorator(
           this,
           prototype,
-          arrayClass
+          () => itemType
         );
         this._setClassMap(decorator);
       };
@@ -160,9 +180,9 @@ export class Snapshot {
     this.object = (<P, C extends object>(
       prototype: new (parent: C) => P
     ): any => {
-      const fn = (values: any, parent: C): P => {
+      const fn = function (values: any, parent: C): P {
         const newClass = new prototype(parent);
-        this._createValues(newClass, values);
+        that._createValues(newClass, values);
         return newClass;
       };
 

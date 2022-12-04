@@ -3,10 +3,10 @@ import {
   zzInteger,
   zzMakeReactive,
   zzObject,
-  zzRoV,
+  zzRV,
   zzString,
 } from "@lizzi/core";
-import { zzEvent } from "@lizzi/core/Event";
+import { zzEvent } from "@lizzi/core";
 import { zzUrlGetParams } from "./urlParams";
 import { JSONValue } from "./json";
 
@@ -60,10 +60,10 @@ export class zzFetch<T extends JSONValue> {
     this.isLoading.value = false;
   }
 
-  constructor(url: zzRoV<string> | zzUrlGetParams) {
+  constructor(url: zzRV<string> | zzUrlGetParams) {
     this.url =
       url instanceof zzUrlGetParams
         ? url
-        : new zzUrlGetParams(zzMakeReactive(url));
+        : new zzUrlGetParams(zzMakeReactive(url), {});
   }
 }

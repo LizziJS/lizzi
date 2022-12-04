@@ -8,12 +8,12 @@ import {
   zzReactive,
   zzCompute,
   zzArray,
-  runVar,
   zzIf,
   ValueOrReactive,
   zzArrayInstance,
+  ValueChangeEvent,
 } from "@lizzi/core";
-import { ViewElement } from "..";
+import { ViewElement } from ".";
 
 type OutputTypes<T extends any[]> = T[number] | zzReactive<T[number]>;
 type InputTypes<T extends any[]> =
@@ -157,7 +157,7 @@ export function ClassLink<T extends ViewElement>(
                   );
               }
             })
-            .run(runVar(item));
+            .run(ValueChangeEvent.run(item));
         } else {
           String(item)
             .split(/\s+/)

@@ -7,7 +7,7 @@
     "types": ["node", "jest", "express"],
     "module": "esnext",
     "downlevelIteration": true,
-    "moduleResolution": "Node16",
+    "moduleResolution": "Node",
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "outDir": "dist/esm",

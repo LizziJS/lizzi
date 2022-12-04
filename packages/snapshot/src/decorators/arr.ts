@@ -12,7 +12,9 @@ export class ArrayDecorator implements ISnapshotType<any> {
   protected snapshot: Snapshot;
   readonly prototype: Function;
 
-  protected arrayClass: new (values: any, object: any) => any;
+  protected getConstructorFn: (
+    values: any
+  ) => new (values: any, object: any) => any | undefined;
 
   primaries() {
     return [];
@@ -22,16 +24,21 @@ export class ArrayDecorator implements ISnapshotType<any> {
     if (!Array.isArray(values))
       throw new Error("values isn't array for array object");
 
-    const ids =
-      this.snapshot.prototypesFnClassMap.get(this.arrayClass)?.primaries() ??
-      [];
-
-    if (ids.length === 0)
-      throw new Error(this.arrayClass.name + " class hasn't primary id");
-
     const oldArray = object.toArray().slice();
 
     for (let newValue of values) {
+      const itemConstructor = this.getConstructorFn(values);
+
+      if (!itemConstructor)
+        throw new Error("No class constructor for " + values);
+
+      const ids =
+        this.snapshot.prototypesFnClassMap.get(itemConstructor)?.primaries() ??
+        [];
+
+      if (ids.length === 0)
+        throw new Error(itemConstructor.name + " class hasn't primary id");
+
       let item = oldArray.find((value) => {
         for (const idName of ids) {
           if (value[idName].value !== newValue[idName]) return false;
@@ -41,7 +48,7 @@ export class ArrayDecorator implements ISnapshotType<any> {
       });
 
       if (!item) {
-        item = new this.arrayClass(newValue, object);
+        item = new itemConstructor(newValue, object);
         object.add([item]);
       } else {
         this.snapshot.setValues(item!, newValue);
@@ -58,11 +65,13 @@ export class ArrayDecorator implements ISnapshotType<any> {
   constructor(
     snapshot: Snapshot,
     prototype: Function,
-    arrayClass: new (values: any, object: any) => any
+    arrayClass: (
+      values: any
+    ) => new (values: any, object: any) => any | undefined
   ) {
     this.snapshot = snapshot;
     this.prototype = prototype;
-    this.arrayClass = arrayClass;
+    this.getConstructorFn = arrayClass;
   }
 }
 
@@ -71,17 +80,23 @@ export class ArrayReplaceDecorator extends ArrayDecorator {
     if (!Array.isArray(values))
       throw new Error("values isn't array for array object");
 
-    const ids =
-      this.snapshot.prototypesFnClassMap.get(this.arrayClass)?.primaries() ??
-      [];
-
-    if (ids.length === 0)
-      throw new Error(this.arrayClass.name + " class hasn't primary id");
-
     const oldArray = object.toArray().slice();
 
     object.replace(
       values.map((newValue) => {
+        const itemConstructor = this.getConstructorFn(values);
+
+        if (!itemConstructor)
+          throw new Error("No class constructor for " + values);
+
+        const ids =
+          this.snapshot.prototypesFnClassMap
+            .get(itemConstructor)
+            ?.primaries() ?? [];
+
+        if (ids.length === 0)
+          throw new Error(itemConstructor.name + " class hasn't primary id");
+
         let item = oldArray.find((value) => {
           for (const idName of ids) {
             if (value[idName].value !== newValue[idName]) return false;
@@ -91,7 +106,7 @@ export class ArrayReplaceDecorator extends ArrayDecorator {
         });
 
         if (!item) {
-          item = new this.arrayClass(newValue, object);
+          item = new itemConstructor(newValue, object);
         } else {
           this.snapshot.setValues(item!, newValue);
         }

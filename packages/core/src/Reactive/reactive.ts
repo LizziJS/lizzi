@@ -8,6 +8,10 @@ import { zzEvent } from "../Event";
 import { IDestructor, zzEventListener, zzSimpleEvent } from "../Event/events";
 
 export class ValueChangeEvent<T> {
+  static run<R extends zzReactive<any>>(target: R) {
+    return new ValueChangeEvent(target.value, target.value, target);
+  }
+
   constructor(
     public readonly value: T,
     public readonly last: T,

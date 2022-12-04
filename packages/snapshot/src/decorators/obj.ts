@@ -11,15 +11,20 @@ import { ISnapshotType, ISnapshotValue } from "./interfaces";
 export class ObjectDecorator implements ISnapshotType<any> {
   protected snapshot: Snapshot;
   readonly prototype: object;
+  protected _primaries: null | string[] = null;
 
   primaries() {
-    const mapValues = this.snapshot._getValueMap(this.prototype);
+    if (this._primaries === null) {
+      const mapValues = this.snapshot._getValueMap(this.prototype);
 
-    if (!mapValues) return [];
+      if (!mapValues) return [];
 
-    return Array.from(mapValues.values())
-      .filter((value) => value instanceof ObjectPrimaryValueDecorator)
-      .map((value) => value.name);
+      this._primaries = Array.from(mapValues.values())
+        .filter((value) => value instanceof ObjectPrimaryValueDecorator)
+        .map((value) => value.name);
+    }
+
+    return this._primaries;
   }
 
   setter(
