@@ -10,7 +10,7 @@ module.exports = {
   output: {
     filename: "[name].js",
     path: path.resolve(__dirname, "../../docs/live"),
-    publicPath: "/",
+    publicPath: "./",
   },
   resolve: {
     modules: ["node_modules"],
