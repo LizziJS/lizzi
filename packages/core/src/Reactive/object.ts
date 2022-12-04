@@ -33,6 +33,10 @@ export class zzObject<T> extends zzType<T | null> {
   getValue(name: keyof T) {
     return zzCompute(() => (this.value ? this.value[name] : undefined), this);
   }
+
+  constructor(value: T | null = null) {
+    super(value);
+  }
 }
 
 export const zzObj = zzObject;

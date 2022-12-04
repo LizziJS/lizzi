@@ -7,9 +7,13 @@ export declare namespace JSX {
   interface Element extends ViewNode {}
 
   interface Attributes<T extends keyof AllElementsTagName> {
-    class?: Array<string | zzReactive<any>> | string | zzReactive<any>;
+    class?:
+      | Array<string | zzReactive<any> | (() => string)>
+      | string
+      | zzReactive<any>;
     style?: {
       [key: string]:
+        | (() => string)
         | Array<string | zzReactive<any>>
         | string
         | number

@@ -13,7 +13,11 @@ export const zzS = (strings: TemplateStringsArray, ...values: any) => {
 
   for (let i = 0; i < strings.length - 1; i++) {
     concatArrayString.push(strings[i]);
-    concatArrayString.push(values[i]);
+    if (typeof values[i] === "function") {
+      concatArrayString.push(zzCompute(values[i]));
+    } else {
+      concatArrayString.push(values[i]);
+    }
   }
   concatArrayString.push(strings[strings.length - 1]);
 

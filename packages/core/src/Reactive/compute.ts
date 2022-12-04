@@ -52,6 +52,12 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
           newValue = this._fn.apply(this);
         });
 
+        if (isolator.stackCount() === 0) {
+          throw TypeError(
+            "You forgot to get zzReactive values inside compute function"
+          );
+        }
+
         if (this._value !== newValue!) {
           let ev = new ValueChangeEvent<T>(newValue!, this._value, this);
           this._value = newValue!;
@@ -64,6 +70,12 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
       isolator.isolate(() => {
         this._value = this._fn.apply(this);
       });
+
+      if (isolator.stackCount() === 0) {
+        throw TypeError(
+          "You forgot to get zzReactive values inside compute function"
+        );
+      }
 
       const eventsStack = new DestructorsStack(isolator);
 

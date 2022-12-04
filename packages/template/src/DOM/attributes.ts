@@ -77,6 +77,8 @@ export function AttributeLink<T extends ViewElement>(
   return (view: T) => {
     const element = view.element;
 
+    console.log(name, attrvalue);
+
     if (attrvalue === undefined) {
       return;
     }
@@ -111,6 +113,8 @@ export function AttributeLink<T extends ViewElement>(
 
     const onChange = () => {
       const value = reactiveValue.value;
+
+      console.log(value);
 
       if (!value && value !== "") {
         element.removeAttribute(name);

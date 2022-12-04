@@ -37,6 +37,10 @@ export class RGetObserverIsolator implements IDestructor {
   protected onChange: () => void;
   protected variableStack = new Set<zzReactive<any>>();
 
+  stackCount() {
+    return this.variableStack.size;
+  }
+
   destroy() {
     for (const variable of this.variableStack) {
       variable.onChange.removeListener(this.onChange);
