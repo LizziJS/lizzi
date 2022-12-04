@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzMakeReactive, zzRoV } from "@lizzi/core";
+import { zzMakeReactive, zzRV } from "@lizzi/core";
 import { onClick, ViewComponent } from "@lizzi/template";
 import { JSX } from "@lizzi/jsx-runtime";
 import { Router } from "./view";
@@ -15,7 +15,7 @@ export class Link extends ViewComponent {
     children,
     ...args
   }: {
-    href: zzRoV<string>;
+    href: zzRV<string>;
     children: JSX.Childrens;
     [key: string]: any;
   }) {
