@@ -344,6 +344,44 @@ describe("zzArray", () => {
       expect(less.onChange.countListeners()).toBe(0);
     });
 
+    it("should fire one onChange per one change", () => {
+      const less = new zzInteger(10);
+      const array = new zzArray([1, 2, 3, 4]);
+
+      const filterFn1 = jest.fn((item) => item < less.value);
+      const filterFn2 = jest.fn((item) => item < less.value);
+      const filter1 = array.filter(filterFn1);
+      const filter2 = filter1.filter(filterFn2);
+      const listeners = {
+        add: jest.fn(),
+        remove: jest.fn(),
+        change: jest.fn(),
+      };
+
+      expect(filterFn1.mock.calls.length).toBe(0);
+      expect(filterFn2.mock.calls.length).toBe(0);
+      expect(less.onChange.countListeners()).toBe(0);
+
+      filter2.onAdd.addListener(listeners.add);
+      filter2.onRemove.addListener(listeners.remove);
+      filter2.onChange.addListener(listeners.change);
+
+      expect(less.onChange.countListeners()).toBe(2);
+
+      expect(filter2.value).toEqual([1, 2, 3, 4]);
+      expect(filterFn1.mock.calls.length).toBe(12);
+      expect(filterFn2.mock.calls.length).toBe(8);
+      expect(listeners.change.mock.calls.length).toBe(0);
+      expect(less.onChange.countListeners()).toBe(2);
+
+      array.add([1, 2]);
+      expect(filter2.value).toEqual([1, 2, 3, 4, 1, 2]);
+      expect(filterFn1.mock.calls.length).toBe(18);
+      expect(filterFn2.mock.calls.length).toBe(14);
+      expect(listeners.change.mock.calls.length).toBe(1);
+      expect(less.onChange.countListeners()).toBe(2);
+    });
+
     it("should add listeners to sub-items", () => {
       const array = new zzArray(
         [1, 2, 3, 4, 5, 6, 7, 8, 9].map<{ id: zzInteger }>((value) => ({

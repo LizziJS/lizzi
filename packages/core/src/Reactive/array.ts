@@ -356,6 +356,7 @@ export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
 
 export class zzComputeArrayFn<T> extends zzArrayInstance<T> {
   readonly sourceArray: zzComputeFn<Array<T>>;
+  protected eventObserver;
 
   get value() {
     return this.toArray();
@@ -367,6 +368,10 @@ export class zzComputeArrayFn<T> extends zzArrayInstance<T> {
 
   toArray() {
     zzReactiveGetObserver.emit(this);
+
+    if (this.eventObserver.isWatching) {
+      return this._value;
+    }
 
     return this.sourceArray.value;
   }
@@ -426,7 +431,7 @@ export class zzComputeArrayFn<T> extends zzArrayInstance<T> {
   ) {
     super([]);
 
-    onStartListening(
+    this.eventObserver = onStartListening(
       () => {
         this._value = this.sourceArray.value;
         return this.sourceArray.onChange.addListener(() => {

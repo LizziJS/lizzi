@@ -16,4 +16,9 @@ module.exports = {
     port: 9000,
   },
   ...config,
+  output: {
+    filename: "[name].js",
+    path: path.resolve(__dirname, "dist/"),
+    publicPath: "/",
+  },
 };
