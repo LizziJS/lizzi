@@ -25,8 +25,9 @@ describe("zzCompute", () => {
     });
 
     it("should save old value with listener", () => {
+      const reactiveValue = new zzInteger(0);
       let value = 0;
-      const compute = new zzComputeFn(() => value);
+      const compute = new zzComputeFn(() => reactiveValue.value + value);
 
       expect(compute.value).toBe(0);
       compute.onChange.addListener(() => {});
@@ -51,9 +52,10 @@ describe("zzCompute", () => {
 
     it("should change value only if dependency event fired", () => {
       const listener = jest.fn();
+      const reactiveValue = new zzInteger(0);
       let value = 0;
       let event = new zzEvent();
-      const compute = new zzComputeFn(() => value, event);
+      const compute = new zzComputeFn(() => value + reactiveValue.value, event);
 
       expect(compute.value).toBe(0);
       compute.onChange.addListener(listener);
