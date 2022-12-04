@@ -206,6 +206,44 @@ export function Examples() {
           name="4. use timer"
           embed="https://codesandbox.io/embed/lizzi-template-2-f-t-3if861"
         />
+        <Header2 name="Components advanced:" />
+        <Example
+          name="1. Modal"
+          embed="https://codesandbox.io/embed/lizzi-template-3-2-f91uxq"
+          modules={[
+            "/src/app.tsx",
+            "/src/main.tsx",
+            "/src/modal.tsx",
+            "/src/styles.css",
+          ]}
+        />
+        <Example
+          name="2. Form"
+          embed="https://codesandbox.io/embed/lizzi-template-3-1-d97h78"
+          modules={[
+            "/src/app.tsx",
+            "/src/form.tsx",
+            "/src/input.tsx",
+            "/src/styles.css",
+          ]}
+        />
+        <Example
+          name="3. Flights"
+          embed="https://codesandbox.io/embed/lizzi-template-5-c89r36"
+          modules={["/src/app.tsx", "/src/airports.ts", "/src/styles.css"]}
+        />
+        <Example
+          name="4. Infinite scroll"
+          embed="https://codesandbox.io/embed/lizzi-template-6-059p86"
+          modules={[
+            "/src/components/FetchApp.tsx",
+            "/src/data/product.ts",
+            "/src/lib/fetch.ts",
+            "/src/lib/urlParams.ts",
+            "/src/app.tsx",
+            "/src/styles.css",
+          ]}
+        />
       </div>
       <div class="flex-grow h-full relative">{result}</div>
     </div>

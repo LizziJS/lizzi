@@ -88,7 +88,7 @@ export class ViewHtmlElement<
             console.warn(
               `using ${name} is deprecated,\nuse 'use={[onEvent('${name
                 .toLocaleLowerCase()
-                .slice(2)}', event_function]}' instread`
+                .slice(2)}', event_function)]}' instread`
             );
             //this.onMount(onEvent(name.toLocaleLowerCase(), attributes[name]));
             break;
@@ -138,7 +138,7 @@ export class ViewSvgElement<
         default: {
           if (name.startsWith("on") && typeof attributes[name] === "function") {
             console.warn(
-              `using ${name} is deprecated, use 'use={[onEvent('${name
+              `using ${name} is deprecated,\nuse 'use={[onEvent('${name
                 .toLocaleLowerCase()
                 .slice(2)}', event_function)]}' instread`
             );
