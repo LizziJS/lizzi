@@ -1,6 +1,6 @@
 {
   "name": "@lizzi/sync",
-  "version": "0.0.17",
+  "version": "0.0.18",
   "description": "lizzi js sync library",
   "license": "MIT",
   "scripts": {
@@ -20,7 +20,7 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "dependencies": {
-    "@lizzi/core": "^0.0.20"
+    "@lizzi/core": "^0.0.21"
   },
   "gitHead": "d6d78e384d48a1af81ff8e34d7407001ade9014c",
   "devDependencies": {

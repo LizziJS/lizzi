@@ -1,6 +1,6 @@
 {
   "name": "@lizzi/router",
-  "version": "0.0.27",
+  "version": "0.0.28",
   "description": "lizzi js router library",
   "author": "Stanislav Shishankin",
   "license": "MIT",
@@ -21,8 +21,8 @@
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "dependencies": {
-    "@lizzi/core": "^0.0.20",
-    "@lizzi/template": "^0.0.27"
+    "@lizzi/core": "^0.0.21",
+    "@lizzi/template": "^0.0.28"
   },
   "gitHead": "d6d78e384d48a1af81ff8e34d7407001ade9014c",
   "devDependencies": {
