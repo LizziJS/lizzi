@@ -4,7 +4,12 @@
  * This source code is licensed under the MIT license.
  */
 
-import { DestructorsStack, IDestructor, zzArrayInstance } from "@lizzi/core";
+import {
+  DestructorsStack,
+  IDestructor,
+  ValueChangeEvent,
+  zzArrayInstance,
+} from "@lizzi/core";
 import { JSX } from "@lizzi/jsx-runtime";
 import { zzObject, zzReactive } from "@lizzi/core";
 import { zzSimpleEvent } from "@lizzi/core";
@@ -49,7 +54,6 @@ export class ViewNode implements IViewNode {
   parentNode: ViewNode | null = null;
   readonly childNodes: ViewNode[] = [];
 
-  readonly rootNodes: Node[] = [];
   protected _viewState: ViewComponentStatuses = "unmounted";
   protected _elements: Node[] = [];
 
@@ -306,34 +310,35 @@ export class TextView extends ViewNode {
   constructor({
     children,
   }: {
-    children:
-      | string
-      | number
-      | boolean
-      | zzReactive<any>
-      | Array<string | number | boolean | zzReactive<any>>;
+    children: string | number | boolean | zzReactive<any>;
   }) {
     super();
 
-    const text = Array.isArray(children)
-      ? (new zzArrayInstance(children).join("") as zzReactive<any>)
-      : children;
-
-    if (text instanceof zzReactive) {
+    if (children instanceof zzReactive) {
       const textElement = document.createTextNode("");
       this.setNodes([textElement]);
 
       this.onMount(() => {
         this.addToUnmount(
-          text.onChange.addListener(() => {
-            textElement.data = text.value;
-          })
-        );
+          children.onChange
+            .addListener((ev) => {
+              if (ev.last instanceof ViewNode) {
+                this.removeNode(ev.last);
+              } else {
+                textElement.data = "";
+              }
 
-        textElement.data = text.value;
+              if (ev.value instanceof ViewNode) {
+                this.appendChild(ev.value);
+              } else {
+                textElement.data = ev.value;
+              }
+            })
+            .run(ValueChangeEvent.run(children))
+        );
       });
     } else {
-      this.setNodes([document.createTextNode(String(text))]);
+      this.setNodes([document.createTextNode(String(children))]);
     }
   }
 }

@@ -1,4 +1,4 @@
-import { zzIf, zzObject } from "@lizzi/core";
+import { zzCompute, zzIf, zzObject } from "@lizzi/core";
 import { onClick, ViewComponent } from "@lizzi/template";
 
 class Example extends ViewComponent {
@@ -76,13 +76,9 @@ class ExampleView extends ViewComponent {
 
 const selected = new zzObject<Example>(null);
 
-const result = new zzObject<ExampleView>();
-
-selected.onChange.addListener(() => {
-  if (selected.value) {
-    result.value = new ExampleView(selected.value.createUrl());
-  }
-});
+const result = zzCompute(() =>
+  selected.value ? new ExampleView(selected.value.createUrl()) : null
+);
 
 export function Examples() {
   return (
