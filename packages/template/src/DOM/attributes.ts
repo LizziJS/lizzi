@@ -16,17 +16,18 @@ import {
 import { ViewElement } from ".";
 
 type OutputTypes<T extends any[]> = T[number] | zzReactive<T[number]>;
-type InputTypes<T extends any[]> =
+type InputTypes<T extends any[], V extends ViewElement> =
   | T[number]
   | zzReactive<T[number]>
   | (() => T[number]);
-type InputArrayTypes<T extends any[]> =
-  | InputTypes<T>
-  | Array<InputTypes<T>>
-  | zzArrayInstance<InputTypes<T>>;
+type InputArrayTypes<T extends any[], V extends ViewElement> =
+  | InputTypes<T, V>
+  | Array<InputTypes<T, V>>
+  | zzArrayInstance<InputTypes<T, V>>;
 
-function convertInputToReactiveArray<T extends any[]>(
-  input: InputArrayTypes<T>
+function convertInputToReactiveArray<T extends any[], V extends ViewElement>(
+  input: InputArrayTypes<T, V>,
+  view: V
 ): zzArrayInstance<OutputTypes<T>> {
   if (typeof input === "string" || typeof input === "number") {
     return new zzArray<T | zzReactive<T>>([input]);
@@ -49,12 +50,19 @@ function convertInputToReactiveArray<T extends any[]>(
 
 export function StyleLink<T extends ViewElement<HTMLElement | SVGElement>>(
   styleName: string,
-  array: InputArrayTypes<[string, number]>
+  value: InputTypes<[string, number], T>
 ) {
   return (view: T) => {
     const element = view.element;
 
-    let reactiveValue = convertInputToReactiveArray(array).join();
+    if (typeof value === "string" || typeof value === "number") {
+      element.style.setProperty(styleName, String(value));
+      return;
+    }
+
+    const reactiveValue = (
+      typeof value === "function" ? zzCompute(value) : value
+    ) as zzReactive<any>;
 
     const onChange = () => {
       const value = reactiveValue.value;
@@ -72,7 +80,7 @@ export function StyleLink<T extends ViewElement<HTMLElement | SVGElement>>(
 
 export function AttributeLink<T extends ViewElement>(
   name: string,
-  attrvalue: InputArrayTypes<[string, number, boolean]>
+  attrvalue: InputTypes<[string, number, boolean], T>
 ) {
   return (view: T) => {
     const element = view.element;
@@ -95,19 +103,9 @@ export function AttributeLink<T extends ViewElement>(
       return;
     }
 
-    if (Array.isArray(attrvalue)) {
-      attrvalue = new zzArray(attrvalue);
-    }
-
-    if (attrvalue instanceof zzArrayInstance) {
-      attrvalue = attrvalue.join() as any;
-    }
-
-    if (typeof attrvalue === "function") {
-      attrvalue = zzCompute(attrvalue);
-    }
-
-    const reactiveValue = attrvalue as zzReactive<any>;
+    const reactiveValue = (
+      typeof attrvalue === "function" ? zzCompute(attrvalue) : attrvalue
+    ) as zzReactive<any>;
 
     const onChange = () => {
       const value = reactiveValue.value;
@@ -126,10 +124,10 @@ export function AttributeLink<T extends ViewElement>(
 }
 
 export function ClassLink<T extends ViewElement>(
-  array: InputArrayTypes<[string]>
+  array: InputArrayTypes<[string], T>
 ) {
   return (view: T) => {
-    const classArray = convertInputToReactiveArray(array);
+    const classArray = convertInputToReactiveArray(array, view);
 
     const element = view.element;
     const classList = element.classList;
@@ -170,23 +168,23 @@ export function ClassLink<T extends ViewElement>(
   };
 }
 
-export function cssMap(
-  array: InputArrayTypes<[string]>,
-  styles: { [key: string]: string }
-) {
-  const classArray = convertInputToReactiveArray(array);
+// export function cssMap(
+//   array: InputArrayTypes<[string]>,
+//   styles: { [key: string]: string }
+// ) {
+//   const classArray = convertInputToReactiveArray(array);
 
-  return classArray.map((className) => {
-    if (typeof className === "string" || typeof className === "number") {
-      return styles[className] ?? className;
-    }
+//   return classArray.map((className) => {
+//     if (typeof className === "string" || typeof className === "number") {
+//       return styles[className] ?? className;
+//     }
 
-    return zzCompute(
-      () => styles[className.value] ?? className.value,
-      className
-    );
-  });
-}
+//     return zzCompute(
+//       () => styles[className.value] ?? className.value,
+//       className
+//     );
+//   });
+// }
 
 export function zzCss<T>(
   cond: ValueOrReactive<T> | (() => T),

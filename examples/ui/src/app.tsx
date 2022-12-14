@@ -1,8 +1,6 @@
-import { zzString } from "@lizzi/core";
 import { Body } from "@lizzi/template";
 
 import "./app.css";
+import { UIApp } from "./components/UIApp";
 
-const lizzi = new zzString("lizzi");
-
-Body(<div>Hello {lizzi}!</div>);
+Body(<UIApp />);

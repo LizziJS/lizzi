@@ -12,6 +12,8 @@ export type RouteState = {
 };
 
 export class zzRouter<T extends RouteState> extends zzModel<T> {
+  static zzInstance = Symbol.for(this.name);
+
   protected getPath(path: string) {
     return (
       "/" +

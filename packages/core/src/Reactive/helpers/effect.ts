@@ -14,7 +14,7 @@ import {
 import { DestructorsStack } from "../../Destructor";
 import { onStartListening, zzEvent } from "../../Event";
 
-export function Observer(
+export function createEffect(
   fn: (...args: any) => void,
   ...dependencies: (IReactiveEvent<any> | zzEvent<any>)[]
 ) {
@@ -82,6 +82,8 @@ export function EventAffect<T>(
 }
 
 export class zzValueFilter<Out, In> extends zzReactive<Out> {
+  static zzInstance = Symbol.for(this.name);
+
   onChange;
 
   protected readonly onChangeFn: (newValue: In) => Out | undefined;

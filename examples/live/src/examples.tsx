@@ -89,61 +89,74 @@ export function Examples() {
         <Example
           name="1. Reactive variable"
           embed="https://codesandbox.io/embed/lizzi-reactive-0-nz57ng"
+          modules={["/src/index.ts"]}
         />
         <Example
           name="2. onChange variable event"
           embed="https://codesandbox.io/embed/lizzi-reactive-1-t0imix"
+          modules={["/src/index.ts"]}
         />
         <Example
           name="3. Send pointers inside function"
           embed="https://codesandbox.io/embed/lizzi-reactive-2-b-ibw36z"
+          modules={["/src/index.ts"]}
         />
         <Example
           name="4. Reactive relations"
           embed="https://codesandbox.io/embed/lizzi-reactive-2-o73wqj"
+          modules={["/src/index.ts"]}
         />
         <Header2 name="Reactive array basics:" />
 
         <Example
           name="1. Reactive array"
           embed="https://codesandbox.io/embed/lizzi-reactive-3-w2fpuq"
+          modules={["/src/index.ts"]}
         />
         <Example
           name="2.
       zzArray filter"
           embed="https://codesandbox.io/embed/lizzi-reactive-4-a-74xycb"
+          modules={["/src/index.ts"]}
         />
         <Example
           name="3. zzArray sort"
           embed="https://codesandbox.io/embed/lizzi-reactive-4-b-u7k6kx"
+          modules={["/src/index.ts"]}
         />
         <Example
           name="4. zzArray map"
           embed="https://codesandbox.io/embed/lizzi-reactive-4-c-ztkz0l"
+          modules={["/src/index.ts"]}
         />
         <Example
           name="5. zzArray join"
           embed="https://codesandbox.io/embed/lizzi-reactive-4-d-4qwubp"
+          modules={["/src/index.ts"]}
         />
 
         <Header2 name="Reactive array advanced:" />
         <Example
           name="1. Smart adds/removes"
           embed="https://codesandbox.io/embed/lizzi-reactive-5-b-bwbysr"
+          modules={["/src/index.ts"]}
         />
         <Example
           name="2. Сhains of arrays"
           embed="https://codesandbox.io/embed/lizzi-reactive-5-wuq392"
+          modules={["/src/index.ts"]}
         />
 
         <Header2 name="Event basics:" />
         <Example
           name="1. Add listener"
           embed="https://codesandbox.io/embed/lizzi-events-2-08xtys"
+          modules={["/src/index.ts"]}
         />
         <Example
           name="2. Remove listener"
           embed="https://codesandbox.io/embed/lizzi-events-2-b-cqj88l"
+          modules={["/src/index.ts"]}
         />
         <Header1 name="Lizzi templates" />
         <Header2 name="Template basics:" />

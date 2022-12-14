@@ -6,5 +6,8 @@
 
 export * from "./onclick";
 export * from "./onevent";
+export * from "./usemount";
+export * from "./useobserver";
+export * from "./oninput";
 export * from "./oninput";
 export * from "./ref";

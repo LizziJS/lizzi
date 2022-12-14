@@ -75,6 +75,8 @@ export class RGetObserverIsolator implements IDestructor {
 class ReactiveGetEvent extends zzSimpleEvent<
   (variable: zzReactive<any>) => void
 > {
+  static zzInstance = Symbol.for(this.name);
+
   protected listenersMap = new Map<
     (variable: zzReactive<any>) => void,
     zzEventListener<(variable: zzReactive<any>) => void>
@@ -114,6 +116,19 @@ export const zzReactiveGetObserver = new ReactiveGetEvent();
 export const zzValuesObserverIsolator = () => {};
 
 export class zzReactive<TValue> implements IReactive<TValue> {
+  static zzInstance = Symbol.for(this.name);
+
+  static [Symbol.hasInstance](instance: any) {
+    while (instance !== null) {
+      if (instance.constructor.zzInstance === Symbol.for(this.name))
+        return true;
+
+      instance = Object.getPrototypeOf(instance);
+    }
+
+    return false;
+  }
+
   readonly onChange = new zzEvent<(event: ValueChangeEvent<TValue>) => void>();
   protected _value: TValue;
 
@@ -145,6 +160,8 @@ export class zzReactive<TValue> implements IReactive<TValue> {
 }
 
 export class zzType<T> extends zzReactive<T> {
+  static zzInstance = Symbol.for(this.name);
+
   checkType(value: T): boolean {
     return true;
   }
@@ -180,4 +197,6 @@ export class zzType<T> extends zzReactive<T> {
   }
 }
 
-export class zzAny extends zzType<any> {}
+export class zzAny extends zzType<any> {
+  static zzInstance = Symbol.for(this.name);
+}

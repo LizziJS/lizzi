@@ -33,7 +33,7 @@ type ViewComponentStatuses = "unmounted" | "mounted" | "in-unmount-process";
 //   unmountMap.delete(view);
 // };
 
-export const isViewNodeConstructor = Symbol();
+export const isViewNodeConstructor = Symbol.for("ViewNode");
 
 export interface IViewNode {
   parentNode: ViewNode | null;
@@ -195,6 +195,20 @@ export class ViewNode implements IViewNode {
       );
 
     return parentView;
+  }
+
+  zzParentContext<T extends ViewNode>(findInstance: new (...args: any) => T) {
+    const parentContext = new zzObject<T>();
+
+    this.onMount(() => {
+      parentContext.value = this.parentContext(findInstance);
+
+      this.onceUnmount(() => {
+        parentContext.value = null;
+      });
+    });
+
+    return parentContext;
   }
 
   *findChilds<T extends ViewNode>(

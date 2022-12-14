@@ -80,6 +80,19 @@ export class zzEventListener<ListenerFuncT extends (...args: any[]) => void>
 }
 
 export class zzSimpleEvent<ListenerFuncT extends (...args: any[]) => void> {
+  static zzInstance = Symbol.for(this.name);
+
+  static [Symbol.hasInstance](instance: any) {
+    while (instance !== null) {
+      if (instance.constructor.zzInstance === Symbol.for(this.name))
+        return true;
+
+      instance = Object.getPrototypeOf(instance);
+    }
+
+    return false;
+  }
+
   protected readonly listenersMap = new Map<
     ListenerFuncT,
     zzEventListener<ListenerFuncT>
@@ -127,6 +140,8 @@ export class zzSimpleEvent<ListenerFuncT extends (...args: any[]) => void> {
 export class zzEvent<
   ListenerFuncT extends (...args: any[]) => void
 > extends zzSimpleEvent<ListenerFuncT> {
+  static zzInstance = Symbol.for(this.name);
+
   readonly onAddListener = new zzSimpleEvent<
     (listener: zzEventListener<ListenerFuncT>) => void
   >();

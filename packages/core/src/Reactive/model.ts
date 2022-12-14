@@ -20,6 +20,8 @@ export class ModelUpdateEvent<T extends object> {
 }
 
 export class zzModel<T extends object> extends zzReactive<InferModel<T>> {
+  static zzInstance = Symbol.for(this.name);
+
   readonly model: T;
   readonly onUpdate = new zzEvent<(values: any) => void>();
 
@@ -111,6 +113,8 @@ export class zzModel<T extends object> extends zzReactive<InferModel<T>> {
 }
 
 export class zzModelSync<T extends object> extends zzModel<T> {
+  static zzInstance = Symbol.for(this.name);
+
   constructor(model: T) {
     super(model);
 
@@ -121,6 +125,8 @@ export class zzModelSync<T extends object> extends zzModel<T> {
 export class zzModelConcat<A extends object, B extends object> extends zzModel<
   A & B
 > {
+  static zzInstance = Symbol.for(this.name);
+
   constructor(modelA: zzModel<A>, modelB: zzModel<B>) {
     super(Object.assign({}, modelA.model, modelB.model) as any);
 

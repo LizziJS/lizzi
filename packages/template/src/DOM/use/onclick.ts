@@ -1,6 +1,6 @@
 import { on } from "./onevent";
 
 export const onClick = (
-  fn: (event: MouseEvent) => any,
+  fn: (event: MouseEvent) => void,
   options: boolean = false
-) => on("click", fn, options);
+) => on("click", fn as any, options);

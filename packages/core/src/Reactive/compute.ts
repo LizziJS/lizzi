@@ -15,6 +15,8 @@ import { onStartListening, zzEvent } from "../Event";
 import { zzComputeArrayFn } from "./array";
 
 export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
+  static zzInstance = Symbol.for(this.name);
+
   protected _fn: () => T;
   protected eventObserver;
 

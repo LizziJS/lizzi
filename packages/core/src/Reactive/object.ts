@@ -9,6 +9,8 @@ import { IDestructor } from "../Destructor";
 import { zzCompute } from "./compute";
 
 export class zzObject<T> extends zzType<T | null> {
+  static zzInstance = Symbol.for(this.name);
+
   setItemListener(fn: (item: T) => IDestructor) {
     let toDestroy: IDestructor | null = null;
 

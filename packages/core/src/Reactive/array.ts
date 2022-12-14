@@ -15,6 +15,7 @@ import { zzEvent, EventsObserver, onStartListening } from "../Event";
 import { ValueChangeEvent } from "./Reactive";
 import { zzMakeReactive, ValueOrReactive } from "./helpers";
 import { zzCompute, zzComputeFn } from "./compute";
+import { zzInteger } from "./vars";
 
 export class ArrayAddEvent<T> {
   constructor(
@@ -80,7 +81,7 @@ export interface IArrayHelpers<T> {
   join(join: ValueOrReactive<string>): zzReactive<string>;
 
   map<NewT>(
-    mapFn: (value: T, index: number, self: zzArrayInstance<T>) => NewT,
+    mapFn: (value: T, index: zzInteger, self: zzArrayInstance<T>) => NewT,
     ...dependencies: (zzReactive<any> | zzEvent<any>)[]
   ): zzArrayInstance<NewT>;
 }
@@ -91,6 +92,8 @@ export class zzArrayInstance<T>
   extends zzReactive<T[]>
   implements IArrayEvent<T>, IArrayHelpers<T>
 {
+  static zzInstance = Symbol.for(this.name);
+
   readonly onAdd = new zzEvent<(event: ArrayAddEvent<T>) => void>();
   readonly onRemove = new zzEvent<(event: ArrayRemoveEvent<T>) => void>();
 
@@ -200,7 +203,7 @@ export class zzArrayInstance<T>
   }
 
   map<NewT>(
-    mapFn: (value: T, index: number, self: zzArrayInstance<T>) => NewT,
+    mapFn: (value: T, index: zzInteger, self: zzArrayInstance<T>) => NewT,
     ...dependencies: (zzReactive<any> | zzEvent<any>)[]
   ) {
     return new zzArrayMap<T, NewT>(this, mapFn, dependencies);
@@ -208,6 +211,8 @@ export class zzArrayInstance<T>
 }
 
 export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
+  static zzInstance = Symbol.for(this.name);
+
   add(elements: T[], index?: number) {
     index === undefined && (index = this._value.length);
 
@@ -355,6 +360,8 @@ export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
 }
 
 export class zzComputeArrayFn<T> extends zzArrayInstance<T> {
+  static zzInstance = Symbol.for(this.name);
+
   readonly sourceArray: zzComputeFn<Array<T>>;
   protected eventObserver;
 
@@ -448,9 +455,12 @@ export class zzComputeArrayFn<T> extends zzArrayInstance<T> {
 }
 
 export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
+  static zzInstance = Symbol.for(this.name);
+
   readonly mappedArray: zzArray<T>;
   readonly sourceArray: zzArrayInstance<T>;
-  readonly mapFn: (value: T, index: number, self: zzArray<T>) => NewT;
+  readonly mapFn: (value: T, index: zzInteger, self: zzArray<T>) => NewT;
+  protected readonly indexMap = new Map<T, zzInteger>();
   protected readonly eventObserver: EventsObserver;
 
   protected _isSilent = false;
@@ -493,21 +503,30 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
     zzReactiveGetObserver.emit(this);
 
     if (!this.eventObserver.isWatching) {
-      this.mappedArray.replace(this.sourceArray.toArray());
+      this.refresh();
     }
 
     return this._value;
   }
 
+  protected refreshIndexes() {
+    let index = 0;
+    for (let element of this.mappedArray) {
+      const reactiveIndex = this.indexMap.get(element);
+      if (reactiveIndex) reactiveIndex.value = index++;
+    }
+  }
+
   refresh() {
     this.mappedArray.replace(this.sourceArray.toArray());
+    this.refreshIndexes();
 
     return this;
   }
 
   constructor(
     sourceArray: zzArrayInstance<T>,
-    mapFn: (value: T, index: number, self: zzArrayInstance<T>) => NewT,
+    mapFn: (value: T, index: zzInteger, self: zzArrayInstance<T>) => NewT,
     dependencies: (zzReactive<any> | zzEvent<any>)[]
   ) {
     super([]);
@@ -517,13 +536,23 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
     this.mapFn = mapFn;
 
     this.mappedArray.onAdd.addListener((ev) => {
-      const newValue = mapFn(ev.added, ev.index, this.sourceArray);
+      const newIndex = new zzInteger(ev.index);
+
+      const newValue = mapFn(ev.added, newIndex, this.sourceArray);
+
+      this.indexMap.set(ev.added, newIndex);
 
       this.add([newValue], ev.index);
     });
 
     this.mappedArray.onRemove.addListener((ev) => {
+      this.indexMap.delete(ev.removed);
+
       this.removeByIndex(ev.index);
+    });
+
+    this.mappedArray.onChange.addListener(() => {
+      this.refreshIndexes();
     });
 
     this.eventObserver = onStartListening(
@@ -535,6 +564,7 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
 
         const eventsStack = new DestructorsStack(
           sourceArray.onChange.addListener((ev) => {
+            this.refreshIndexes();
             this.onChange.emit(
               new ValueChangeEvent(this._value, this._value, this)
             );
@@ -586,7 +616,9 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
 // export class zzArrayModel<
 //   NewT extends zzReactive<any>,
 //   T = InferReactive<NewT>
-// > extends zzArray<T> {
+// > extends zzArrayInstance<T> {
+//  static zzInstance = Symbol.for(this.name);
+
 //   readonly model: zzArray<NewT>;
 
 //   get value(): T[] {

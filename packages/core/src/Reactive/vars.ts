@@ -7,6 +7,8 @@
 import { zzType } from "./Reactive";
 
 export class zzNumber<NumberType = number> extends zzType<NumberType> {
+  static zzInstance = Symbol.for(this.name);
+
   checkType(value: NumberType) {
     return (
       typeof value === "number" &&
@@ -17,6 +19,8 @@ export class zzNumber<NumberType = number> extends zzType<NumberType> {
 }
 
 export class zzInteger extends zzNumber {
+  static zzInstance = Symbol.for(this.name);
+
   checkType(value: number) {
     return Number.isInteger(value);
   }
@@ -29,6 +33,8 @@ export class zzInteger extends zzNumber {
 export const zzInt = zzInteger;
 
 export class zzFloat extends zzNumber {
+  static zzInstance = Symbol.for(this.name);
+
   checkType(value: number) {
     return typeof value === "number" && !Number.isNaN(value);
   }
@@ -41,12 +47,16 @@ export class zzFloat extends zzNumber {
 export class zzStringType<
   StringType extends string = any
 > extends zzType<StringType> {
+  static zzInstance = Symbol.for(this.name);
+
   checkType(value: StringType) {
     return typeof value === "string";
   }
 }
 
 export class zzString extends zzStringType<string> {
+  static zzInstance = Symbol.for(this.name);
+
   constructor(value: string = "") {
     super(value);
   }
@@ -55,6 +65,8 @@ export class zzString extends zzStringType<string> {
 export const zzStr = zzString;
 
 export class zzBoolean extends zzType<boolean> {
+  static zzInstance = Symbol.for(this.name);
+
   checkType(value: boolean) {
     return typeof value === "boolean";
   }

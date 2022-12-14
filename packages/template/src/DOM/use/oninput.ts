@@ -1,4 +1,10 @@
-import { zzArray, zzBoolean, zzReactive, zzStringType } from "@lizzi/core";
+import {
+  zzArray,
+  zzBoolean,
+  zzCompute,
+  zzReactive,
+  zzStringType,
+} from "@lizzi/core";
 import { Debounce, EventWrapper } from "@lizzi/core";
 import { ViewElement } from "..";
 
@@ -66,6 +72,82 @@ export function onInput<
     );
 
     element.value = String(value.value);
+  };
+}
+
+export function updateInputValue<
+  E extends ViewElement<HTMLTextAreaElement | HTMLInputElement>
+>(value: zzReactive<string> | (() => string)) {
+  return (view: E) => {
+    const element = view.element;
+
+    if (typeof value === "function") {
+      value = zzCompute(value);
+    }
+
+    if (!(value instanceof zzReactive))
+      throw new Error("updateInputValue variable is not zzReactive");
+
+    const reactiveValue = value as zzReactive<any>;
+
+    if (
+      !(
+        element instanceof HTMLInputElement ||
+        element instanceof HTMLTextAreaElement
+      )
+    )
+      throw new Error(
+        "updateInputValue error: Element is not HTMLTextAreaElement | HTMLInputElement"
+      );
+
+    view.addToUnmount(
+      value.onChange.addListener(() => {
+        if (element.value !== String(reactiveValue.value)) {
+          element.value = String(reactiveValue.value);
+        }
+      }),
+      new EventWrapper(
+        element,
+        "blur",
+        () => {
+          if (element.value !== String(reactiveValue.value)) {
+            element.value = String(reactiveValue.value);
+          }
+        },
+        false
+      )
+    );
+
+    element.value = String(reactiveValue.value);
+  };
+}
+
+export function onInputChange<
+  E extends ViewElement<HTMLTextAreaElement | HTMLInputElement>
+>(onInputChange: (value: string) => void) {
+  return (view: E) => {
+    const element = view.element;
+
+    if (
+      !(
+        element instanceof HTMLInputElement ||
+        element instanceof HTMLTextAreaElement
+      )
+    )
+      throw new Error(
+        "onInputChange error: Element is not HTMLTextAreaElement | HTMLInputElement"
+      );
+
+    view.addToUnmount(
+      new EventWrapper(
+        element,
+        "input",
+        () => {
+          onInputChange(element.value);
+        },
+        false
+      )
+    );
   };
 }
 
