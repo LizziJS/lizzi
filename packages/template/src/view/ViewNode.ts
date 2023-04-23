@@ -8,14 +8,20 @@ import { JSX } from "@lizzi/jsx-runtime";
 import { EventChangeValue, zzArrayInstance, zzReactive } from "@lizzi/core";
 import { zzNode } from "@lizzi/node";
 
-export function* getNodes(startNode: zzNode): Generator<Node> {
-  if (startNode instanceof zzHtmlNode) {
-    yield startNode.element;
+export function findFirstChildHtmlNode(parent: zzNode): zzHtmlNode<any> | null {
+  if (parent instanceof zzHtmlNode) {
+    return parent;
   } else {
-    for (const child of startNode.childNodes) {
-      yield* getNodes(child);
+    for (const child of parent.childNodes) {
+      const node = findFirstChildHtmlNode(child);
+
+      if (node) {
+        return node;
+      }
     }
   }
+
+  return null;
 }
 
 function findNextHtmlNode(
@@ -29,8 +35,10 @@ function findNextHtmlNode(
     let index = childs.indexOf(afterElement);
 
     for (; index < childs.length; index++) {
-      if (childs[index] instanceof zzHtmlNode) {
-        return childs[index] as zzHtmlNode<any>;
+      const findHtmlNode = findFirstChildHtmlNode(childs[index]);
+
+      if (findHtmlNode) {
+        return findHtmlNode;
       }
     }
 

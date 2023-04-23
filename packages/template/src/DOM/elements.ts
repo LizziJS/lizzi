@@ -6,10 +6,10 @@
 
 import { zzReactive } from "@lizzi/core";
 import { AttributeLink, ClassLink, StyleLink } from "./attributes";
-import { ViewNode } from "../view/ViewNode";
 import { JSX } from "@lizzi/jsx-runtime";
+import { zzHtmlNode } from "../..";
 
-export type ElementAttributes<T extends ViewElement> = {
+export type ElementAttributes<T extends zzHtmlNode<any>> = {
   class?: Array<string | zzReactive<any>>;
   style?: { [key: string]: Array<string | zzReactive<any>> };
   use?: Array<(view: T) => void>;
@@ -17,44 +17,13 @@ export type ElementAttributes<T extends ViewElement> = {
   [key: string]: any;
 };
 
-export class ViewElement<T extends Element = Element> extends ViewNode {
-  readonly element: T;
-
-  constructor(element: T) {
-    super();
-
-    this.element = element;
-    this.setNodes([this.element]);
-  }
-
-  protected _appendElement(view: ViewNode, beforeViewNode: ViewNode | null) {
-    const nodes = view.getNodes();
-    const before = beforeViewNode ? beforeViewNode.getFirstNode() : null;
-    for (let node of nodes) {
-      this.element.insertBefore(node, before);
-    }
-  }
-
-  getNodes() {
-    return this._elements;
-  }
-
-  getFirstNode(): T {
-    return this.element;
-  }
-
-  protected _createElement(tagName: string): T {
-    throw new Error("rewrite _createElement method");
-  }
-}
-
 export class ViewHtmlElement<
   T extends keyof HTMLElementTagNameMap
-> extends ViewElement<HTMLElementTagNameMap[T]> {
+> extends zzHtmlNode<HTMLElementTagNameMap[T]> {
   constructor(tagName: T, attributes: ElementAttributes<ViewHtmlElement<T>>) {
     super(document.createElement(tagName));
 
-    this.append(attributes.children);
+    this.childNodes.add(attributes.children);
 
     this._initAttributes(attributes);
   }
@@ -102,11 +71,11 @@ export class ViewHtmlElement<
 
 export class ViewSvgElement<
   T extends keyof SVGElementTagNameMap
-> extends ViewElement<SVGElementTagNameMap[T]> {
+> extends zzHtmlNode<SVGElementTagNameMap[T]> {
   constructor(tagName: T, attributes: ElementAttributes<ViewSvgElement<T>>) {
     super(document.createElementNS("http://www.w3.org/2000/svg", tagName));
 
-    this.append(attributes.children);
+    this.childNodes.add(attributes.children);
 
     this._initAttributes(attributes);
   }
