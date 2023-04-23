@@ -4,10 +4,11 @@
  * This source code is licensed under the MIT license.
  */
 
-export * from "./Reactive";
+export * from "./reactive";
 export * from "./vars";
+export * from "./compute";
 export * from "./object";
 export * from "./array";
-export * from "./compute";
-export * from "./model";
-export * from "./helpers";
+export * from "./map";
+export * from "./set";
+export * from "./tags";

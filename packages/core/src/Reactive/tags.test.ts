@@ -1,11 +1,11 @@
-import { zzEvent } from "../../Event";
-import { zzBoolean, zzInteger, zzString } from "../vars";
-import { zz } from "./tags";
+import { zzEvent } from "../Event";
+import { zzBoolean, zzInteger, zzString } from "./vars";
+import { zzT } from "./tags";
 
 describe("zz tag", () => {
   it("should create an reactive string", () => {
-    expect(zz).toBeInstanceOf(Function);
-    const string = zz``;
+    expect(zzT).toBeInstanceOf(Function);
+    const string = zzT``;
 
     expect(string.onChange).toBeInstanceOf(zzEvent);
   });
@@ -14,15 +14,15 @@ describe("zz tag", () => {
     const var1 = new zzString("abc");
     const var2 = new zzInteger(2998);
     const var3 = new zzBoolean(false);
-    const string = zz`is ${var1} as ${var2} == ${var3}`;
+    const string = zzT`is ${var1} as ${var2} == ${var3}`;
 
     expect(string.value).toBe("is abc as 2998 == false");
 
-    var1.value = "try it";
+    var1.value = "null";
     var2.value = 0;
     var3.value = true;
 
-    expect(string.value).toBe("is try it as 0 == true");
+    expect(string.value).toBe("is null as 0 == true");
   });
 
   it("should call listener on every change", () => {
@@ -31,10 +31,10 @@ describe("zz tag", () => {
     const var1 = new zzString("abc");
     const var2 = new zzInteger(2998);
     const var3 = new zzBoolean(false);
-    const string = zz`is ${var1} as ${var2} == ${var3}`;
-    expect(var1.onChange.countListeners()).toBe(0);
-    expect(var2.onChange.countListeners()).toBe(0);
-    expect(var3.onChange.countListeners()).toBe(0);
+    const string = zzT`is ${var1} as ${var2} == ${var3}`;
+    expect(var1.onChange.countListeners()).toBe(1);
+    expect(var2.onChange.countListeners()).toBe(1);
+    expect(var3.onChange.countListeners()).toBe(1);
 
     string.onChange.addListener(listener);
     expect(string.value).toBe("is abc as 2998 == false");
@@ -51,9 +51,9 @@ describe("zz tag", () => {
     expect(string.value).toBe("is try it as 0 == true");
 
     string.onChange.removeListener(listener);
-    expect(var1.onChange.countListeners()).toBe(0);
-    expect(var2.onChange.countListeners()).toBe(0);
-    expect(var3.onChange.countListeners()).toBe(0);
+    expect(var1.onChange.countListeners()).toBe(1);
+    expect(var2.onChange.countListeners()).toBe(1);
+    expect(var3.onChange.countListeners()).toBe(1);
     expect(string.value).toBe("is try it as 0 == true");
   });
 });

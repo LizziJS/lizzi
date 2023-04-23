@@ -4,4 +4,5 @@
  * This source code is licensed under the MIT license.
  */
 
-export { IDestructor, DestructorsStack } from "./Event/events";
+export * from "./destructor";
+export * from "./observer";

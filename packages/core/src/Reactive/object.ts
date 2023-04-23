@@ -4,41 +4,35 @@
  * This source code is licensed under the MIT license.
  */
 
-import { ValueChangeEvent, zzType } from "./Reactive";
-import { IDestructor } from "../Destructor";
-import { zzCompute } from "./compute";
+import { EventChangeValue, zzType } from "./reactive";
+import {
+  DestructorsStack,
+  IDestructor,
+  zzDestructorsObserver,
+} from "../Destructor";
 
 export class zzObject<T> extends zzType<T | null> {
-  static zzInstance = Symbol.for(this.name);
+  itemListener(changeFn: (item: T) => IDestructor) {
+    const destructor = new DestructorsStack();
 
-  setItemListener(fn: (item: T) => IDestructor) {
-    let toDestroy: IDestructor | null = null;
-
-    return this.onChange
+    this.onChange
       .addListener((ev) => {
-        if (toDestroy !== null) {
-          toDestroy.destroy();
-          toDestroy = null;
-        }
+        destructor.destroy();
 
         if (ev.value !== null) {
-          toDestroy = fn(ev.value);
+          destructor.add(
+            zzDestructorsObserver.catch(() => changeFn(ev.value!))
+          );
         }
       })
-      .run(new ValueChangeEvent(this.value, null, this));
-  }
+      .run(new EventChangeValue(this.value, null, this));
 
-  checkType(value: T | null) {
-    return typeof value === "object";
-  }
-
-  getValue(name: keyof T) {
-    return zzCompute(() => (this.value ? this.value[name] : undefined), this);
+    return this;
   }
 
   constructor(value: T | null = null) {
     super(value);
+
+    this.validate((value) => typeof value === "object");
   }
 }
-
-export const zzObj = zzObject;

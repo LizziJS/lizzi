@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-import { IDestructor } from "../Destructor";
+import { zzDestructor } from "../Destructor";
 
 type EventEmitterType1 = {
   on(...args: any[]): any;
@@ -25,8 +25,7 @@ export class EventWrapper<
   T1 extends EventEmitterType1,
   T2 extends EventEmitterType2,
   T3 extends EventEmitterType3
-> implements IDestructor
-{
+> extends zzDestructor {
   readonly object: any;
   readonly params: any[];
 
@@ -61,6 +60,8 @@ export class EventWrapper<
   constructor(object: T2, ...params: Parameters<T2["addEventListener"]>);
   constructor(object: T3, ...params: Parameters<T3["addListener"]>);
   constructor(object: any, ...params: any[]) {
+    super();
+
     this.object = object;
     this.params = params;
 

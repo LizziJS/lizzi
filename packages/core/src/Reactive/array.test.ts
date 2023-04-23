@@ -1,14 +1,15 @@
+import { zzDestructorsObserver } from "../Destructor";
 import { zzEvent } from "../Event";
 import {
-  ArrayAddEvent,
-  ArrayRemoveEvent,
+  EventAddArray,
+  EventRemoveArray,
   zzArray,
   zzArrayInstance,
   zzArrayMap,
   zzComputeArrayFn,
 } from "./array";
 import { zzComputeFn } from "./compute";
-import { ValueChangeEvent } from "./Reactive";
+import { EventChangeValue } from "./reactive";
 import { zzInteger } from "./vars";
 
 describe("zzArray", () => {
@@ -56,13 +57,13 @@ describe("zzArray", () => {
       expect(array.value).toEqual([1, 2, 3]);
 
       expect(listeners.add.mock.calls[0][0]).toEqual(
-        new ArrayAddEvent(1, 0, array)
+        new EventAddArray(1, 0, array)
       );
       expect(listeners.add.mock.calls[1][0]).toEqual(
-        new ArrayAddEvent(2, 1, array)
+        new EventAddArray(2, 1, array)
       );
       expect(listeners.add.mock.calls[2][0]).toEqual(
-        new ArrayAddEvent(3, 2, array)
+        new EventAddArray(3, 2, array)
       );
     });
 
@@ -96,13 +97,13 @@ describe("zzArray", () => {
       expect(array.value).toEqual([]);
 
       expect(listeners.remove.mock.calls[0][0]).toEqual(
-        new ArrayRemoveEvent(2, 1, array)
+        new EventRemoveArray(2, 1, array)
       );
       expect(listeners.remove.mock.calls[1][0]).toEqual(
-        new ArrayRemoveEvent(1, 0, array)
+        new EventRemoveArray(1, 0, array)
       );
       expect(listeners.remove.mock.calls[2][0]).toEqual(
-        new ArrayRemoveEvent(3, 0, array)
+        new EventRemoveArray(3, 0, array)
       );
     });
 
@@ -128,13 +129,13 @@ describe("zzArray", () => {
       expect(array.value).toEqual([2, 4]);
 
       expect(listeners.remove.mock.calls[0][0]).toEqual(
-        new ArrayRemoveEvent(1, 0, array)
+        new EventRemoveArray(1, 0, array)
       );
       expect(listeners.remove.mock.calls[1][0]).toEqual(
-        new ArrayRemoveEvent(3, 1, array)
+        new EventRemoveArray(3, 1, array)
       );
       expect(listeners.add.mock.calls[0][0]).toEqual(
-        new ArrayAddEvent(4, 1, array)
+        new EventAddArray(4, 1, array)
       );
 
       array.replace([3, 2, 1]);
@@ -146,13 +147,13 @@ describe("zzArray", () => {
       expect(array.value).toEqual([3, 2, 1]);
 
       expect(listeners.remove.mock.calls[2][0]).toEqual(
-        new ArrayRemoveEvent(4, 1, array)
+        new EventRemoveArray(4, 1, array)
       );
       expect(listeners.add.mock.calls[1][0]).toEqual(
-        new ArrayAddEvent(3, 0, array)
+        new EventAddArray(3, 0, array)
       );
       expect(listeners.add.mock.calls[2][0]).toEqual(
-        new ArrayAddEvent(1, 2, array)
+        new EventAddArray(1, 2, array)
       );
 
       array.replace([1, 3, 2]);
@@ -164,16 +165,16 @@ describe("zzArray", () => {
       expect(array.value).toEqual([1, 3, 2]);
 
       expect(listeners.remove.mock.calls[3][0]).toEqual(
-        new ArrayRemoveEvent(3, 0, array)
+        new EventRemoveArray(3, 0, array)
       );
       expect(listeners.remove.mock.calls[4][0]).toEqual(
-        new ArrayRemoveEvent(2, 0, array)
+        new EventRemoveArray(2, 0, array)
       );
       expect(listeners.add.mock.calls[3][0]).toEqual(
-        new ArrayAddEvent(3, 1, array)
+        new EventAddArray(3, 1, array)
       );
       expect(listeners.add.mock.calls[4][0]).toEqual(
-        new ArrayAddEvent(2, 2, array)
+        new EventAddArray(2, 2, array)
       );
     });
   });
@@ -246,10 +247,10 @@ describe("zzArray", () => {
       expect(filter.toArray()).toEqual([2, 4, 6]);
 
       expect(listeners.add.mock.calls[0][0]).toEqual(
-        new ArrayAddEvent(4, 1, filter)
+        new EventAddArray(4, 1, filter)
       );
       expect(listeners.add.mock.calls[1][0]).toEqual(
-        new ArrayAddEvent(6, 2, filter)
+        new EventAddArray(6, 2, filter)
       );
 
       array.remove([2, 3, 7]);
@@ -261,7 +262,7 @@ describe("zzArray", () => {
       expect(filter.toArray()).toEqual([4, 6]);
 
       expect(listeners.remove.mock.calls[0][0]).toEqual(
-        new ArrayRemoveEvent(2, 0, filter)
+        new EventRemoveArray(2, 0, filter)
       );
 
       array.replace([5, 4, 8, 9]);
@@ -273,10 +274,10 @@ describe("zzArray", () => {
       expect(filter.toArray()).toEqual([4, 8]);
 
       expect(listeners.remove.mock.calls[1][0]).toEqual(
-        new ArrayRemoveEvent(6, 1, filter)
+        new EventRemoveArray(6, 1, filter)
       );
       expect(listeners.add.mock.calls[2][0]).toEqual(
-        new ArrayAddEvent(8, 1, filter)
+        new EventAddArray(8, 1, filter)
       );
     });
 
@@ -304,43 +305,45 @@ describe("zzArray", () => {
       const array = new zzArray([1, 2, 3, 4]);
 
       const filterFn = jest.fn((item) => item < less.value);
-      const filter = array.filter(filterFn);
-      const listeners = {
-        add: jest.fn(),
-        remove: jest.fn(),
-        change: jest.fn(),
-      };
 
-      expect(less.onChange.countListeners()).toBe(0);
+      const listener = zzDestructorsObserver.catch(() => {
+        const filter = array.filter(filterFn);
 
-      filter.onAdd.addListener(listeners.add);
-      filter.onRemove.addListener(listeners.remove);
-      filter.onChange.addListener(listeners.change);
+        const listeners = {
+          add: jest.fn(),
+          remove: jest.fn(),
+          change: jest.fn(),
+        };
 
-      expect(less.onChange.countListeners()).toBe(1);
+        expect(less.onChange.countListeners()).toBe(1);
 
-      expect(filter.value).toEqual([1, 2, 3, 4]);
-      expect(filterFn.mock.calls.length).toBe(8);
-      expect(less.onChange.countListeners()).toBe(1);
+        filter.onAdd.addListener(listeners.add);
+        filter.onRemove.addListener(listeners.remove);
+        filter.onChange.addListener(listeners.change);
 
-      less.value = 0;
-      expect(filter.value).toEqual([]);
-      expect(filterFn.mock.calls.length).toBe(12);
-      expect(less.onChange.countListeners()).toBe(1);
+        expect(less.onChange.countListeners()).toBe(1);
 
-      less.value = 5;
-      expect(filter.value).toEqual([1, 2, 3, 4]);
-      expect(filterFn.mock.calls.length).toBe(16);
-      expect(less.onChange.countListeners()).toBe(1);
+        expect(filter.value).toEqual([1, 2, 3, 4]);
+        expect(filterFn.mock.calls.length).toBe(4);
+        expect(less.onChange.countListeners()).toBe(1);
 
-      less.value = 2;
-      expect(filter.value).toEqual([1]);
-      expect(filterFn.mock.calls.length).toBe(20);
-      expect(less.onChange.countListeners()).toBe(1);
+        less.value = 0;
+        expect(filter.value).toEqual([]);
+        expect(filterFn.mock.calls.length).toBe(8);
+        expect(less.onChange.countListeners()).toBe(1);
 
-      filter.onAdd.removeListener(listeners.add);
-      filter.onRemove.removeListener(listeners.remove);
-      filter.onChange.removeListener(listeners.change);
+        less.value = 5;
+        expect(filter.value).toEqual([1, 2, 3, 4]);
+        expect(filterFn.mock.calls.length).toBe(12);
+        expect(less.onChange.countListeners()).toBe(1);
+
+        less.value = 2;
+        expect(filter.value).toEqual([1]);
+        expect(filterFn.mock.calls.length).toBe(16);
+        expect(less.onChange.countListeners()).toBe(1);
+      });
+
+      listener.destroy();
       expect(less.onChange.countListeners()).toBe(0);
     });
 
@@ -350,17 +353,19 @@ describe("zzArray", () => {
 
       const filterFn1 = jest.fn((item) => item < less.value);
       const filterFn2 = jest.fn((item) => item < less.value);
+
       const filter1 = array.filter(filterFn1);
       const filter2 = filter1.filter(filterFn2);
+
       const listeners = {
         add: jest.fn(),
         remove: jest.fn(),
         change: jest.fn(),
       };
 
-      expect(filterFn1.mock.calls.length).toBe(0);
-      expect(filterFn2.mock.calls.length).toBe(0);
-      expect(less.onChange.countListeners()).toBe(0);
+      expect(filterFn1.mock.calls.length).toBe(4);
+      expect(filterFn2.mock.calls.length).toBe(4);
+      expect(less.onChange.countListeners()).toBe(2);
 
       filter2.onAdd.addListener(listeners.add);
       filter2.onRemove.addListener(listeners.remove);
@@ -369,15 +374,15 @@ describe("zzArray", () => {
       expect(less.onChange.countListeners()).toBe(2);
 
       expect(filter2.value).toEqual([1, 2, 3, 4]);
-      expect(filterFn1.mock.calls.length).toBe(12);
-      expect(filterFn2.mock.calls.length).toBe(8);
+      expect(filterFn1.mock.calls.length).toBe(4);
+      expect(filterFn2.mock.calls.length).toBe(4);
       expect(listeners.change.mock.calls.length).toBe(0);
       expect(less.onChange.countListeners()).toBe(2);
 
       array.add([1, 2]);
       expect(filter2.value).toEqual([1, 2, 3, 4, 1, 2]);
-      expect(filterFn1.mock.calls.length).toBe(18);
-      expect(filterFn2.mock.calls.length).toBe(14);
+      expect(filterFn1.mock.calls.length).toBe(10);
+      expect(filterFn2.mock.calls.length).toBe(10);
       expect(listeners.change.mock.calls.length).toBe(1);
       expect(less.onChange.countListeners()).toBe(2);
     });
@@ -393,39 +398,42 @@ describe("zzArray", () => {
         (item: { id: zzInteger }) => item.id.value < lessId.value
       );
 
-      const filter = array.filter(filterFn);
+      let filter;
 
-      expect(filterFn.mock.calls.length).toBe(0);
-      expect(array.onChange.countListeners()).toBe(0);
+      const listener = zzDestructorsObserver.catch(() => {
+        filter = array.filter(filterFn);
+      });
+
+      expect(filterFn.mock.calls.length).toBe(9);
+      expect(array.onChange.countListeners()).toBe(1);
       for (const item of array) {
-        expect(item.id.onChange.countListeners()).toBe(0);
+        expect(item.id.onChange.countListeners()).toBe(1);
       }
-
-      const listener = filter.onChange.addListener(() => {});
+      expect(lessId.onChange.countListeners()).toBe(1);
 
       expect(JSON.stringify(filter)).toEqual(
         JSON.stringify([{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }])
       );
-      expect(filterFn.mock.calls.length).toBe(18);
+      expect(filterFn.mock.calls.length).toBe(9);
       expect(array.onChange.countListeners()).toBe(1);
       for (const item of array) {
         expect(item.id.onChange.countListeners()).toBe(1);
       }
 
       array.toArray()[0].id.value = 5;
-      expect(filterFn.mock.calls.length).toBe(27);
+      expect(filterFn.mock.calls.length).toBe(18);
       expect(JSON.stringify(filter)).toEqual(
         JSON.stringify([{ id: 2 }, { id: 3 }, { id: 4 }])
       );
 
       array.toArray()[7].id.value = 1;
-      expect(filterFn.mock.calls.length).toBe(36);
+      expect(filterFn.mock.calls.length).toBe(27);
       expect(JSON.stringify(filter)).toEqual(
         JSON.stringify([{ id: 2 }, { id: 3 }, { id: 4 }, { id: 1 }])
       );
 
       lessId.value = 7;
-      expect(filterFn.mock.calls.length).toBe(45);
+      expect(filterFn.mock.calls.length).toBe(36);
       expect(JSON.stringify(filter)).toEqual(
         JSON.stringify([
           { id: 5 },
@@ -439,11 +447,12 @@ describe("zzArray", () => {
       );
 
       listener.destroy();
-      expect(filterFn.mock.calls.length).toBe(45);
+      expect(filterFn.mock.calls.length).toBe(36);
       expect(array.onChange.countListeners()).toBe(0);
       for (const item of array) {
         expect(item.id.onChange.countListeners()).toBe(0);
       }
+      expect(lessId.onChange.countListeners()).toBe(0);
 
       expect(JSON.stringify(filter)).toEqual(
         JSON.stringify([
@@ -456,6 +465,39 @@ describe("zzArray", () => {
           { id: 1 },
         ])
       );
+    });
+
+    it("should not add listeners from events", () => {
+      const array = new zzArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+      const dontTouch = new zzInteger(0);
+      const lessId = new zzInteger(5);
+      const filterFn = jest.fn((item: number) => item < lessId.value);
+
+      const listeners = {
+        add: jest.fn(() => (dontTouch.value += 1)),
+        remove: jest.fn(() => (dontTouch.value += 100)),
+        change: jest.fn(() => (dontTouch.value += 10000)),
+      };
+
+      const filter = array.filter(filterFn);
+      filter.onAdd.addListener(listeners.add);
+      filter.onRemove.addListener(listeners.remove);
+      filter.onChange.addListener(listeners.change);
+
+      expect(lessId.onChange.countListeners()).toBe(1);
+      expect(dontTouch.onChange.countListeners()).toBe(0);
+
+      expect(filter.value).toEqual([1, 2, 3, 4]);
+      expect(filterFn.mock.calls.length).toBe(9);
+
+      lessId.value = 7;
+
+      expect(filter.value).toEqual([1, 2, 3, 4, 5, 6]);
+      expect(filterFn.mock.calls.length).toBe(18);
+
+      expect(lessId.onChange.countListeners()).toBe(1);
+      expect(dontTouch.value).toBe(10002);
+      expect(dontTouch.onChange.countListeners()).toBe(0);
     });
   });
 
@@ -528,10 +570,10 @@ describe("zzArray", () => {
       expect(listeners.change.mock.calls.length).toBe(1);
 
       expect(listeners.add.mock.calls[0][0]).toEqual(
-        new ArrayAddEvent(6, 2, map)
+        new EventAddArray(6, 2, map)
       );
       expect(listeners.add.mock.calls[1][0]).toEqual(
-        new ArrayAddEvent(8, 3, map)
+        new EventAddArray(8, 3, map)
       );
 
       array.remove([2, 4]);
@@ -544,10 +586,10 @@ describe("zzArray", () => {
       expect(listeners.change.mock.calls.length).toBe(2);
 
       expect(listeners.remove.mock.calls[0][0]).toEqual(
-        new ArrayRemoveEvent(4, 1, map)
+        new EventRemoveArray(4, 1, map)
       );
       expect(listeners.remove.mock.calls[1][0]).toEqual(
-        new ArrayRemoveEvent(8, 2, map)
+        new EventRemoveArray(8, 2, map)
       );
 
       array.replace([5, 3, 1]);
@@ -560,51 +602,14 @@ describe("zzArray", () => {
       expect(listeners.change.mock.calls.length).toBe(3);
 
       expect(listeners.remove.mock.calls[2][0]).toEqual(
-        new ArrayRemoveEvent(2, 0, map)
+        new EventRemoveArray(2, 0, map)
       );
       expect(listeners.add.mock.calls[2][0]).toEqual(
-        new ArrayAddEvent(10, 0, map)
+        new EventAddArray(10, 0, map)
       );
       expect(listeners.add.mock.calls[3][0]).toEqual(
-        new ArrayAddEvent(2, 2, map)
+        new EventAddArray(2, 2, map)
       );
-    });
-
-    it("should map update if listeners updated", () => {
-      const multiplyer = new zzInteger(0);
-      const mapFn = jest.fn((value) => {
-        return value * multiplyer.value;
-      });
-
-      const array = new zzArray([1, 2, 3, 4]);
-      const map = array.map(mapFn, multiplyer);
-      const listeners = {
-        add: jest.fn(),
-        remove: jest.fn(),
-        change: jest.fn(),
-      };
-
-      map.onAdd.addListener(listeners.add);
-      map.onRemove.addListener(listeners.remove);
-      map.onChange.addListener(listeners.change);
-
-      expect(listeners.add.mock.calls.length).toBe(0);
-      expect(listeners.remove.mock.calls.length).toBe(0);
-      expect(listeners.change.mock.calls.length).toBe(0);
-
-      expect(map.value).toEqual([0, 0, 0, 0]);
-      expect(map.toArray()).toEqual([0, 0, 0, 0]);
-      expect(listeners.add.mock.calls.length).toBe(0);
-      expect(listeners.remove.mock.calls.length).toBe(0);
-      expect(listeners.change.mock.calls.length).toBe(0);
-
-      multiplyer.value = 10;
-
-      expect(map.value).toEqual([10, 20, 30, 40]);
-      expect(map.toArray()).toEqual([10, 20, 30, 40]);
-      expect(listeners.add.mock.calls.length).toBe(4);
-      expect(listeners.remove.mock.calls.length).toBe(4);
-      expect(listeners.change.mock.calls.length).toBe(1);
     });
   });
 
@@ -668,7 +673,7 @@ describe("zzArray", () => {
       expect(check.value).toBe(true);
       expect(listener.mock.calls.length).toBe(1);
       expect(listener.mock.calls[0][0]).toEqual(
-        new ValueChangeEvent(true, false, check)
+        new EventChangeValue(true, false, check)
       );
 
       array.add([6, 7]);
@@ -681,7 +686,7 @@ describe("zzArray", () => {
       expect(check.value).toBe(false);
       expect(listener.mock.calls.length).toBe(2);
       expect(listener.mock.calls[1][0]).toEqual(
-        new ValueChangeEvent(false, true, check)
+        new EventChangeValue(false, true, check)
       );
 
       array.replace([]);
@@ -704,7 +709,7 @@ describe("zzArray", () => {
       const array = new zzArray([1, 4, 2]);
       const find = array.find(findFn);
 
-      expect(findFn.mock.calls.length).toBe(0);
+      expect(findFn.mock.calls.length).toBe(2);
 
       expect(find.value).toBe(4);
       expect(findFn.mock.calls.length).toBe(2);
@@ -720,7 +725,7 @@ describe("zzArray", () => {
       const array = new zzArray([1, 2]);
       const find = array.find(findFn);
 
-      expect(findFn.mock.calls.length).toBe(0);
+      expect(findFn.mock.calls.length).toBe(2);
 
       expect(find.value).toBe(undefined);
       expect(findFn.mock.calls.length).toBe(2);
@@ -751,7 +756,7 @@ describe("zzArray", () => {
 
       expect(listener.mock.calls.length).toBe(1);
       expect(listener.mock.calls[0][0]).toEqual(
-        new ValueChangeEvent(4, undefined, find)
+        new EventChangeValue(4, undefined, find)
       );
       expect(find.value).toBe(4);
 
@@ -764,7 +769,7 @@ describe("zzArray", () => {
 
       expect(listener.mock.calls.length).toBe(2);
       expect(listener.mock.calls[1][0]).toEqual(
-        new ValueChangeEvent(undefined, 4, find)
+        new EventChangeValue(undefined, 4, find)
       );
       expect(find.value).toBe(undefined);
     });
@@ -773,10 +778,10 @@ describe("zzArray", () => {
       const dependency = new zzInteger(4);
       const findFn = jest.fn((value) => value === dependency.value);
       const array = new zzArray([1, 2]);
-      const find = array.find(findFn, dependency);
+      const find = array.find(findFn);
       const listener = jest.fn();
 
-      expect(findFn.mock.calls.length).toBe(0);
+      expect(findFn.mock.calls.length).toBe(2);
       expect(listener.mock.calls.length).toBe(0);
 
       find.onChange.addListener(listener);
@@ -799,7 +804,7 @@ describe("zzArray", () => {
       expect(findFn.mock.calls.length).toBe(9);
       expect(listener.mock.calls.length).toBe(1);
       expect(listener.mock.calls[0][0]).toEqual(
-        new ValueChangeEvent(6, undefined, find)
+        new EventChangeValue(6, undefined, find)
       );
       expect(find.value).toBe(6);
 
@@ -808,7 +813,7 @@ describe("zzArray", () => {
       expect(findFn.mock.calls.length).toBe(11);
       expect(listener.mock.calls.length).toBe(2);
       expect(listener.mock.calls[1][0]).toEqual(
-        new ValueChangeEvent(2, 6, find)
+        new EventChangeValue(2, 6, find)
       );
       expect(find.value).toBe(2);
 
@@ -817,7 +822,7 @@ describe("zzArray", () => {
       expect(findFn.mock.calls.length).toBe(15);
       expect(listener.mock.calls.length).toBe(3);
       expect(listener.mock.calls[2][0]).toEqual(
-        new ValueChangeEvent(undefined, 2, find)
+        new EventChangeValue(undefined, 2, find)
       );
       expect(find.value).toBe(undefined);
     });
@@ -896,13 +901,13 @@ describe("zzArray", () => {
       expect(listeners.change.mock.calls.length).toBe(1);
 
       expect(listeners.add.mock.calls[0][0]).toEqual(
-        new ArrayAddEvent(3, 1, sort)
+        new EventAddArray(3, 1, sort)
       );
       expect(listeners.add.mock.calls[1][0]).toEqual(
-        new ArrayAddEvent(7, 3, sort)
+        new EventAddArray(7, 3, sort)
       );
       expect(listeners.add.mock.calls[2][0]).toEqual(
-        new ArrayAddEvent(10, 5, sort)
+        new EventAddArray(10, 5, sort)
       );
 
       array.remove([3, 9, 0]);
@@ -916,13 +921,13 @@ describe("zzArray", () => {
       expect(listeners.change.mock.calls.length).toBe(2);
 
       expect(listeners.remove.mock.calls[0][0]).toEqual(
-        new ArrayRemoveEvent(0, 0, sort)
+        new EventRemoveArray(0, 0, sort)
       );
       expect(listeners.remove.mock.calls[1][0]).toEqual(
-        new ArrayRemoveEvent(3, 0, sort)
+        new EventRemoveArray(3, 0, sort)
       );
       expect(listeners.remove.mock.calls[2][0]).toEqual(
-        new ArrayRemoveEvent(9, 2, sort)
+        new EventRemoveArray(9, 2, sort)
       );
 
       array.replace([7, 3, 4]);
@@ -936,16 +941,16 @@ describe("zzArray", () => {
       expect(listeners.change.mock.calls.length).toBe(3);
 
       expect(listeners.remove.mock.calls[3][0]).toEqual(
-        new ArrayRemoveEvent(5, 0, sort)
+        new EventRemoveArray(5, 0, sort)
       );
       expect(listeners.remove.mock.calls[4][0]).toEqual(
-        new ArrayRemoveEvent(10, 1, sort)
+        new EventRemoveArray(10, 1, sort)
       );
       expect(listeners.add.mock.calls[3][0]).toEqual(
-        new ArrayAddEvent(3, 0, sort)
+        new EventAddArray(3, 0, sort)
       );
       expect(listeners.add.mock.calls[4][0]).toEqual(
-        new ArrayAddEvent(4, 1, sort)
+        new EventAddArray(4, 1, sort)
       );
     });
   });

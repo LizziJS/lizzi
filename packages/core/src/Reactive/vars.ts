@@ -4,76 +4,49 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzType } from "./Reactive";
+import { zzType } from "./reactive";
 
-export class zzNumber<NumberType = number> extends zzType<NumberType> {
-  static zzInstance = Symbol.for(this.name);
+export class zzNumber<TNumber = number> extends zzType<TNumber> {
+  constructor(value: TNumber = 0 as any) {
+    super(value);
 
-  checkType(value: NumberType) {
-    return (
-      typeof value === "number" &&
-      !Number.isNaN(value) &&
-      Number.isFinite(value)
+    this.validate(
+      (value) =>
+        typeof value === "number" &&
+        !Number.isNaN(value) &&
+        Number.isFinite(value)
     );
   }
 }
 
 export class zzInteger extends zzNumber {
-  static zzInstance = Symbol.for(this.name);
-
-  checkType(value: number) {
-    return Number.isInteger(value);
-  }
-
   constructor(value: number = 0) {
     super(value);
+
+    this.validate((value) => Number.isInteger(value));
   }
 }
 
-export const zzInt = zzInteger;
-
-export class zzFloat extends zzNumber {
-  static zzInstance = Symbol.for(this.name);
-
-  checkType(value: number) {
-    return typeof value === "number" && !Number.isNaN(value);
-  }
-
-  constructor(value: number = 0) {
+export class zzFloat<TNumber = number> extends zzType<TNumber> {
+  constructor(value: TNumber = 0 as any) {
     super(value);
+
+    this.validate((value) => typeof value === "number" && !Number.isNaN(value));
   }
 }
 
-export class zzStringType<
-  StringType extends string = any
-> extends zzType<StringType> {
-  static zzInstance = Symbol.for(this.name);
-
-  checkType(value: StringType) {
-    return typeof value === "string";
-  }
-}
-
-export class zzString extends zzStringType<string> {
-  static zzInstance = Symbol.for(this.name);
-
-  constructor(value: string = "") {
+export class zzString<TString = string> extends zzType<TString> {
+  constructor(value: TString = "" as any) {
     super(value);
+
+    this.validate((value) => typeof value === "string");
   }
 }
-
-export const zzStr = zzString;
 
 export class zzBoolean extends zzType<boolean> {
-  static zzInstance = Symbol.for(this.name);
-
-  checkType(value: boolean) {
-    return typeof value === "boolean";
-  }
-
   constructor(value: boolean = false) {
     super(value);
+
+    this.validate((value) => typeof value === "boolean");
   }
 }
-
-export const zzBool = zzBoolean;

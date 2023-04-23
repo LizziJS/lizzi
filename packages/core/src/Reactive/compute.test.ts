@@ -1,7 +1,7 @@
 import { zzEvent } from "../Event";
 import { zzComputeFn } from "./compute";
 import { zzObject } from "./object";
-import { zzReactive } from "./Reactive";
+import { zzReactive } from "./reactive";
 import { zzBoolean, zzInteger, zzString } from "./vars";
 
 describe("zzCompute", () => {
@@ -21,7 +21,7 @@ describe("zzCompute", () => {
       expect(compute.value).toBe(0);
 
       value = 1;
-      expect(compute.value).toBe(1);
+      expect(compute.value).toBe(0);
     });
 
     it("should save old value with listener", () => {
@@ -55,7 +55,7 @@ describe("zzCompute", () => {
       const reactiveValue = new zzInteger(0);
       let value = 0;
       let event = new zzEvent();
-      const compute = new zzComputeFn(() => value + reactiveValue.value, event);
+      const compute = new zzComputeFn(() => value + reactiveValue.value);
 
       expect(compute.value).toBe(0);
       compute.onChange.addListener(listener);
@@ -65,28 +65,28 @@ describe("zzCompute", () => {
       expect(listener.mock.calls.length).toBe(0);
 
       event.emit();
-      expect(compute.value).toBe(1);
-      expect(listener.mock.calls.length).toBe(1);
+      expect(compute.value).toBe(0);
+      expect(listener.mock.calls.length).toBe(0);
     });
 
     it("should remove dependencies if listener removed", () => {
       const listener = jest.fn();
       let value = new zzInteger(0);
       let event = new zzEvent();
-      const compute = new zzComputeFn(() => value.value, event);
+      const compute = new zzComputeFn(() => value.value);
 
       expect(compute.value).toBe(0);
-      expect(value.onChange.countListeners()).toBe(0);
+      expect(value.onChange.countListeners()).toBe(1);
       expect(event.countListeners()).toBe(0);
 
       compute.onChange.addListener(listener);
       expect(value.onChange.countListeners()).toBe(1);
-      expect(event.countListeners()).toBe(1);
+      expect(event.countListeners()).toBe(0);
 
       value.value = 1;
       expect(compute.value).toBe(1);
       compute.onChange.removeListener(listener);
-      expect(value.onChange.countListeners()).toBe(0);
+      expect(value.onChange.countListeners()).toBe(1);
       expect(event.countListeners()).toBe(0);
 
       value.value = 2;
@@ -105,14 +105,14 @@ describe("zzCompute", () => {
       );
       const compute = new zzComputeFn(computeFn);
 
-      expect(computeFn.mock.calls.length).toBe(0);
+      expect(computeFn.mock.calls.length).toBe(1);
 
       expect(compute.value).toBe(false);
       expect(computeFn.mock.calls.length).toBe(1);
 
       compute.onChange.addListener(listener);
       expect(listener.mock.calls.length).toBe(0);
-      expect(computeFn.mock.calls.length).toBe(2);
+      expect(computeFn.mock.calls.length).toBe(1);
       expect(value1.onChange.countListeners()).toBe(1);
       expect(value2.onChange.countListeners()).toBe(0);
       expect(value3.onChange.countListeners()).toBe(0);
@@ -120,7 +120,7 @@ describe("zzCompute", () => {
       value1.value = true;
       expect(compute.value).toBe(false);
       expect(listener.mock.calls.length).toBe(0);
-      expect(computeFn.mock.calls.length).toBe(3);
+      expect(computeFn.mock.calls.length).toBe(2);
       expect(value1.onChange.countListeners()).toBe(1);
       expect(value2.onChange.countListeners()).toBe(1);
       expect(value3.onChange.countListeners()).toBe(0);
@@ -128,7 +128,7 @@ describe("zzCompute", () => {
       value2.value = true;
       expect(compute.value).toBe(false);
       expect(listener.mock.calls.length).toBe(0);
-      expect(computeFn.mock.calls.length).toBe(4);
+      expect(computeFn.mock.calls.length).toBe(3);
       expect(value1.onChange.countListeners()).toBe(1);
       expect(value2.onChange.countListeners()).toBe(1);
       expect(value3.onChange.countListeners()).toBe(1);
@@ -136,7 +136,7 @@ describe("zzCompute", () => {
       value3.value = true;
       expect(compute.value).toBe(true);
       expect(listener.mock.calls.length).toBe(1);
-      expect(computeFn.mock.calls.length).toBe(5);
+      expect(computeFn.mock.calls.length).toBe(4);
       expect(value1.onChange.countListeners()).toBe(1);
       expect(value2.onChange.countListeners()).toBe(1);
       expect(value3.onChange.countListeners()).toBe(1);
@@ -144,7 +144,7 @@ describe("zzCompute", () => {
       value1.value = false;
       expect(compute.value).toBe(false);
       expect(listener.mock.calls.length).toBe(2);
-      expect(computeFn.mock.calls.length).toBe(6);
+      expect(computeFn.mock.calls.length).toBe(5);
       expect(value1.onChange.countListeners()).toBe(1);
       expect(value2.onChange.countListeners()).toBe(0);
       expect(value3.onChange.countListeners()).toBe(0);
@@ -164,9 +164,9 @@ describe("zzCompute", () => {
       const compute2 = new zzComputeFn(computeFn2);
 
       expect(compute2.value).toBe(6);
-      expect(value1.onChange.countListeners()).toBe(0);
-      expect(value3.onChange.countListeners()).toBe(0);
-      expect(value2.onChange.countListeners()).toBe(0);
+      expect(value1.onChange.countListeners()).toBe(1);
+      expect(value3.onChange.countListeners()).toBe(1);
+      expect(value2.onChange.countListeners()).toBe(1);
 
       compute2.onChange.addListener(listener);
 
@@ -179,9 +179,9 @@ describe("zzCompute", () => {
       compute2.onChange.removeListener(listener);
 
       expect(listener.mock.calls.length).toBe(0);
-      expect(value1.onChange.countListeners()).toBe(0);
-      expect(value2.onChange.countListeners()).toBe(0);
-      expect(value3.onChange.countListeners()).toBe(0);
+      expect(value1.onChange.countListeners()).toBe(1);
+      expect(value2.onChange.countListeners()).toBe(1);
+      expect(value3.onChange.countListeners()).toBe(1);
       expect(compute2.value).toBe(6);
     });
 
@@ -198,7 +198,7 @@ describe("zzCompute", () => {
       const compute = new zzComputeFn(computeFn);
 
       expect(compute.value).toBe(undefined);
-      expect(obj1.onChange.countListeners()).toBe(0);
+      expect(obj1.onChange.countListeners()).toBe(1);
       expect(obj21.onChange.countListeners()).toBe(0);
       expect(obj22.onChange.countListeners()).toBe(0);
       expect(str1.onChange.countListeners()).toBe(0);

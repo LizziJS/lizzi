@@ -4,6 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-export * from "./Reactive";
-export * from "./Event";
+export * from "./Isolator";
 export * from "./Destructor";
+export * from "./Event";
+export * from "./Reactive";

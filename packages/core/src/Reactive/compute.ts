@@ -4,32 +4,44 @@
  * This source code is licensed under the MIT license.
  */
 
-import {
-  IReactiveEvent,
-  ValueChangeEvent,
-  zzReactive,
-  zzReactiveGetObserver,
-} from "./Reactive";
-import { DestructorsStack, IDestructor } from "../Destructor";
-import { onStartListening, zzEvent } from "../Event";
-import { zzComputeArrayFn } from "./array";
+import { EventChangeValue, zzReactive } from "./reactive";
+import { zzGetReactiveObserver } from "./observer";
+import { DestructorsStack } from "../Destructor";
 
-export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
-  static zzInstance = Symbol.for(this.name);
-
+export class zzComputeFn<T> extends zzReactive<T> {
   protected _fn: () => T;
-  protected eventObserver;
+  protected _destructor = new DestructorsStack();
 
-  destroy() {
-    this.eventObserver.destroy();
+  destroy(): void {
+    super.destroy();
+    this._destructor.destroy();
+  }
+
+  protected _isolate() {
+    this._destructor.destroy();
+
+    this._destructor.add(
+      zzGetReactiveObserver.catch(
+        () => {
+          const lastValue = this._value;
+
+          this._value = this._fn.apply(this);
+
+          if (lastValue !== this._value) {
+            zzGetReactiveObserver.runIsolated(() => {
+              this.onChange.emit(
+                new EventChangeValue(this._value, lastValue, this)
+              );
+            });
+          }
+        },
+        () => this._isolate()
+      )
+    );
   }
 
   get value() {
-    zzReactiveGetObserver.emit(this);
-
-    if (!this.eventObserver.isWatching) {
-      this._value = this._fn.apply(this);
-    }
+    zzGetReactiveObserver.add(this);
 
     return this._value;
   }
@@ -38,78 +50,15 @@ export class zzComputeFn<T> extends zzReactive<T> implements IDestructor {
     throw new SyntaxError("You can not set compute value");
   }
 
-  constructor(
-    fn: () => T,
-    ...dependencies: (IReactiveEvent<any> | zzEvent<any>)[]
-  ) {
+  constructor(fn: () => T) {
     super(undefined as any);
 
     this._fn = fn;
 
-    this.eventObserver = onStartListening(() => {
-      const checkChange = () => {
-        let newValue: T;
-
-        isolator.isolate(() => {
-          newValue = this._fn.apply(this);
-        });
-
-        if (isolator.stackCount() === 0) {
-          throw TypeError(
-            "You forgot to get zzReactive values inside compute function"
-          );
-        }
-
-        if (this._value !== newValue!) {
-          let ev = new ValueChangeEvent<T>(newValue!, this._value, this);
-          this._value = newValue!;
-          this.onChange.emit(ev);
-        }
-      };
-
-      const isolator = zzReactiveGetObserver.createIsolator(checkChange);
-
-      isolator.isolate(() => {
-        this._value = this._fn.apply(this);
-      });
-
-      if (isolator.stackCount() === 0) {
-        throw TypeError(
-          "You forgot to get zzReactive values inside compute function"
-        );
-      }
-
-      const eventsStack = new DestructorsStack(isolator);
-
-      for (let varOrEvent of dependencies) {
-        if (varOrEvent instanceof zzEvent) {
-          eventsStack.add(varOrEvent.addListener(checkChange));
-        } else if (varOrEvent.onChange instanceof zzEvent) {
-          eventsStack.add(varOrEvent.onChange.addListener(checkChange));
-        }
-      }
-
-      return eventsStack;
-    }, this.onChange);
+    this._isolate();
   }
 }
 
-export function zzCompute<T>(
-  fn: (...args: any) => T,
-  ...dependencies: (zzReactive<any> | zzEvent<any>)[]
-) {
-  return new zzComputeFn(fn, ...dependencies);
+export function zzCompute<T>(fn: (...args: any) => T) {
+  return new zzComputeFn(fn);
 }
-
-export const zzMemo = zzCompute;
-export const zzC = zzCompute;
-
-export function zzComputeArray<T>(
-  fn: () => Array<T>,
-  ...dependencies: (zzReactive<any> | zzEvent<any>)[]
-) {
-  return new zzComputeArrayFn(fn, ...dependencies);
-}
-
-export const zzMemoArray = zzComputeArray;
-export const zzA = zzComputeArray;
