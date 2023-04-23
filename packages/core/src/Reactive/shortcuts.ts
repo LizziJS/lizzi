@@ -10,7 +10,7 @@ import { zzTag } from "./tags";
 import { zzBoolean, zzFloat, zzInteger, zzNumber, zzString } from "./vars";
 
 export class zz {
-  static val<T>(value: T) {
+  static value<T>(value: T) {
     return new zzReactive<T>(value);
   }
 
