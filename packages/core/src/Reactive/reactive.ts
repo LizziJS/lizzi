@@ -4,9 +4,9 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzDestructor } from "../Destructor";
+import { zzDestructor, DestructorsStack } from "../Destructor";
+import { zzIsolatorStack } from "../Isolator";
 import { zzEvent } from "../Event";
-import { zzGetReactiveObserver } from "./observer";
 
 export class EventChangeValue<T> {
   static new<R extends zzReactive<any>>(target: R) {
@@ -67,10 +67,6 @@ export class zzReactive<TValue>
     return this.value;
   }
 
-  compute<R>(fn: (value: TValue) => R): zzReactive<R> {
-    return zzCompute(() => fn(this.value));
-  }
-
   constructor(value: TValue) {
     super();
 
@@ -127,4 +123,14 @@ export class zzType<T> extends zzReactive<T> {
 
 export class zzAny extends zzType<any> {}
 
-import { zzCompute } from "./compute";
+class GetReactiveIsolator extends zzIsolatorStack<zzReactive<any>> {
+  catch(isolatedFn: () => void, onUpdateFn: () => void): DestructorsStack {
+    return new DestructorsStack(
+      ...super
+        .runIsolated(isolatedFn)
+        .map((r) => r.onChange.addListener(onUpdateFn))
+    );
+  }
+}
+
+export const zzGetReactiveObserver = new GetReactiveIsolator();

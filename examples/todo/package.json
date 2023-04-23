@@ -8,7 +8,8 @@
     "dev": "npx webpack serve --config webpack.dev.js"
   },
   "dependencies": {
-    "@lizzi/template": "^0.0.33"
+    "@lizzi/template": "^0.0.33",
+    "@lizzi/node": "^0.0.33"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",

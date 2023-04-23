@@ -1,46 +1,47 @@
-import { zzReactive, zzSimpleEvent } from "@lizzi/core";
-import { ViewNode, ViewElement } from "@lizzi/template";
+import { zzEvent, zzReactive } from "@lizzi/core";
+import { zzNode } from "@lizzi/node";
+import { zzHtmlNode } from "@lizzi/template";
 
 type AllElementsTagName = HTMLElementTagNameMap & SVGElementTagNameMap;
 
 export declare namespace JSX {
-  interface Element extends ViewNode {}
+  interface Element extends zzNode {}
 
   interface Attributes<T extends keyof AllElementsTagName> {
     class?:
       | Array<
           | string
           | zzReactive<any>
-          | ((view: ViewElement<AllElementsTagName[T]>) => string)
+          | ((view: zzHtmlNode<AllElementsTagName[T]>) => string)
         >
       | string
       | zzReactive<any>
-      | ((view: ViewElement<AllElementsTagName[T]>) => string);
+      | ((view: zzHtmlNode<AllElementsTagName[T]>) => string);
     style?: {
       [key: string]:
-        | ((view: ViewElement<AllElementsTagName[T]>) => string)
+        | ((view: zzHtmlNode<AllElementsTagName[T]>) => string)
         | Array<string | zzReactive<any>>
         | string
         | number
         | zzReactive<any>;
     };
-    use?: Array<(view: ViewElement<AllElementsTagName[T]>) => void>;
+    use?: Array<(view: zzHtmlNode<AllElementsTagName[T]>) => void>;
     [key: string]: any;
   }
 
-  type Children = ViewNode | string | number | boolean | zzReactive<any>;
+  type Children = zzNode | string | number | boolean | zzReactive<any>;
 
   type Childrens = Array<Children> | Children;
 
-  type FuncChildrens<T extends ViewNode> = Childrens | ((node: T) => ViewNode);
+  type FuncChildrens<T extends zzNode> = Childrens | ((node: T) => zzNode);
 
-  type zzEventProps<T extends ViewNode> = {
-    [K in keyof T]: T[K] extends zzSimpleEvent<any>
+  type zzEventProps<T extends zzNode> = {
+    [K in keyof T]: T[K] extends zzEvent<any>
       ? Parameters<T[K]["addListener"]>[0]
       : never;
   };
 
-  type ChildrenProps<T extends ViewNode> = {
+  type ChildrenProps<T extends zzNode> = {
     children: FuncChildrens<T>;
   };
 
@@ -48,7 +49,7 @@ export declare namespace JSX {
     children: Childrens;
   };
 
-  interface ElementClass extends ViewNode {}
+  interface ElementClass extends zzNode {}
   interface ElementChildrenAttribute {
     children: {};
   }

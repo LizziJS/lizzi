@@ -1,6 +1,6 @@
-import { zzIf } from "@lizzi/core";
 import { onClick } from "@lizzi/template";
 import { Todo } from "../data/Todo";
+import { zz } from "@lizzi/core";
 
 export function TodoView({
   todo,
@@ -17,12 +17,17 @@ export function TodoView({
       <div class="border border-2 border-black w-5 h-5 rounded p-0.5">
         <div
           class={[
-            zzIf(todo.done, "bg-blue-700", ""),
+            zz.compute(() => (todo.done.value ? "bg-blue-700" : "")),
             "w-full h-full rounded-sm",
           ]}
         ></div>
       </div>
-      <div class={[zzIf(todo.done, "line-through", ""), "grow"]}>
+      <div
+        class={[
+          zz.compute(() => (todo.done.value ? "line-through" : "")),
+          "grow",
+        ]}
+      >
         {todo.todo}
       </div>
       <div

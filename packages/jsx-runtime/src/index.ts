@@ -2,15 +2,14 @@ export * from "./namespace";
 
 import { JSX } from "./namespace";
 import {
-  isViewNodeConstructor,
-  ViewNode,
+  ViewComponent,
   ViewHtmlElement,
   ViewSvgElement,
-  ViewComponent,
 } from "@lizzi/template";
 import { isSvgTag } from "./SvgTags";
+import { isNodeConstructor, zzNode } from "@lizzi/node";
 
-export const jsx = <T extends ViewNode>(
+export const jsx = <T extends zzNode>(
   type: string | T,
   props: {
     [k: string]: any;
@@ -20,7 +19,7 @@ export const jsx = <T extends ViewNode>(
   return jsxs<T>(type, props);
 };
 
-export const jsxs = <T extends ViewNode>(
+export const jsxs = <T extends zzNode>(
   type: string | T,
   props: {
     svg?: boolean | undefined;
@@ -35,14 +34,14 @@ export const jsxs = <T extends ViewNode>(
 
     return new ViewHtmlElement(type as any, props);
   } else if (typeof type === "function") {
-    if (type[isViewNodeConstructor]) {
+    if (type[isNodeConstructor]) {
       return new (type as new (props: object) => T)(props);
     }
 
     return (type as (props: object) => T)(props);
   } else {
     throw new Error(
-      "JSX constructor should be string, HTML tag or ViewNode constructor"
+      "JSX constructor should be string, HTML tag or zzNode constructor"
     );
   }
 };

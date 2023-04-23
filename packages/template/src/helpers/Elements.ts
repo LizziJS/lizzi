@@ -4,13 +4,16 @@
  * This source code is licensed under the MIT license.
  */
 
-import { ViewElement } from "../DOM";
-import { ViewNode } from "../view/ViewNode";
+import { JSX } from "@lizzi/jsx-runtime";
+import { zzHtmlNode } from "../view/zzHtmlNode";
 
-export const AppendToElement = (element: HTMLElement, children: ViewNode) => {
-  return new ViewElement(element).append([children]);
+export const AppendToElement = (
+  element: HTMLElement,
+  children: JSX.Childrens
+) => {
+  return new zzHtmlNode(element).append(children);
 };
 
-export const Body = (children: ViewNode) => {
-  return new ViewElement(document.body).append([children]).mount();
+export const Body = (children: JSX.Childrens) => {
+  return new zzHtmlNode(document.body).append(children)._mount();
 };

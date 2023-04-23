@@ -11,8 +11,12 @@ import {
 } from "../Destructor";
 import { zzEvent } from "../Event";
 import { zzComputeArray } from "./array";
-import { zzGetReactiveObserver } from "./observer";
-import { EventChangeValue, zzReactive } from "./reactive";
+import { zzCompute } from "./compute";
+import {
+  EventChangeValue,
+  zzReactive,
+  zzGetReactiveObserver,
+} from "./reactive";
 
 export class EventAddSet<T> {
   constructor(public readonly added: T, public readonly target: zzSet<T>) {}
@@ -121,7 +125,7 @@ export class zzSet<T> extends zzReactive<Set<T>> {
   }
 
   has(element: T) {
-    return this.compute((set) => set.has(element));
+    return zzCompute(() => this.value.has(element));
   }
 
   values() {

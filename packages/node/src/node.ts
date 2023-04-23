@@ -23,7 +23,11 @@ export interface INode {
   _unmount(): void;
 }
 
+export const isNodeConstructor = Symbol("isNodeConstructor");
+
 export class zzNode extends zzDestructor implements INode {
+  static [isNodeConstructor] = true;
+
   protected readonly _nodeState = new zzReactive<ViewComponentStatuses>(
     "unmounted"
   );
@@ -59,7 +63,7 @@ export class zzNode extends zzDestructor implements INode {
 
   destroy(): void {
     this._unmount();
-    this.parentNode?.childNodes.remove([this]);
+    this.parentNode?.remove(this);
   }
 
   _mount(): void {
@@ -104,6 +108,22 @@ export class zzNode extends zzDestructor implements INode {
     }
 
     this._parentNode = parent;
+  }
+
+  append(node: zzNode | zzNode[]) {
+    if (Array.isArray(node)) {
+      this.childNodes.add(node);
+    } else {
+      this.childNodes.add([node]);
+    }
+  }
+
+  remove(node: zzNode | zzNode[]) {
+    if (Array.isArray(node)) {
+      this.childNodes.remove(node);
+    } else {
+      this.childNodes.remove([node]);
+    }
   }
 
   *findParentNodes<T extends zzNode>(

@@ -3,24 +3,24 @@ import {
   zzBoolean,
   zzCompute,
   zzReactive,
-  zzStringType,
+  zzString,
 } from "@lizzi/core";
 import { Debounce, EventWrapper } from "@lizzi/core";
-import { ViewElement } from "..";
+import { zzHtmlNode } from "../../..";
 
 export function onInput<
-  E extends ViewElement<HTMLTextAreaElement | HTMLInputElement>
+  E extends zzHtmlNode<HTMLTextAreaElement | HTMLInputElement>
 >(
   value: zzReactive<string>,
   onChange?: (value: string) => void
 ): (view: E) => void;
 export function onInput<
   T,
-  E extends ViewElement<HTMLTextAreaElement | HTMLInputElement>
+  E extends zzHtmlNode<HTMLTextAreaElement | HTMLInputElement>
 >(value: zzReactive<T>, onChange: (value: string) => void): (view: E) => void;
 export function onInput<
   T,
-  E extends ViewElement<HTMLTextAreaElement | HTMLInputElement>
+  E extends zzHtmlNode<HTMLTextAreaElement | HTMLInputElement>
 >(value: zzReactive<T>, onChange?: (value: string) => void) {
   return (view: E) => {
     if (!(value instanceof zzReactive))
@@ -43,32 +43,32 @@ export function onInput<
         "onInput error: Element is not HTMLTextAreaElement | HTMLInputElement"
       );
 
-    view.addToUnmount(
-      value.onChange.addListener(() => {
+    value.onChange.addListener(() => {
+      if (element.value !== String(value.value)) {
+        element.value = String(value.value);
+      }
+    });
+
+    new EventWrapper(
+      element,
+      "input",
+      () => {
+        if (element.value !== String(value.value)) {
+          onInputChange(element.value);
+        }
+      },
+      false
+    );
+
+    new EventWrapper(
+      element,
+      "blur",
+      () => {
         if (element.value !== String(value.value)) {
           element.value = String(value.value);
         }
-      }),
-      new EventWrapper(
-        element,
-        "input",
-        () => {
-          if (element.value !== String(value.value)) {
-            onInputChange(element.value);
-          }
-        },
-        false
-      ),
-      new EventWrapper(
-        element,
-        "blur",
-        () => {
-          if (element.value !== String(value.value)) {
-            element.value = String(value.value);
-          }
-        },
-        false
-      )
+      },
+      false
     );
 
     element.value = String(value.value);
@@ -76,7 +76,7 @@ export function onInput<
 }
 
 export function updateInputValue<
-  E extends ViewElement<HTMLTextAreaElement | HTMLInputElement>
+  E extends zzHtmlNode<HTMLTextAreaElement | HTMLInputElement>
 >(value: zzReactive<string> | (() => string)) {
   return (view: E) => {
     const element = view.element;
@@ -100,22 +100,21 @@ export function updateInputValue<
         "updateInputValue error: Element is not HTMLTextAreaElement | HTMLInputElement"
       );
 
-    view.addToUnmount(
-      value.onChange.addListener(() => {
+    value.onChange.addListener(() => {
+      if (element.value !== String(reactiveValue.value)) {
+        element.value = String(reactiveValue.value);
+      }
+    });
+
+    new EventWrapper(
+      element,
+      "blur",
+      () => {
         if (element.value !== String(reactiveValue.value)) {
           element.value = String(reactiveValue.value);
         }
-      }),
-      new EventWrapper(
-        element,
-        "blur",
-        () => {
-          if (element.value !== String(reactiveValue.value)) {
-            element.value = String(reactiveValue.value);
-          }
-        },
-        false
-      )
+      },
+      false
     );
 
     element.value = String(reactiveValue.value);
@@ -123,7 +122,7 @@ export function updateInputValue<
 }
 
 export function onInputChange<
-  E extends ViewElement<HTMLTextAreaElement | HTMLInputElement>
+  E extends zzHtmlNode<HTMLTextAreaElement | HTMLInputElement>
 >(onInputChange: (value: string) => void) {
   return (view: E) => {
     const element = view.element;
@@ -138,20 +137,18 @@ export function onInputChange<
         "onInputChange error: Element is not HTMLTextAreaElement | HTMLInputElement"
       );
 
-    view.addToUnmount(
-      new EventWrapper(
-        element,
-        "input",
-        () => {
-          onInputChange(element.value);
-        },
-        false
-      )
+    new EventWrapper(
+      element,
+      "input",
+      () => {
+        onInputChange(element.value);
+      },
+      false
     );
   };
 }
 
-export function AutoResizeTextarea<T extends ViewElement<HTMLTextAreaElement>>(
+export function AutoResizeTextarea<T extends zzHtmlNode<HTMLTextAreaElement>>(
   value: zzReactive<any>
 ) {
   return (view: T) => {
@@ -167,18 +164,16 @@ export function AutoResizeTextarea<T extends ViewElement<HTMLTextAreaElement>>(
       textElement.style.height = textElement.scrollHeight + "px";
     });
 
-    view.addToUnmount(
-      new EventWrapper(textElement, "focus", fn, false),
-      new EventWrapper(textElement, "change", fn, false),
-      new EventWrapper(textElement, "input", fn, false),
-      new EventWrapper(textElement, "cut", fn, false),
-      new EventWrapper(textElement, "paste", fn, false),
-      new EventWrapper(textElement, "drop", fn, false),
-      new EventWrapper(textElement, "keydown", fn, false)
-    );
+    new EventWrapper(textElement, "focus", fn, false);
+    new EventWrapper(textElement, "change", fn, false);
+    new EventWrapper(textElement, "input", fn, false);
+    new EventWrapper(textElement, "cut", fn, false);
+    new EventWrapper(textElement, "paste", fn, false);
+    new EventWrapper(textElement, "drop", fn, false);
+    new EventWrapper(textElement, "keydown", fn, false);
 
     if (value instanceof zzReactive) {
-      view.addToUnmount(value.onChange.addListener(fn));
+      value.onChange.addListener(fn);
     }
 
     fn();
@@ -187,8 +182,8 @@ export function AutoResizeTextarea<T extends ViewElement<HTMLTextAreaElement>>(
   };
 }
 
-export function onCheckboxInput<T extends ViewElement<HTMLInputElement>>(
-  value: zzArray<string> | zzBoolean | zzStringType,
+export function onCheckboxInput<T extends zzHtmlNode<HTMLInputElement>>(
+  value: zzArray<string> | zzBoolean | zzString,
   onChange?: (checked: boolean, value: string) => void
 ) {
   return (view: T) => {
@@ -208,25 +203,25 @@ export function onCheckboxInput<T extends ViewElement<HTMLInputElement>>(
           }
         });
 
-      view.addToUnmount(
-        value.onAdd.addListener((ev) => {
-          if (element.value === ev.added) {
-            element.checked = true;
-          }
-        }),
-        value.onRemove.addListener((ev) => {
-          if (element.value === ev.removed) {
-            element.checked = false;
-          }
-        }),
-        new EventWrapper(
-          element,
-          "change",
-          () => {
-            onChangeInput(element.checked, element.value);
-          },
-          false
-        )
+      value.onAdd.addListener((ev) => {
+        if (element.value === ev.added) {
+          element.checked = true;
+        }
+      });
+
+      value.onRemove.addListener((ev) => {
+        if (element.value === ev.removed) {
+          element.checked = false;
+        }
+      });
+
+      new EventWrapper(
+        element,
+        "change",
+        () => {
+          onChangeInput(element.checked, element.value);
+        },
+        false
       );
     } else if (value instanceof zzBoolean) {
       const onChangeInput =
@@ -235,20 +230,19 @@ export function onCheckboxInput<T extends ViewElement<HTMLInputElement>>(
           value.value = checked;
         });
 
-      view.addToUnmount(
-        value.onChange.addListener(() => {
-          element.checked = value.value ? true : false;
-        }),
-        new EventWrapper(
-          element,
-          "change",
-          () => {
-            onChangeInput(element.checked, element.value);
-          },
-          false
-        )
+      value.onChange.addListener(() => {
+        element.checked = value.value ? true : false;
+      });
+
+      new EventWrapper(
+        element,
+        "change",
+        () => {
+          onChangeInput(element.checked, element.value);
+        },
+        false
       );
-    } else if (value instanceof zzStringType) {
+    } else if (value instanceof zzString) {
       const onChangeInput =
         onChange ??
         ((checked: boolean, elvalue: string) => {
@@ -261,18 +255,17 @@ export function onCheckboxInput<T extends ViewElement<HTMLInputElement>>(
           }
         });
 
-      view.addToUnmount(
-        value.onChange.addListener((ev) => {
-          element.checked = value.value === element.value;
-        }),
-        new EventWrapper(
-          element,
-          "change",
-          () => {
-            onChangeInput(element.checked, element.value);
-          },
-          false
-        )
+      value.onChange.addListener((ev) => {
+        element.checked = value.value === element.value;
+      });
+
+      new EventWrapper(
+        element,
+        "change",
+        () => {
+          onChangeInput(element.checked, element.value);
+        },
+        false
       );
     } else {
       throw Error("Wrong checkbox variable type");

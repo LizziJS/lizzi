@@ -12,5 +12,4 @@ export * from "./array";
 export * from "./map";
 export * from "./set";
 export * from "./tags";
-export * from "./observer";
 export * from "./shortcuts";

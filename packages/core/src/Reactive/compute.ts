@@ -4,8 +4,11 @@
  * This source code is licensed under the MIT license.
  */
 
-import { EventChangeValue, zzReactive } from "./reactive";
-import { zzGetReactiveObserver } from "./observer";
+import {
+  EventChangeValue,
+  zzReactive,
+  zzGetReactiveObserver,
+} from "./reactive";
 import { DestructorsStack } from "../Destructor";
 
 export class zzComputeFn<T> extends zzReactive<T> {

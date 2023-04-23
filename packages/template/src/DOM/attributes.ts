@@ -8,25 +8,23 @@ import {
   zzReactive,
   zzCompute,
   zzArray,
-  zzIf,
-  ValueOrReactive,
   zzArrayInstance,
-  ValueChangeEvent,
+  EventChangeValue,
 } from "@lizzi/core";
-import { ViewElement } from ".";
+import { zzHtmlNode } from "../..";
 
 type OutputTypes<T extends any[]> = T[number] | zzReactive<T[number]>;
-type InputTypes<T extends any[], V extends ViewElement> =
+type InputTypes<T extends any[]> =
   | T[number]
   | zzReactive<T[number]>
   | (() => T[number]);
-type InputArrayTypes<T extends any[], V extends ViewElement> =
-  | InputTypes<T, V>
-  | Array<InputTypes<T, V>>
-  | zzArrayInstance<InputTypes<T, V>>;
+type InputArrayTypes<T extends any[]> =
+  | InputTypes<T>
+  | Array<InputTypes<T>>
+  | zzArrayInstance<InputTypes<T>>;
 
-function convertInputToReactiveArray<T extends any[], V extends ViewElement>(
-  input: InputArrayTypes<T, V>,
+function convertInputToReactiveArray<T extends any[], V extends zzHtmlNode>(
+  input: InputArrayTypes<T>,
   view: V
 ): zzArrayInstance<OutputTypes<T>> {
   if (typeof input === "string" || typeof input === "number") {
@@ -48,9 +46,9 @@ function convertInputToReactiveArray<T extends any[], V extends ViewElement>(
   }
 }
 
-export function StyleLink<T extends ViewElement<HTMLElement | SVGElement>>(
+export function StyleLink<T extends zzHtmlNode<HTMLElement | SVGElement>>(
   styleName: string,
-  value: InputTypes<[string, number], T>
+  value: InputTypes<[string, number]>
 ) {
   return (view: T) => {
     const element = view.element;
@@ -74,13 +72,13 @@ export function StyleLink<T extends ViewElement<HTMLElement | SVGElement>>(
       }
     };
 
-    view.addToUnmount(reactiveValue.onChange.addListener(onChange).run());
+    reactiveValue.onChange.addListener(onChange).run();
   };
 }
 
-export function AttributeLink<T extends ViewElement>(
+export function AttributeLink<T extends zzHtmlNode>(
   name: string,
-  attrvalue: InputTypes<[string, number, boolean], T>
+  attrvalue: InputTypes<[string, number, boolean]>
 ) {
   return (view: T) => {
     const element = view.element;
@@ -119,12 +117,12 @@ export function AttributeLink<T extends ViewElement>(
       }
     };
 
-    view.addToUnmount(reactiveValue.onChange.addListener(onChange).run());
+    reactiveValue.onChange.addListener(onChange).run();
   };
 }
 
-export function ClassLink<T extends ViewElement>(
-  array: InputArrayTypes<[string], T>
+export function ClassLink<T extends zzHtmlNode>(
+  array: InputArrayTypes<[string]>
 ) {
   return (view: T) => {
     const classArray = convertInputToReactiveArray(array, view);
@@ -133,63 +131,32 @@ export function ClassLink<T extends ViewElement>(
     const classList = element.classList;
     element.className = "";
 
-    view.addToUnmount(
-      classArray.setItemsListener((item) => {
-        if (item instanceof zzReactive) {
-          return item.onChange
-            .addListener((event) => {
-              if (event.last) {
-                String(event.last)
-                  .split(/\s+/)
-                  .forEach(
-                    (className) =>
-                      className !== "" && classList.remove(className)
-                  );
-              }
+    classArray.itemsListener((item) => {
+      if (item instanceof zzReactive) {
+        return item.onChange
+          .addListener((event) => {
+            if (event.last) {
+              String(event.last)
+                .split(/\s+/)
+                .forEach(
+                  (className) => className !== "" && classList.remove(className)
+                );
+            }
 
-              if (event.value) {
-                String(event.value)
-                  .split(/\s+/)
-                  .forEach(
-                    (className) => className !== "" && classList.add(className)
-                  );
-              }
-            })
-            .run(ValueChangeEvent.run(item));
-        } else {
-          String(item)
-            .split(/\s+/)
-            .forEach(
-              (className) => className !== "" && classList.add(className)
-            );
-        }
-      })
-    );
+            if (event.value) {
+              String(event.value)
+                .split(/\s+/)
+                .forEach(
+                  (className) => className !== "" && classList.add(className)
+                );
+            }
+          })
+          .run(EventChangeValue.new(item));
+      } else {
+        String(item)
+          .split(/\s+/)
+          .forEach((className) => className !== "" && classList.add(className));
+      }
+    });
   };
-}
-
-// export function cssMap(
-//   array: InputArrayTypes<[string]>,
-//   styles: { [key: string]: string }
-// ) {
-//   const classArray = convertInputToReactiveArray(array);
-
-//   return classArray.map((className) => {
-//     if (typeof className === "string" || typeof className === "number") {
-//       return styles[className] ?? className;
-//     }
-
-//     return zzCompute(
-//       () => styles[className.value] ?? className.value,
-//       className
-//     );
-//   });
-// }
-
-export function zzCss<T>(
-  cond: ValueOrReactive<T> | (() => T),
-  isTrue: string,
-  isFalse: string = ""
-) {
-  return zzIf(cond, isTrue, isFalse);
 }

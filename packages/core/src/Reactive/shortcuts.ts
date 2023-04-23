@@ -1,5 +1,5 @@
 import { DestructorsStack } from "../Destructor";
-import { zzEvent } from "../Event";
+import { EventWrapper, zzEvent } from "../Event";
 import { zzArray } from "./array";
 import { zzCompute } from "./compute";
 import { zzMap } from "./map";
@@ -60,6 +60,15 @@ export class zz {
 
   static event<T extends (...args: any) => void>() {
     return new zzEvent<T>();
+  }
+
+  static wrapEvent<T extends (...args: any) => void>(
+    element: HTMLElement,
+    eventName: Parameters<HTMLElement["addEventListener"]>[0],
+    fn: T,
+    options: boolean = false
+  ) {
+    return new EventWrapper(element, eventName, fn, options);
   }
 
   static destructor() {

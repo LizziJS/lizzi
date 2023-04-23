@@ -1,5 +1,5 @@
 import { zzString } from "@lizzi/core";
-import { onEvent, onInput } from "@lizzi/template";
+import { on, onInput } from "@lizzi/template";
 
 export function AddTodo({ onAdd }: { onAdd: (todo: string) => void }) {
   const newTodo = new zzString("");
@@ -8,7 +8,7 @@ export function AddTodo({ onAdd }: { onAdd: (todo: string) => void }) {
     <form
       class="flex gap-2"
       use={[
-        onEvent("submit", (ev: SubmitEvent) => {
+        on("submit", (ev: SubmitEvent) => {
           ev.preventDefault();
 
           if (newTodo.value === "") return;

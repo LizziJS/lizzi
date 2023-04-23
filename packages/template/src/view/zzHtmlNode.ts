@@ -4,12 +4,12 @@
  * This source code is licensed under the MIT license.
  */
 
-import { JSX } from "@lizzi/jsx-runtime";
 import { EventChangeValue, zzArrayInstance, zzReactive } from "@lizzi/core";
 import { zzNode } from "@lizzi/node";
+import { JSX } from "@lizzi/jsx-runtime";
 
-export function findFirstChildHtmlNode(parent: zzNode): zzHtmlNode<any> | null {
-  if (parent instanceof zzHtmlNode) {
+export function findFirstChildHtmlNode(parent: zzNode): zzHtmlNode | null {
+  if (parent instanceof zzHtmlNode && parent.nodeState === "mounted") {
     return parent;
   } else {
     for (const child of parent.childNodes) {
@@ -27,12 +27,12 @@ export function findFirstChildHtmlNode(parent: zzNode): zzHtmlNode<any> | null {
 function findNextHtmlNode(
   nextParent: zzNode | null,
   afterElement: zzNode
-): zzHtmlNode<any> | null {
+): zzHtmlNode | null {
   if (nextParent === null) return null;
 
   do {
     let childs = nextParent.childNodes.toArray();
-    let index = childs.indexOf(afterElement);
+    let index = childs.indexOf(afterElement) + 1;
 
     for (; index < childs.length; index++) {
       const findHtmlNode = findFirstChildHtmlNode(childs[index]);
@@ -49,7 +49,38 @@ function findNextHtmlNode(
   return null;
 }
 
-export class zzHtmlNode<TElement extends Node> extends zzNode {
+export class ViewComponent extends zzNode {
+  constructor({ children }: { children?: JSX.Childrens } = {}) {
+    super();
+
+    this.append(children);
+  }
+
+  append(childrens?: JSX.Childrens) {
+    console.log("append", childrens);
+
+    if (Array.isArray(childrens)) {
+      const viewNodes = childrens.map((child) =>
+        JSXChildrenToNodeMapper(child)
+      );
+
+      for (let view of viewNodes) {
+        if (view) {
+          super.append(view);
+        }
+      }
+    } else if (childrens) {
+      const view = JSXChildrenToNodeMapper(childrens);
+      if (view) {
+        super.append(view);
+      }
+    }
+
+    return this;
+  }
+}
+
+export class zzHtmlNode<TElement extends Node = Element> extends ViewComponent {
   readonly element: TElement;
 
   constructor(node: TElement) {
@@ -59,43 +90,25 @@ export class zzHtmlNode<TElement extends Node> extends zzNode {
   }
 
   _setParentNode(parent: zzNode | null): void {
+    super._setParentNode(parent);
+
     if (parent === null) {
       this.element.parentNode?.removeChild(this.element);
     } else {
       const parentHtmlNode = this.findParentNodes(
         (node) => node instanceof zzHtmlNode
-      ).next().value as zzHtmlNode<any> | undefined;
+      ).next().value as zzHtmlNode | undefined;
 
       if (parentHtmlNode) {
         const nextNode = findNextHtmlNode(parent, this);
+
+        console.log("insert", this.element, parentHtmlNode.element, nextNode);
 
         parentHtmlNode.element.insertBefore(
           this.element,
           nextNode?.element ?? null
         );
       }
-    }
-  }
-}
-
-export class TextNodeView extends zzHtmlNode<Text> {
-  constructor({
-    children,
-  }: {
-    children: string | number | boolean | zzReactive<any>;
-  }) {
-    super(document.createTextNode(""));
-
-    if (children instanceof zzReactive) {
-      this.onMount(() => {
-        children.onChange
-          .addListener((ev) => {
-            this.element.data = ev.value;
-          })
-          .run(EventChangeValue.new(children));
-      });
-    } else {
-      this.element.data = String(children);
     }
   }
 }
@@ -144,6 +157,28 @@ export class ArrayView<T extends zzNode> extends zzNode {
       });
     } else {
       this.childNodes.add(children);
+    }
+  }
+}
+
+export class TextNodeView extends zzHtmlNode<Text> {
+  constructor({
+    children,
+  }: {
+    children: string | number | boolean | zzReactive<any>;
+  }) {
+    super(document.createTextNode(""));
+
+    if (children instanceof zzReactive) {
+      this.onMount(() => {
+        children.onChange
+          .addListener((ev) => {
+            this.element.data = ev.value;
+          })
+          .run(EventChangeValue.new(children));
+      });
+    } else {
+      this.element.data = String(children);
     }
   }
 }

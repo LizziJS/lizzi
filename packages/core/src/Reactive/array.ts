@@ -9,6 +9,7 @@ import {
   IReactiveValue,
   zzReactive,
   EventChangeValue,
+  zzGetReactiveObserver,
 } from "./reactive";
 import {
   DestructorsStack,
@@ -18,7 +19,6 @@ import {
 import { zzEvent } from "../Event";
 import { zzCompute } from "./compute";
 import { zzInteger } from "./vars";
-import { zzGetReactiveObserver } from "./observer";
 
 export class EventAddArray<T> {
   constructor(

@@ -7,9 +7,9 @@
 import { zzReactive } from "@lizzi/core";
 import { AttributeLink, ClassLink, StyleLink } from "./attributes";
 import { JSX } from "@lizzi/jsx-runtime";
-import { zzHtmlNode } from "../..";
+import { zzHtmlNode } from "../view";
 
-export type ElementAttributes<T extends zzHtmlNode<any>> = {
+export type ElementAttributes<T extends zzHtmlNode> = {
   class?: Array<string | zzReactive<any>>;
   style?: { [key: string]: Array<string | zzReactive<any>> };
   use?: Array<(view: T) => void>;
@@ -23,7 +23,7 @@ export class ViewHtmlElement<
   constructor(tagName: T, attributes: ElementAttributes<ViewHtmlElement<T>>) {
     super(document.createElement(tagName));
 
-    this.childNodes.add(attributes.children);
+    this.append(attributes.children);
 
     this._initAttributes(attributes);
   }
@@ -75,7 +75,7 @@ export class ViewSvgElement<
   constructor(tagName: T, attributes: ElementAttributes<ViewSvgElement<T>>) {
     super(document.createElementNS("http://www.w3.org/2000/svg", tagName));
 
-    this.childNodes.add(attributes.children);
+    this.append(attributes.children);
 
     this._initAttributes(attributes);
   }

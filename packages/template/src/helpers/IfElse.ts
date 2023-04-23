@@ -6,8 +6,8 @@
 
 import { zzCompute, zzReactive } from "@lizzi/core";
 import { JSX } from "@lizzi/jsx-runtime";
-import { MapJSXChildrensToNodes } from "../view";
-import { ViewComponent } from "../view/ViewComponent";
+import { zzNode } from "@lizzi/node";
+import { MapJSXChildrensToNodes, ViewComponent } from "../view/";
 
 export class If extends ViewComponent {
   constructor({
@@ -48,7 +48,7 @@ export class If extends ViewComponent {
           }
         };
 
-        view.addToUnmount(condition.onChange.addListener(onChange).run());
+        condition.onChange.addListener(onChange).run();
       });
     } else {
       if (condition) {

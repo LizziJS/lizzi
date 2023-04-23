@@ -11,8 +11,12 @@ import {
 } from "../Destructor";
 import { zzEvent } from "../Event";
 import { zzComputeArray } from "./array";
-import { zzGetReactiveObserver } from "./observer";
-import { EventChangeValue, zzReactive } from "./reactive";
+import { zzCompute } from "./compute";
+import {
+  EventChangeValue,
+  zzReactive,
+  zzGetReactiveObserver,
+} from "./reactive";
 
 export class EventSetMap<TKey, TValue> {
   constructor(
@@ -129,11 +133,11 @@ export class zzMap<TKey, TValue> extends zzReactive<Map<TKey, TValue>> {
   }
 
   has(key: TKey) {
-    return this.compute((map) => map.has(key));
+    return zzCompute(() => this.value.has(key));
   }
 
   get(key: TKey) {
-    return this.compute((map) => map.get(key));
+    return zzCompute(() => this.value.get(key));
   }
 
   values() {

@@ -1,10 +1,11 @@
 import { Body } from "@lizzi/template";
-import { zzArray } from "@lizzi/core";
+import { zzArray, zzString } from "@lizzi/core";
 
 import { TodoApp } from "./components/TodoApp";
 import { Todo } from "./data/Todo";
 
 import "./app.css";
+import { SearchComponent } from "./components/SearchComponent";
 
 const todos = new zzArray<Todo>();
 
@@ -15,4 +16,10 @@ todos.add([
   new Todo("Profit!", false),
 ]);
 
-Body(<TodoApp todos={todos} />);
+//
+
+Body(
+  <div class={"asd"}>
+    <SearchComponent />
+  </div>
+);
