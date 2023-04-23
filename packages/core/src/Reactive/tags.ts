@@ -6,7 +6,7 @@
 
 import { zzCompute } from "./compute";
 
-export const zzT = (strings: TemplateStringsArray, ...values: any) => {
+export const zzTag = (strings: TemplateStringsArray, ...values: any) => {
   const concatArrayString: any[] = [];
 
   for (let i = 0; i < strings.length - 1; i++) {

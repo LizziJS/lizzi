@@ -1,11 +1,11 @@
 import { zzEvent } from "../Event";
 import { zzBoolean, zzInteger, zzString } from "./vars";
-import { zzT } from "./tags";
+import { zzTag } from "./tags";
 
 describe("zz tag", () => {
   it("should create an reactive string", () => {
-    expect(zzT).toBeInstanceOf(Function);
-    const string = zzT``;
+    expect(zzTag).toBeInstanceOf(Function);
+    const string = zzTag``;
 
     expect(string.onChange).toBeInstanceOf(zzEvent);
   });
@@ -14,7 +14,7 @@ describe("zz tag", () => {
     const var1 = new zzString("abc");
     const var2 = new zzInteger(2998);
     const var3 = new zzBoolean(false);
-    const string = zzT`is ${var1} as ${var2} == ${var3}`;
+    const string = zzTag`is ${var1} as ${var2} == ${var3}`;
 
     expect(string.value).toBe("is abc as 2998 == false");
 
@@ -31,7 +31,7 @@ describe("zz tag", () => {
     const var1 = new zzString("abc");
     const var2 = new zzInteger(2998);
     const var3 = new zzBoolean(false);
-    const string = zzT`is ${var1} as ${var2} == ${var3}`;
+    const string = zzTag`is ${var1} as ${var2} == ${var3}`;
     expect(var1.onChange.countListeners()).toBe(1);
     expect(var2.onChange.countListeners()).toBe(1);
     expect(var3.onChange.countListeners()).toBe(1);
