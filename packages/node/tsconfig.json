@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "declaration": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "jsxImportSource": "@lizzi",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "types": ["node", "jest", "express"],
+    "module": "esnext",
+    "downlevelIteration": true,
+    "moduleResolution": "Node",
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "outDir": "dist/esm",
+    "rootDir": "src",
+    "sourceMap": true,
+    "strict": true,
+    "target": "es6"
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
+  "exclude": ["src/**/*.test.ts"]
+}
