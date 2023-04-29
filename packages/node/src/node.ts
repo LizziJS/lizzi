@@ -56,6 +56,7 @@ export class zzNode extends zzDestructor implements INode {
           .run();
       },
       (item) => {
+        item._unmount();
         item._setParentNode(null);
       }
     );

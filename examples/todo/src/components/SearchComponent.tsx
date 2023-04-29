@@ -1,7 +1,7 @@
 import { zzString } from "@lizzi/core";
-import { ViewComponent, onInput } from "@lizzi/template";
+import { onInput, zzHtmlComponent } from "@lizzi/template";
 
-export class SearchComponent extends ViewComponent {
+export class SearchComponent extends zzHtmlComponent {
   readonly search: zzString;
 
   constructor() {

@@ -5,21 +5,19 @@
  */
 
 import { zzCompute, zzReactive } from "@lizzi/core";
-import { JSX } from "@lizzi/jsx-runtime";
-import { zzNode } from "@lizzi/node";
-import { MapJSXChildrensToNodes, ViewComponent } from "../view/";
+import { zzNode } from "./node";
 
-export class If extends ViewComponent {
+export class If extends zzNode {
   constructor({
     condition,
     children,
   }: {
     condition: zzReactive<any> | (() => boolean) | any;
-    children: JSX.Childrens;
+    children: zzNode | zzNode[];
   }) {
     super();
 
-    const nodes = MapJSXChildrensToNodes(children);
+    const nodes = Array.isArray(children) ? children : [children];
 
     const elseNodes = nodes.filter((node) => node instanceof Else);
     const condNodes = nodes.filter((node) => !(node instanceof Else));
@@ -31,7 +29,7 @@ export class If extends ViewComponent {
     if (condition instanceof zzReactive) {
       let last: boolean | null = null;
 
-      this.onMount((view) => {
+      this.onMount(() => {
         const onChange = () => {
           const visible = Boolean(condition.value);
 
@@ -60,4 +58,10 @@ export class If extends ViewComponent {
   }
 }
 
-export class Else extends ViewComponent {}
+export class Else extends zzNode {
+  constructor({ children }: { children: zzNode | zzNode[] }) {
+    super();
+
+    this.append(children);
+  }
+}

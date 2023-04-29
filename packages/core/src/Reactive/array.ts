@@ -200,6 +200,10 @@ export class zzArrayInstance<T>
   ) {
     return new zzArrayMap<T, NewT>(this, mapFn);
   }
+
+  compute<NewT>(computeFn: (array: T[]) => NewT[]) {
+    return new zzComputeArrayFn(() => computeFn(this.toArray()));
+  }
 }
 
 export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
@@ -351,8 +355,14 @@ export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
 
 export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
   protected readonly indexMap = new Map<T, zzInteger>();
+  protected readonly destructorMap = new Map<T, IDestructor>();
   protected _destructor = new DestructorsStack();
   protected sourceArray: zzArrayInstance<T>;
+
+  destroy(): void {
+    super.destroy();
+    this._destructor.destroy();
+  }
 
   protected add(elements: NewT[], index?: number) {
     index === undefined && (index = this._value.length);
@@ -400,26 +410,44 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
     for (const element of sourceArray) {
       const newIndex = new zzInteger(index++);
 
-      const newValue = mapFn(element, newIndex, sourceArray);
+      let newValue: NewT;
+
+      const elementDestructor = zzDestructorsObserver.catch(() => {
+        newValue = mapFn(element, newIndex, sourceArray);
+      });
+
+      if (elementDestructor.size > 0) {
+        this.destructorMap.set(element, elementDestructor);
+      }
 
       this.indexMap.set(element, newIndex);
 
-      this.add([newValue]);
+      this.add([newValue!]);
     }
 
     this._destructor.add(
       this.sourceArray.onAdd.addListener((ev) => {
         const newIndex = new zzInteger(ev.index);
 
-        const newValue = mapFn(ev.added, newIndex, this.sourceArray);
+        let newValue: NewT;
+
+        const elementDestructor = zzDestructorsObserver.catch(() => {
+          newValue = mapFn(ev.added, newIndex, sourceArray);
+        });
+
+        if (elementDestructor.size > 0) {
+          this.destructorMap.set(ev.added, elementDestructor);
+        }
 
         this.indexMap.set(ev.added, newIndex);
 
-        this.add([newValue], ev.index);
+        this.add([newValue!], ev.index);
       }),
 
       this.sourceArray.onRemove.addListener((ev) => {
         this.indexMap.delete(ev.removed);
+
+        this.destructorMap.get(ev.removed)?.destroy();
 
         this.removeByIndex(ev.index);
       }),

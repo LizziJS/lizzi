@@ -8,48 +8,7 @@ import { EventChangeValue, zzArrayInstance, zzReactive } from "@lizzi/core";
 import { zzNode } from "@lizzi/node";
 import { JSX } from "@lizzi/jsx-runtime";
 
-export function findFirstChildHtmlNode(parent: zzNode): zzHtmlNode | null {
-  if (parent instanceof zzHtmlNode && parent.nodeState === "mounted") {
-    return parent;
-  } else {
-    for (const child of parent.childNodes) {
-      const node = findFirstChildHtmlNode(child);
-
-      if (node) {
-        return node;
-      }
-    }
-  }
-
-  return null;
-}
-
-function findNextHtmlNode(
-  nextParent: zzNode | null,
-  afterElement: zzNode
-): zzHtmlNode | null {
-  if (nextParent === null) return null;
-
-  do {
-    let childs = nextParent.childNodes.toArray();
-    let index = childs.indexOf(afterElement) + 1;
-
-    for (; index < childs.length; index++) {
-      const findHtmlNode = findFirstChildHtmlNode(childs[index]);
-
-      if (findHtmlNode) {
-        return findHtmlNode;
-      }
-    }
-
-    afterElement = nextParent;
-    nextParent = nextParent.parentNode;
-  } while (nextParent !== null && !(nextParent instanceof zzHtmlNode));
-
-  return null;
-}
-
-export class ViewComponent extends zzNode {
+export class zzHtmlComponent extends zzNode {
   constructor({ children }: { children?: JSX.Childrens } = {}) {
     super();
 
@@ -57,8 +16,6 @@ export class ViewComponent extends zzNode {
   }
 
   append(childrens?: JSX.Childrens) {
-    console.log("append", childrens);
-
     if (Array.isArray(childrens)) {
       const viewNodes = childrens.map((child) =>
         JSXChildrenToNodeMapper(child)
@@ -80,36 +37,51 @@ export class ViewComponent extends zzNode {
   }
 }
 
-export class zzHtmlNode<TElement extends Node = Element> extends ViewComponent {
-  readonly element: TElement;
+export class zzHtmlNode<
+  THtmlNode extends Node = Element
+> extends zzHtmlComponent {
+  readonly element: THtmlNode;
 
-  constructor(node: TElement) {
+  constructor(node: THtmlNode) {
     super();
 
     this.element = node;
+
+    this._initChildMap();
   }
 
-  _setParentNode(parent: zzNode | null): void {
-    super._setParentNode(parent);
+  protected _initChildMap() {
+    type MapT = Node | zzArrayInstance<MapT>;
 
-    if (parent === null) {
-      this.element.parentNode?.removeChild(this.element);
-    } else {
-      const parentHtmlNode = this.findParentNodes(
-        (node) => node instanceof zzHtmlNode
-      ).next().value as zzHtmlNode | undefined;
-
-      if (parentHtmlNode) {
-        const nextNode = findNextHtmlNode(parent, this);
-
-        console.log("insert", this.element, parentHtmlNode.element, nextNode);
-
-        parentHtmlNode.element.insertBefore(
-          this.element,
-          nextNode?.element ?? null
-        );
+    const mapNodes = (node: zzNode): MapT => {
+      if (node instanceof zzHtmlNode) {
+        return node.element;
       }
-    }
+
+      return node.childNodes.map(mapNodes);
+    };
+
+    const flatMap = (node: MapT): Node[] | Node => {
+      if (node instanceof zzArrayInstance) {
+        return node.toArray().flatMap(flatMap);
+      }
+
+      return node;
+    };
+
+    const _childNodes = this.childNodes
+      .map(mapNodes)
+      .compute((array) => array.flatMap(flatMap));
+
+    _childNodes.onAdd.addListener((ev) => {
+      const beforeElement = this.element.childNodes.item(ev.index);
+
+      this.element.insertBefore(ev.added, beforeElement);
+    });
+
+    _childNodes.onRemove.addListener((ev) => {
+      this.element.removeChild(ev.removed);
+    });
   }
 }
 

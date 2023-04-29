@@ -1,5 +1,5 @@
 import { zzArray, zzCompute } from "@lizzi/core";
-import { Else, If } from "@lizzi/template";
+import { Else, If } from "@lizzi/node";
 import { AddTodo } from "./AddTodo";
 import { SearchComponent } from "./SearchComponent";
 import { Todo } from "../data/Todo";
@@ -23,16 +23,20 @@ export function TodoApp({ todos }: { todos: zzArray<Todo> }) {
       <div class="my-5 mx-5 flex flex-col">
         <If condition={isEmptyResults}>
           <If condition={isEmptyTodos}>
-            Empty list
-            <Else>Found 0 result</Else>
+            <>Empty list</>
+            <Else>
+              <>Found 0 result</>
+            </Else>
           </If>
           <Else>
-            {filteredTodos.map((todo) => (
-              <TodoView
-                todo={todo}
-                onRemove={(removeTodo) => todos.remove([removeTodo])}
-              />
-            ))}
+            <>
+              {filteredTodos.map((todo) => (
+                <TodoView
+                  todo={todo}
+                  onRemove={(removeTodo) => todos.remove([removeTodo])}
+                />
+              ))}
+            </>
           </Else>
         </If>
       </div>

@@ -5,3 +5,4 @@
  */
 
 export * from "./node";
+export * from "./IfElse";

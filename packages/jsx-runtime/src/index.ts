@@ -2,7 +2,7 @@ export * from "./namespace";
 
 import { JSX } from "./namespace";
 import {
-  ViewComponent,
+  zzHtmlComponent,
   ViewHtmlElement,
   ViewSvgElement,
 } from "@lizzi/template";
@@ -46,4 +46,4 @@ export const jsxs = <T extends zzNode>(
   }
 };
 
-export const Fragment = ViewComponent;
+export const Fragment = zzHtmlComponent;
