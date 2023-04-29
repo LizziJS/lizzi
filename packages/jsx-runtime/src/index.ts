@@ -3,8 +3,8 @@ export * from "./namespace";
 import { JSX } from "./namespace";
 import {
   zzHtmlComponent,
-  ViewHtmlElement,
-  ViewSvgElement,
+  HtmlElementView,
+  SvgElementView,
 } from "@lizzi/template";
 import { isSvgTag } from "./SvgTags";
 import { isNodeConstructor, zzNode } from "@lizzi/node";
@@ -29,10 +29,10 @@ export const jsxs = <T extends zzNode>(
 ) => {
   if (typeof type === "string") {
     if (isSvgTag.has(type as any) || props.svg) {
-      return new ViewSvgElement(type as any, props);
+      return new SvgElementView(type as any, props);
     }
 
-    return new ViewHtmlElement(type as any, props);
+    return new HtmlElementView(type as any, props);
   } else if (typeof type === "function") {
     if (type[isNodeConstructor]) {
       return new (type as new (props: object) => T)(props);

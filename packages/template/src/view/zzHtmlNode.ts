@@ -17,15 +17,11 @@ export class zzHtmlComponent extends zzNode {
 
   append(childrens?: JSX.Childrens) {
     if (Array.isArray(childrens)) {
-      const viewNodes = childrens.map((child) =>
-        JSXChildrenToNodeMapper(child)
-      );
+      const viewNodes = childrens
+        .map((child) => JSXChildrenToNodeMapper(child))
+        .filter((view) => view);
 
-      for (let view of viewNodes) {
-        if (view) {
-          super.append(view);
-        }
-      }
+      super.append(viewNodes);
     } else if (childrens) {
       const view = JSXChildrenToNodeMapper(childrens);
       if (view) {
@@ -61,17 +57,7 @@ export class zzHtmlNode<
       return node.childNodes.map(mapNodes);
     };
 
-    const flatMap = (node: MapT): Node[] | Node => {
-      if (node instanceof zzArrayInstance) {
-        return node.toArray().flatMap(flatMap);
-      }
-
-      return node;
-    };
-
-    const _childNodes = this.childNodes
-      .map(mapNodes)
-      .compute((array) => array.flatMap(flatMap));
+    const _childNodes = this.childNodes.map(mapNodes).flat();
 
     _childNodes.onAdd.addListener((ev) => {
       const beforeElement = this.element.childNodes.item(ev.index);

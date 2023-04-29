@@ -17,10 +17,10 @@ export type ElementAttributes<T extends zzHtmlNode> = {
   [key: string]: any;
 };
 
-export class ViewHtmlElement<
+export class HtmlElementView<
   T extends keyof HTMLElementTagNameMap
 > extends zzHtmlNode<HTMLElementTagNameMap[T]> {
-  constructor(tagName: T, attributes: ElementAttributes<ViewHtmlElement<T>>) {
+  constructor(tagName: T, attributes: ElementAttributes<HtmlElementView<T>>) {
     super(document.createElement(tagName));
 
     this.append(attributes.children);
@@ -28,7 +28,7 @@ export class ViewHtmlElement<
     this._initAttributes(attributes);
   }
 
-  protected _initAttributes(attributes: ElementAttributes<ViewHtmlElement<T>>) {
+  protected _initAttributes(attributes: ElementAttributes<HtmlElementView<T>>) {
     for (let name in attributes) {
       switch (name.toLocaleLowerCase()) {
         case "children": {
@@ -69,10 +69,10 @@ export class ViewHtmlElement<
   }
 }
 
-export class ViewSvgElement<
+export class SvgElementView<
   T extends keyof SVGElementTagNameMap
 > extends zzHtmlNode<SVGElementTagNameMap[T]> {
-  constructor(tagName: T, attributes: ElementAttributes<ViewSvgElement<T>>) {
+  constructor(tagName: T, attributes: ElementAttributes<SvgElementView<T>>) {
     super(document.createElementNS("http://www.w3.org/2000/svg", tagName));
 
     this.append(attributes.children);
@@ -80,7 +80,7 @@ export class ViewSvgElement<
     this._initAttributes(attributes);
   }
 
-  protected _initAttributes(attributes: ElementAttributes<ViewSvgElement<T>>) {
+  protected _initAttributes(attributes: ElementAttributes<SvgElementView<T>>) {
     for (let name in attributes) {
       switch (name.toLocaleLowerCase()) {
         case "children": {
@@ -107,7 +107,7 @@ export class ViewSvgElement<
         default: {
           if (name.startsWith("on") && typeof attributes[name] === "function") {
             console.warn(
-              `using ${name} is deprecated,\nuse 'use={[onEvent('${name
+              `using ${name} is deprecated,\nuse 'use={[on('${name
                 .toLocaleLowerCase()
                 .slice(2)}', event_function)]}' instread`
             );

@@ -124,7 +124,10 @@ export class zzType<T> extends zzReactive<T> {
 export class zzAny extends zzType<any> {}
 
 class GetReactiveIsolator extends zzIsolatorStack<zzReactive<any>> {
-  catch(isolatedFn: () => void, onUpdateFn: () => void): DestructorsStack {
+  catch(
+    isolatedFn: () => void,
+    onUpdateFn: (ev: EventChangeValue<any>) => void
+  ): DestructorsStack {
     return new DestructorsStack(
       ...super
         .runIsolated(isolatedFn)

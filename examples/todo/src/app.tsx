@@ -8,11 +8,10 @@ import "./app.css";
 
 const todos = new zzArray<Todo>();
 
-todos.add([
-  new Todo("Watch TV", true),
-  new Todo("Go shopping", false),
-  new Todo("...", false),
-  new Todo("Profit!", false),
-]);
+todos.add([]);
+
+for (let i = 0; i < 100; i++) {
+  todos.add([new Todo("index+" + i, false)]);
+}
 
 Body(<TodoApp todos={todos} />);

@@ -16,7 +16,7 @@ import {
   IDestructor,
   zzDestructorsObserver,
 } from "../Destructor";
-import { zzEvent } from "../Event";
+import { Debounce, zzEvent } from "../Event";
 import { zzCompute } from "./compute";
 import { zzInteger } from "./vars";
 
@@ -204,6 +204,10 @@ export class zzArrayInstance<T>
   compute<NewT>(computeFn: (array: T[]) => NewT[]) {
     return new zzComputeArrayFn(() => computeFn(this.toArray()));
   }
+
+  flat() {
+    return new zzArrayFlat(this as any);
+  }
 }
 
 export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
@@ -362,6 +366,9 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
   destroy(): void {
     super.destroy();
     this._destructor.destroy();
+
+    this.destructorMap.forEach((destructor) => destructor.destroy());
+    this.indexMap.clear();
   }
 
   protected add(elements: NewT[], index?: number) {
@@ -387,6 +394,8 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
   }
 
   protected refreshIndexes() {
+    console.count("refreshIndexes");
+
     let index = 0;
     for (let element of this.sourceArray) {
       const reactiveIndex = this.indexMap.get(element);
@@ -545,4 +554,111 @@ export class zzComputeArrayFn<T> extends zzArrayInstance<T> {
 
 export function zzComputeArray<T>(fn: () => Array<T>) {
   return new zzComputeArrayFn(fn);
+}
+
+type ITreeArray<T> = T | zzArrayInstance<ITreeArray<T>>;
+
+export class zzArrayFlat<T> extends zzArrayInstance<T> {
+  protected readonly indexMap = new Map<ITreeArray<T>, number>();
+  protected readonly destructorMap = new Map<ITreeArray<T>, IDestructor>();
+
+  destroy(): void {
+    super.destroy();
+    this.destructorMap.forEach((destructor) => destructor.destroy());
+    this.indexMap.clear();
+  }
+
+  protected add(elements: T[], index?: number) {
+    index === undefined && (index = this._value.length);
+
+    this._value.splice(index, 0, ...elements);
+
+    for (let i = 0; i < elements.length; i++) {
+      this.onAdd.emit(new EventAddArray(elements[i], index + i, this));
+    }
+
+    return this;
+  }
+
+  protected remove(element: T) {
+    const index = this._value.indexOf(element);
+    if (index !== -1) {
+      const removed = this._value.splice(index, 1);
+
+      this.onRemove.emit(new EventRemoveArray(removed[0], index, this));
+    }
+
+    return index;
+  }
+
+  _unsubscribeRecursively(treeArray: ITreeArray<T>) {
+    console.count("unsubscribe");
+    if (treeArray instanceof zzArrayInstance) {
+      this.indexMap.delete(treeArray);
+
+      this.destructorMap.get(treeArray)?.destroy();
+      this.destructorMap.delete(treeArray);
+
+      for (const element of treeArray) {
+        this._unsubscribeRecursively(element);
+      }
+    } else {
+      const index = this.remove(treeArray);
+
+      if (index !== -1) {
+        this.indexMap.forEach((oldIndex, key) => {
+          if (oldIndex > index) {
+            this.indexMap.set(key, oldIndex - 1);
+          }
+        });
+      }
+    }
+  }
+
+  _subscribeRecursively(treeArray: ITreeArray<T>, index: number) {
+    if (treeArray instanceof zzArrayInstance) {
+      this.indexMap.set(treeArray, index);
+
+      this.destructorMap.set(
+        treeArray,
+        new DestructorsStack(
+          treeArray.onAdd.addListener((ev) => {
+            const index = this.indexMap.get(treeArray) ?? 0;
+
+            this._subscribeRecursively(ev.added, index + ev.index);
+          }),
+          treeArray.onRemove.addListener((ev) => {
+            this._unsubscribeRecursively(ev.removed);
+          }),
+          treeArray.onChange.addListener(() => {
+            this.onChange.emit(
+              new EventChangeValue(this._value, this._value, this)
+            );
+          })
+        )
+      );
+
+      for (const element of treeArray) {
+        this._subscribeRecursively(element, index);
+
+        if (!(element instanceof zzArrayInstance)) {
+          index++;
+        }
+      }
+    } else {
+      this.add([treeArray], index);
+
+      this.indexMap.forEach((oldIndex, key) => {
+        if (oldIndex >= index) {
+          this.indexMap.set(key, oldIndex + 1);
+        }
+      });
+    }
+  }
+
+  constructor(sourceArray: ITreeArray<T>) {
+    super([]);
+
+    this._subscribeRecursively(sourceArray, 0);
+  }
 }
