@@ -18,7 +18,6 @@ import {
 } from "../Destructor";
 import { zzEvent } from "../Event";
 import { zzCompute } from "./compute";
-import { zzInteger } from "./vars";
 
 export class EventAddArray<T> {
   constructor(
@@ -84,8 +83,7 @@ export interface IArrayHelpers<T> {
   join(join: zzReactive<string>): zzReactive<string>;
 
   map<NewT>(
-    mapFn: (value: T, index: zzInteger, self: zzArrayInstance<T>) => NewT,
-    ...dependencies: (zzReactive<any> | zzEvent<any>)[]
+    mapFn: (value: T, self: zzArrayInstance<T>) => NewT
   ): zzArrayInstance<NewT>;
 }
 
@@ -195,9 +193,7 @@ export class zzArrayInstance<T>
     return joinedString;
   }
 
-  map<NewT>(
-    mapFn: (value: T, index: zzInteger, self: zzArrayInstance<T>) => NewT
-  ) {
+  map<NewT>(mapFn: (value: T, self: zzArrayInstance<T>) => NewT) {
     return new zzArrayMap<T, NewT>(this, mapFn);
   }
 
@@ -375,7 +371,6 @@ export const safeInsertToArray = <T>(
 };
 
 export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
-  protected readonly indexMap = new Map<T, zzInteger>();
   protected readonly destructorMap = new Map<T, IDestructor>();
   protected _destructor = new DestructorsStack();
   protected sourceArray: zzArrayInstance<T>;
@@ -385,7 +380,6 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
     this._destructor.destroy();
 
     this.destructorMap.forEach((destructor) => destructor.destroy());
-    this.indexMap.clear();
   }
 
   protected add(elements: NewT[], index?: number) {
@@ -411,64 +405,43 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
     return this;
   }
 
-  protected refreshIndexes() {
-    let index = 0;
-    for (let element of this.sourceArray) {
-      const reactiveIndex = this.indexMap.get(element);
-      if (reactiveIndex) reactiveIndex.value = index++;
-    }
-
-    return this;
-  }
-
   constructor(
     sourceArray: zzArrayInstance<T>,
-    mapFn: (value: T, index: zzInteger, self: zzArrayInstance<T>) => NewT
+    mapFn: (value: T, self: zzArrayInstance<T>) => NewT
   ) {
     super([]);
 
     this.sourceArray = sourceArray;
 
-    let index = 0;
     for (const element of sourceArray) {
-      const newIndex = new zzInteger(index++);
-
       let newValue: NewT;
 
       const elementDestructor = zzDestructorsObserver.catch(() => {
-        newValue = mapFn(element, newIndex, sourceArray);
+        newValue = mapFn(element, sourceArray);
       });
 
       if (elementDestructor.size > 0) {
         this.destructorMap.set(element, elementDestructor);
       }
 
-      this.indexMap.set(element, newIndex);
-
       this.add([newValue!]);
     }
 
-    //this._destructor.add(
-    this.sourceArray.onAdd.addListener((ev) => {
-      const newIndex = new zzInteger(ev.index);
+    this._destructor.add(
+      this.sourceArray.onAdd.addListener((ev) => {
+        let newValue: NewT;
 
-      let newValue: NewT;
+        const elementDestructor = zzDestructorsObserver.catch(() => {
+          newValue = mapFn(ev.added, sourceArray);
+        });
 
-      const elementDestructor = zzDestructorsObserver.catch(() => {
-        newValue = mapFn(ev.added, newIndex, sourceArray);
-      });
+        if (elementDestructor.size > 0) {
+          this.destructorMap.set(ev.added, elementDestructor);
+        }
 
-      if (elementDestructor.size > 0) {
-        this.destructorMap.set(ev.added, elementDestructor);
-      }
-
-      this.indexMap.set(ev.added, newIndex);
-
-      this.add([newValue!], ev.index);
-    }),
+        this.add([newValue!], ev.index);
+      }),
       this.sourceArray.onRemove.addListener((ev) => {
-        this.indexMap.delete(ev.removed);
-
         this.destructorMap.get(ev.removed)?.destroy();
 
         this.removeByIndex(ev.index);
@@ -477,12 +450,8 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
         this.onChange.emit(
           new EventChangeValue(this._value, this._value, this)
         );
-      });
-
-    // this.sourceArray.onChange.addListener(
-    //   Debounce(() => this.refreshIndexes())
-    // )
-    //);
+      })
+    );
   }
 }
 
