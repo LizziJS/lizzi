@@ -34,12 +34,21 @@ export interface IReactiveValue<T> {
 
 export type IReactive<T> = IReactiveEvent<T> & IReactiveValue<T>;
 
+function hasGetter(obj: any, prop: string): boolean {
+  const descriptor = Object.getOwnPropertyDescriptor(obj, prop);
+  if (descriptor) {
+    return Boolean(descriptor.get);
+  }
+  const proto = Object.getPrototypeOf(obj);
+  return proto ? hasGetter(proto, prop) : false;
+}
+
 export class zzReactive<TValue>
   extends zzDestructor
   implements IReactive<TValue>
 {
   static isReactive(check: any): check is zzReactive<any> {
-    return "value" in check && zzEvent.isEvent(check.onChange);
+    return hasGetter(check, "value") && zzEvent.isEvent(check.onChange);
   }
 
   readonly onChange = new zzEvent<(event: EventChangeValue<TValue>) => void>();

@@ -31,10 +31,10 @@ export function TodoView({
         {todo.todo}
       </div>
       <div
-        class="text-xl bg-red-500 rounded-full w-6 h-6 leading-none text-white text-center"
+        class="text-xl bg-red-500 w-5 h-5 rounded leading-none text-white text-center"
         use={[onClick(() => onRemove(todo))]}
       >
-        x
+        ✕
       </div>
     </div>
   );

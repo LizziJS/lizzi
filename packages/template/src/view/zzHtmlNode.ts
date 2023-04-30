@@ -54,10 +54,10 @@ export class zzHtmlNode<
 
     this.element = node;
 
-    this._initChildMap();
+    this._initChildDomMap();
   }
 
-  protected _initChildMap() {
+  protected _initChildDomMap() {
     type MapT = Node | zzArrayInstance<MapT>;
 
     const mapNodes = (node: zzNode): MapT => {
