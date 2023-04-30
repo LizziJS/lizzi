@@ -267,8 +267,9 @@ export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
   }
 
   removeByIndex(index: number) {
-    if (typeof this._value[index] !== "undefined") {
-      const removed = this._value.splice(index, 1);
+    const removed = this._value.splice(index, 1);
+
+    if (removed.length > 0) {
       this.onRemove.emit(new EventRemoveArray(removed[0], index, this));
       this.onChange.emit(new EventChangeValue(this._value, this._value, this));
     }
@@ -396,9 +397,9 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
   }
 
   protected removeByIndex(index: number) {
-    if (typeof this._value[index] !== "undefined") {
-      const removed = this._value.splice(index, 1);
+    const removed = this._value.splice(index, 1);
 
+    if (removed.length > 0) {
       this.onRemove.emit(new EventRemoveArray(removed[0], index, this));
     }
 
