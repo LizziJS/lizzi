@@ -87,55 +87,6 @@ export class zzReactive<TValue>
   }
 }
 
-export class zzType<T> extends zzReactive<T> {
-  protected _typeCheckers: ((value: any) => boolean)[] = [];
-
-  validate(fn: (value: any) => boolean) {
-    this._typeCheckers.push(fn);
-
-    return this;
-  }
-
-  protected checkValueTypes(newValue: T) {
-    try {
-      if (!this._typeCheckers.every((fn) => fn(newValue))) {
-        throw new TypeError(
-          newValue + " is not match type " + this.constructor.name
-        );
-      }
-    } catch (error) {
-      throw new TypeError(
-        newValue + " is not match type " + this.constructor.name + ": " + error
-      );
-    }
-
-    return true;
-  }
-
-  get value(): T {
-    zzGetReactiveObserver.add(this);
-
-    return this._value;
-  }
-
-  set value(newValue: T) {
-    if (this._value !== newValue && this.checkValueTypes(newValue)) {
-      let ev = new EventChangeValue<T>(newValue, this._value, this);
-      this._value = newValue;
-
-      this.onChange.emit(ev);
-    }
-  }
-
-  constructor(value: T) {
-    super(value);
-
-    this.checkValueTypes(value);
-  }
-}
-
-export class zzAny extends zzType<any> {}
-
 class GetReactiveIsolator extends zzIsolatorStack<zzReactive<any>> {
   catch(
     isolatedFn: () => void,

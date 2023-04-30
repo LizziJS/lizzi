@@ -4,12 +4,13 @@
  * This source code is licensed under the MIT license.
  */
 
-import { EventChangeValue, zzType } from "./reactive";
+import { EventChangeValue } from "./reactive";
 import {
   DestructorsStack,
   IDestructor,
   zzDestructorsObserver,
 } from "../Destructor";
+import { zzType } from "./type";
 
 export class zzObject<T> extends zzType<T | null> {
   itemListener(changeFn: (item: T) => IDestructor) {
@@ -33,6 +34,6 @@ export class zzObject<T> extends zzType<T | null> {
   constructor(value: T | null = null) {
     super(value);
 
-    this.validate((value) => typeof value === "object");
+    this.addValidator((value) => typeof value === "object");
   }
 }

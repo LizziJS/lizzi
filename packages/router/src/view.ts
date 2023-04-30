@@ -4,35 +4,29 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzBoolean, zzReactive } from "@lizzi/core";
-import { RouteState, zzRouter } from "./router";
-import { ViewComponent } from "@lizzi/template";
-import { JSX } from "@lizzi/jsx-runtime";
+import { zzArray, zzBoolean, zzReactive } from "@lizzi/core";
+import { zzRouter } from "./router";
+import { zzNode } from "@lizzi/node";
 
-export class RouterComponent extends ViewComponent {
+export class RouterComponent extends zzNode {
   parentRouter: RouterComponent | null = null;
-  appRouter: zzRouter<any> | null = null;
-  readonly routes: Route[] = [];
-  protected _lastPath: string = "";
+  appRouter: zzRouter | null = null;
+  readonly routes = new zzArray<Route>();
 
   addRoute(route: Route) {
-    this.routes.push(route);
+    if (!this.appRouter) throw new Error("Router not initialized");
 
-    route.parentRouter = this;
-    route.appRouter = this.appRouter;
+    this.routes.add([route]);
 
-    this.checkRoutes(this._lastPath);
+    this.checkRoutes(this.appRouter.url.value);
   }
 
   removeRoute(route: Route) {
-    const index = this.routes.indexOf(route);
-    if (index !== -1) {
-      route.parentRouter = null;
+    if (!this.appRouter) throw new Error("Router not initialized");
 
-      this.routes.splice(index, 1);
-    }
+    this.routes.remove([route]);
 
-    this.checkRoutes(this._lastPath);
+    this.checkRoutes(this.appRouter.url.value);
   }
 
   checkRoutes(path: string) {
@@ -40,29 +34,27 @@ export class RouterComponent extends ViewComponent {
       return true;
     }
 
-    this._lastPath = path;
-    for (let index = 0; index < this.routes.length; index++) {
-      if (this.routes[index].check(path)) {
-        //close unchecked routes
-        for (let idx = index + 1; idx < this.routes.length; idx++) {
-          this.routes[idx].close();
-        }
-
-        return true;
+    let found = false;
+    for (const route of this.routes) {
+      if (!found && route.check(path)) {
+        found = true;
+        continue;
       }
+
+      route.close();
     }
 
-    return false;
+    return found;
   }
 
   go(url: string) {
-    this.appRouter?.go({ url });
+    this.appRouter?.go(url);
   }
 }
 
 export class Route extends RouterComponent {
   readonly regexp: RegExp;
-  readonly paramNames: zzReactive<any>[];
+  readonly params: zzReactive<any>[];
   readonly childrens;
   protected isOpened: zzBoolean;
 
@@ -75,8 +67,8 @@ export class Route extends RouterComponent {
       return false;
     }
 
-    for (let k in this.paramNames) {
-      this.paramNames[k].value = match[Number(k) * 1 + 1];
+    for (let k in this.params) {
+      this.params[k].value = match[Number(k) * 1 + 1];
     }
 
     this.open();
@@ -101,7 +93,7 @@ export class Route extends RouterComponent {
     if (this.isOpened.value) {
       this.isOpened.value = false;
 
-      this.removeAllChilds();
+      this.childNodes.removeAll();
     }
   }
 
@@ -110,14 +102,14 @@ export class Route extends RouterComponent {
     children,
   }: {
     route: Array<string | zzReactive<any>>;
-    children: JSX.Childrens;
+    children: zzNode | zzNode[];
   }) {
-    super({});
+    super();
 
     this.isOpened = new zzBoolean(false);
 
     this.childrens = children;
-    this.paramNames = [];
+    this.params = [];
 
     let regexp = "^";
     for (let oneRoute of route) {
@@ -140,48 +132,52 @@ export class Route extends RouterComponent {
         }
       } else {
         regexp += "([\\p{L}\\p{N}:+%_-]+)";
-        this.paramNames.push(oneRoute);
+        this.params.push(oneRoute);
       }
     }
 
     this.regexp = new RegExp(regexp, "mu");
 
     this.onMount(() => {
-      const pRoute = this.findParent<RouterComponent>(
+      const parentNodes = this.findParentNodes(
         (node) => node instanceof RouterComponent
-      );
+      ).next();
 
-      if (pRoute) {
-        pRoute.addRoute(this);
-
-        this.onceUnmount(() => pRoute.removeRoute(this));
+      if (parentNodes.done) {
+        throw new Error("Route must be inside Router");
       }
+
+      const parentRouter = parentNodes.value as RouterComponent;
+
+      parentRouter.addRoute(this);
+
+      this.onceUnmount(() => {
+        parentRouter.removeRoute(this);
+      });
     });
   }
 }
 
-export class Router<T extends RouteState> extends RouterComponent {
+export class Router extends RouterComponent {
   constructor({
     appRouter,
     children,
   }: {
-    appRouter: zzRouter<T>;
-    children: JSX.Childrens;
+    appRouter: zzRouter;
+    children: zzNode | zzNode[];
   }) {
-    super({});
+    super();
 
     this.appRouter = appRouter;
 
     this.append(children);
 
     this.onMount(() => {
-      this.addToUnmount(
-        appRouter.onUpdate
-          .addListener(() => {
-            this.checkRoutes(appRouter.model.url.value);
-          })
-          .run()
-      );
+      appRouter.url.onChange
+        .addListener(() => {
+          this.checkRoutes(appRouter.url.value);
+        })
+        .run();
     });
   }
 }

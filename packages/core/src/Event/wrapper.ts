@@ -21,21 +21,44 @@ type EventEmitterType3 = {
   removeListener(...args: any[]): any;
 };
 
+type EventParameters<TM, Type extends keyof TM> = Parameters<
+  (
+    type: Type,
+    listener: (ev: TM[Type]) => void,
+    options?: boolean | AddEventListenerOptions
+  ) => void
+>;
+
+type WindowEventFunctionParams<Type extends keyof WindowEventMap> =
+  EventParameters<WindowEventMap, Type>;
+
+type HTMLElementEventFunctionParams<Type extends keyof HTMLElementEventMap> =
+  EventParameters<HTMLElementEventMap, Type>;
+
+type DocumentEventFunctionParams<Type extends keyof DocumentEventMap> =
+  EventParameters<DocumentEventMap, Type>;
+
+type EventKeys<TObj> = TObj extends EventEmitterType1
+  ? Parameters<TObj["on"]>
+  : TObj extends EventEmitterType2
+  ? Parameters<TObj["addEventListener"]>
+  : TObj extends EventEmitterType3
+  ? Parameters<TObj["addListener"]>
+  : never;
+
 export class EventWrapper<
-  T1 extends EventEmitterType1,
-  T2 extends EventEmitterType2,
-  T3 extends EventEmitterType3
+  TW extends Window,
+  TE extends HTMLElement,
+  TD extends Document,
+  T extends EventEmitterType1 | EventEmitterType2 | EventEmitterType3,
+  WType extends keyof WindowEventMap,
+  EType extends keyof HTMLElementEventMap,
+  DType extends keyof HTMLElementEventMap
 > extends zzDestructor {
   readonly object: any;
   readonly params: any[];
 
-  run(...args: Parameters<Parameters<T1["on"]>[1]>): EventWrapper<T1, T2, T3>;
-  run(
-    ...args: Parameters<Parameters<T2["addEventListener"]>[1]>
-  ): EventWrapper<T1, T2, T3>;
-  run(
-    ...args: Parameters<Parameters<T3["removeListener"]>[1]>
-  ): EventWrapper<T1, T2, T3> {
+  run(...args: Parameters<EventKeys<T>[1]>) {
     this.params[1](...args);
 
     return this;
@@ -56,9 +79,10 @@ export class EventWrapper<
     return this;
   }
 
-  constructor(object: T1, ...params: Parameters<T1["on"]>);
-  constructor(object: T2, ...params: Parameters<T2["addEventListener"]>);
-  constructor(object: T3, ...params: Parameters<T3["addListener"]>);
+  constructor(object: TW, ...params: WindowEventFunctionParams<WType>);
+  constructor(object: TE, ...params: HTMLElementEventFunctionParams<EType>);
+  constructor(object: TD, ...params: DocumentEventFunctionParams<DType>);
+  constructor(object: T, ...params: EventKeys<T>);
   constructor(object: any, ...params: any[]) {
     super();
 
@@ -69,4 +93,57 @@ export class EventWrapper<
 
     on && on.call(object, ...params);
   }
+}
+
+// export addListener function shortcut for EventWrapper
+export function addListener<
+  TW extends Window,
+  TE extends HTMLElement,
+  TD extends Document,
+  T extends EventEmitterType1 | EventEmitterType2 | EventEmitterType3,
+  WType extends keyof WindowEventMap,
+  EType extends keyof HTMLElementEventMap,
+  DType extends keyof HTMLElementEventMap
+>(
+  object: TW,
+  ...params: WindowEventFunctionParams<WType>
+): EventWrapper<TW, TE, TD, T, WType, EType, DType>;
+export function addListener<
+  TW extends Window,
+  TE extends HTMLElement,
+  TD extends Document,
+  T extends EventEmitterType1 | EventEmitterType2 | EventEmitterType3,
+  WType extends keyof WindowEventMap,
+  EType extends keyof HTMLElementEventMap,
+  DType extends keyof HTMLElementEventMap
+>(
+  object: TE,
+  ...params: HTMLElementEventFunctionParams<EType>
+): EventWrapper<TW, TE, TD, T, WType, EType, DType>;
+export function addListener<
+  TW extends Window,
+  TE extends HTMLElement,
+  TD extends Document,
+  T extends EventEmitterType1 | EventEmitterType2 | EventEmitterType3,
+  WType extends keyof WindowEventMap,
+  EType extends keyof HTMLElementEventMap,
+  DType extends keyof HTMLElementEventMap
+>(
+  object: TD,
+  ...params: DocumentEventFunctionParams<DType>
+): EventWrapper<TW, TE, TD, T, WType, EType, DType>;
+export function addListener<
+  TW extends Window,
+  TE extends HTMLElement,
+  TD extends Document,
+  T extends EventEmitterType1 | EventEmitterType2 | EventEmitterType3,
+  WType extends keyof WindowEventMap,
+  EType extends keyof HTMLElementEventMap,
+  DType extends keyof HTMLElementEventMap
+>(
+  object: T,
+  ...params: EventKeys<T>
+): EventWrapper<TW, TE, TD, T, WType, EType, DType>;
+export function addListener(object: any, ...params: any[]) {
+  return new EventWrapper(object, ...params);
 }

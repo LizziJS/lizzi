@@ -4,9 +4,10 @@ import { zzArray } from "./array";
 import { zzCompute } from "./compute";
 import { zzMap } from "./map";
 import { zzObject } from "./object";
-import { zzReactive, zzType } from "./reactive";
+import { zzReactive } from "./reactive";
 import { zzSet } from "./set";
 import { zzTag } from "./tags";
+import { zzType } from "./type";
 import { zzBoolean, zzFloat, zzInteger, zzNumber, zzString } from "./vars";
 
 export class zz {
