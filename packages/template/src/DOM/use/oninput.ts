@@ -23,7 +23,7 @@ export function onInput<
   E extends zzHtmlNode<HTMLTextAreaElement | HTMLInputElement>
 >(value: zzReactive<T>, onChange?: (value: string) => void) {
   return (view: E) => {
-    if (!(value instanceof zzReactive))
+    if (!zzReactive.isReactive(value))
       throw new Error("onInput variable is not zzReactive");
 
     const element = view.element;
@@ -85,7 +85,7 @@ export function updateInputValue<
       value = zzCompute(value);
     }
 
-    if (!(value instanceof zzReactive))
+    if (!zzReactive.isReactive(value))
       throw new Error("updateInputValue variable is not zzReactive");
 
     const reactiveValue = value as zzReactive<any>;
@@ -172,18 +172,16 @@ export function AutoResizeTextarea<T extends zzHtmlNode<HTMLTextAreaElement>>(
     new EventWrapper(textElement, "drop", fn, false);
     new EventWrapper(textElement, "keydown", fn, false);
 
-    if (value instanceof zzReactive) {
+    if (zzReactive.isReactive(value)) {
       value.onChange.addListener(fn);
     }
 
     fn();
-
-    return value;
   };
 }
 
 export function onCheckboxInput<T extends zzHtmlNode<HTMLInputElement>>(
-  value: zzArray<string> | zzBoolean | zzString,
+  value: zzArray<string> | zzReactive<string> | zzReactive<boolean>,
   onChange?: (checked: boolean, value: string) => void
 ) {
   return (view: T) => {
@@ -192,7 +190,7 @@ export function onCheckboxInput<T extends zzHtmlNode<HTMLInputElement>>(
     if (!(element instanceof HTMLInputElement))
       throw new Error("onCheckboxInput error: Element is not HTMLInputElement");
 
-    if (value instanceof zzArray) {
+    if (zzArray.isArray(value)) {
       const onChangeInput =
         onChange ??
         ((checked: boolean, elvalue: string) => {
@@ -223,40 +221,29 @@ export function onCheckboxInput<T extends zzHtmlNode<HTMLInputElement>>(
         },
         false
       );
-    } else if (value instanceof zzBoolean) {
+    } else if (zzReactive.isReactive(value)) {
       const onChangeInput =
         onChange ??
         ((checked: boolean, elvalue: string) => {
-          value.value = checked;
-        });
-
-      value.onChange.addListener(() => {
-        element.checked = value.value ? true : false;
-      });
-
-      new EventWrapper(
-        element,
-        "change",
-        () => {
-          onChangeInput(element.checked, element.value);
-        },
-        false
-      );
-    } else if (value instanceof zzString) {
-      const onChangeInput =
-        onChange ??
-        ((checked: boolean, elvalue: string) => {
-          if (checked) {
-            value.value = elvalue;
+          if (value.value === true || value.value === false) {
+            value.value = checked;
           } else {
-            if (value.value === elvalue) {
-              value.value = "";
+            if (checked) {
+              value.value = elvalue;
+            } else {
+              if (value.value === elvalue) {
+                value.value = "";
+              }
             }
           }
         });
 
-      value.onChange.addListener((ev) => {
-        element.checked = value.value === element.value;
+      (value as zzReactive<boolean | string>).onChange.addListener(() => {
+        if (value.value === true || value.value === false) {
+          element.checked = value.value ? true : false;
+        } else {
+          element.checked = value.value === element.value;
+        }
       });
 
       new EventWrapper(

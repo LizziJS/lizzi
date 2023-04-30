@@ -26,7 +26,7 @@ export class If extends zzNode {
       condition = zzCompute(condition);
     }
 
-    if (condition instanceof zzReactive) {
+    if (zzReactive.isReactive(condition)) {
       let last: boolean | null = null;
 
       this.onMount(() => {

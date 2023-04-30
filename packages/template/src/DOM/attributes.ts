@@ -36,12 +36,12 @@ function convertInputToReactiveArray<T extends any[]>(
         typeof value === "function" ? zzCompute(value) : value
       )
     );
-  } else if (input instanceof zzArrayInstance) {
+  } else if (zzArrayInstance.isArray(input)) {
     return input;
-  } else if (input instanceof zzReactive) {
+  } else if (zzReactive.isReactive(input)) {
     return new zzArray<T | zzReactive<T>>([input]);
   } else {
-    throw new Error("wrong input type");
+    throw new TypeError("Wrong input type");
   }
 }
 
@@ -131,7 +131,7 @@ export function ClassLink<T extends zzHtmlNode>(
     element.className = "";
 
     classArray.itemsListener((item) => {
-      if (item instanceof zzReactive) {
+      if (zzReactive.isReactive(item)) {
         return item.onChange
           .addListener((event) => {
             if (event.last) {

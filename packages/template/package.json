@@ -6,7 +6,7 @@
   "license": "MIT",
   "scripts": {
     "clean": "rm -rf dist/",
-    "test": "echo no tests",
+    "test": "jest",
     "build": "npm run clean && npm test && npm run build:esm && npm run build:cjs",
     "build:esm": "tsc",
     "build:cjs": "tsc --module CommonJS --outDir dist/cjs"
@@ -24,12 +24,13 @@
   "source": "src/index.ts",
   "dependencies": {
     "@lizzi/core": "^0.0.25",
-    "@lizzi/node": "^0.0.33",
-    "@lizzi/jsx-runtime": "^0.0.33"
+    "@lizzi/jsx-runtime": "^0.0.33",
+    "@lizzi/node": "^0.0.33"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",
     "jest": "^29.2.2",
+    "jest-environment-jsdom": "^29.5.0",
     "ts-jest": "^29.0.3"
   },
   "repository": {

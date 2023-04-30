@@ -38,6 +38,10 @@ export class zzReactive<TValue>
   extends zzDestructor
   implements IReactive<TValue>
 {
+  static isReactive(check: any): check is zzReactive<any> {
+    return "value" in check && zzEvent.isEvent(check.onChange);
+  }
+
   readonly onChange = new zzEvent<(event: EventChangeValue<TValue>) => void>();
   protected _value: TValue;
 

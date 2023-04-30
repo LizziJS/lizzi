@@ -57,9 +57,9 @@ export class ArrayDecorator implements ISnapshotType<any> {
   }
 
   getter(valuesArray: { [key: string]: any }[]) {
-    return (
-      valuesArray instanceof zzArray ? valuesArray.value : valuesArray
-    ).map((item) => this.snapshot.getValues(item));
+    return (zzArray.isArray(valuesArray) ? valuesArray.value : valuesArray).map(
+      (item) => this.snapshot.getValues(item)
+    );
   }
 
   constructor(

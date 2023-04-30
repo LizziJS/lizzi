@@ -97,7 +97,10 @@ export class ReactiveValueView extends zzNode {
     this.onMount(() => {
       children.onChange
         .addListener((ev) => {
-          if (ev.value instanceof zzNode) {
+          if (ev.value === null) {
+            this.childNodes.removeAll();
+            isTextNow = false;
+          } else if (ev.value instanceof zzNode) {
             this.childNodes.removeAll();
             this.childNodes.add([ev.value]);
             isTextNow = false;
@@ -146,7 +149,7 @@ export class TextNodeView extends zzHtmlNode<Text> {
       this.onMount(() => {
         children.onChange
           .addListener((ev) => {
-            this.element.data = ev.value;
+            this.element.data = String(ev.value);
           })
           .run(EventChangeValue.new(children));
       });

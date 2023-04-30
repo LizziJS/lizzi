@@ -96,6 +96,14 @@ export class zzArrayInstance<T>
   readonly onAdd = new zzEvent<(event: EventAddArray<T>) => void>();
   readonly onRemove = new zzEvent<(event: EventRemoveArray<T>) => void>();
 
+  static isArray(check: any): check is zzArrayInstance<any> {
+    return (
+      zzEvent.isEvent(check.onAdd) &&
+      zzEvent.isEvent(check.onRemove) &&
+      zzReactive.isReactive(check)
+    );
+  }
+
   destroy(): void {
     super.destroy();
     this.onAdd.destroy();
@@ -170,11 +178,11 @@ export class zzArrayInstance<T>
   }
 
   includes(value: T | zzReactive<T>) {
-    if (value instanceof zzReactive) {
+    if (zzReactive.isReactive(value)) {
       return zzCompute(() => this.toArray().includes(value.value));
     }
 
-    return zzCompute(() => this.toArray().includes(value));
+    return zzCompute(() => this.toArray().includes(value as T));
   }
 
   find(findFn: (value: T, index: number, array: this) => boolean) {
@@ -207,6 +215,14 @@ export class zzArrayInstance<T>
 }
 
 export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
+  static isArray(check: any): check is zzArray<any> {
+    return (
+      typeof check.add === "function" &&
+      typeof check.remove === "function" &&
+      zzArrayInstance.isArray(check)
+    );
+  }
+
   add(elements: T[], index?: number) {
     index === undefined && (index = this._value.length);
 

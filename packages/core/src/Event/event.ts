@@ -57,6 +57,13 @@ export class zzEvent<TFunc extends (...args: any[]) => void>
 {
   protected readonly listenersMap = new Map<TFunc, zzEventListener<TFunc>>();
 
+  static isEvent(check: any): check is zzEvent<any> {
+    return (
+      typeof check["addListener"] === "function" &&
+      typeof check["emit"] === "function"
+    );
+  }
+
   destroy(): void {
     this.removeAllListeners();
   }
