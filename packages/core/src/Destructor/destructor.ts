@@ -36,6 +36,10 @@ export class DestructorsStack extends zzDestructor {
   }
 
   add(...destructors: IDestructor[]) {
+    return this.addArray(destructors);
+  }
+
+  addArray(destructors: IDestructor[]) {
     for (const destructor of destructors) {
       this.destructors.add(destructor);
     }
@@ -50,7 +54,7 @@ export class DestructorsStack extends zzDestructor {
   constructor(...destructors: IDestructor[]) {
     super();
 
-    this.add(...destructors);
+    this.addArray(destructors);
   }
 }
 

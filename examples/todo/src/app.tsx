@@ -1,16 +1,16 @@
-import { Body, onClick } from "@lizzi/template";
-import { zzArray, zzBoolean } from "@lizzi/core";
+import { Body, TextNodeView, onClick } from "@lizzi/template";
+import { zzArray } from "@lizzi/core";
 
-import { TodoApp } from "./components/TodoApp";
 import { Todo } from "./data/Todo";
 
 import "./app.css";
+import { TodoApp } from "./components/TodoApp";
 
 const todos = new zzArray<Todo>();
 
 todos.add([]);
 
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 10000; i++) {
   todos.add([new Todo("index+" + i, false)]);
 }
 

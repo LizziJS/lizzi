@@ -16,7 +16,7 @@ import {
   IDestructor,
   zzDestructorsObserver,
 } from "../Destructor";
-import { Debounce, zzEvent } from "../Event";
+import { zzEvent } from "../Event";
 import { zzCompute } from "./compute";
 import { zzInteger } from "./vars";
 
@@ -214,7 +214,8 @@ export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
   add(elements: T[], index?: number) {
     index === undefined && (index = this._value.length);
 
-    this._value.splice(index, 0, ...elements);
+    // this._value.splice(index, 0, ...elements);
+    safeInsertToArray(this._value, index, elements);
 
     for (let i = 0; i < elements.length; i++) {
       this.onAdd.emit(new EventAddArray(elements[i], index + i, this));
@@ -357,6 +358,22 @@ export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
   }
 }
 
+const MIN_SPLIT_ARRAY_SIZE = 10000;
+export const safeInsertToArray = <T>(
+  array: T[],
+  index: number,
+  elements: T[]
+) => {
+  if (elements.length <= MIN_SPLIT_ARRAY_SIZE) {
+    array.splice(index, 0, ...elements);
+    return;
+  }
+
+  for (let i = 0; i < elements.length; i += MIN_SPLIT_ARRAY_SIZE) {
+    array.splice(index + i, 0, ...elements.slice(i, i + MIN_SPLIT_ARRAY_SIZE));
+  }
+};
+
 export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
   protected readonly indexMap = new Map<T, zzInteger>();
   protected readonly destructorMap = new Map<T, IDestructor>();
@@ -374,7 +391,8 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
   protected add(elements: NewT[], index?: number) {
     index === undefined && (index = this._value.length);
 
-    this._value.splice(index, 0, ...elements);
+    //this._value.splice(index, 0, ...elements);
+    safeInsertToArray(this._value, index, elements);
 
     for (let i = 0; i < elements.length; i++) {
       this.onAdd.emit(new EventAddArray(elements[i], index + i, this));
@@ -394,15 +412,11 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
   }
 
   protected refreshIndexes() {
-    console.count("refreshIndexes");
-
     let index = 0;
     for (let element of this.sourceArray) {
       const reactiveIndex = this.indexMap.get(element);
       if (reactiveIndex) reactiveIndex.value = index++;
     }
-
-    this.onChange.emit(new EventChangeValue(this._value, this._value, this));
 
     return this;
   }
@@ -434,25 +448,24 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
       this.add([newValue!]);
     }
 
-    this._destructor.add(
-      this.sourceArray.onAdd.addListener((ev) => {
-        const newIndex = new zzInteger(ev.index);
+    //this._destructor.add(
+    this.sourceArray.onAdd.addListener((ev) => {
+      const newIndex = new zzInteger(ev.index);
 
-        let newValue: NewT;
+      let newValue: NewT;
 
-        const elementDestructor = zzDestructorsObserver.catch(() => {
-          newValue = mapFn(ev.added, newIndex, sourceArray);
-        });
+      const elementDestructor = zzDestructorsObserver.catch(() => {
+        newValue = mapFn(ev.added, newIndex, sourceArray);
+      });
 
-        if (elementDestructor.size > 0) {
-          this.destructorMap.set(ev.added, elementDestructor);
-        }
+      if (elementDestructor.size > 0) {
+        this.destructorMap.set(ev.added, elementDestructor);
+      }
 
-        this.indexMap.set(ev.added, newIndex);
+      this.indexMap.set(ev.added, newIndex);
 
-        this.add([newValue!], ev.index);
-      }),
-
+      this.add([newValue!], ev.index);
+    }),
       this.sourceArray.onRemove.addListener((ev) => {
         this.indexMap.delete(ev.removed);
 
@@ -460,11 +473,16 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
 
         this.removeByIndex(ev.index);
       }),
-
       this.sourceArray.onChange.addListener(() => {
-        this.refreshIndexes();
-      })
-    );
+        this.onChange.emit(
+          new EventChangeValue(this._value, this._value, this)
+        );
+      });
+
+    // this.sourceArray.onChange.addListener(
+    //   Debounce(() => this.refreshIndexes())
+    // )
+    //);
   }
 }
 
@@ -571,7 +589,8 @@ export class zzArrayFlat<T> extends zzArrayInstance<T> {
   protected add(elements: T[], index?: number) {
     index === undefined && (index = this._value.length);
 
-    this._value.splice(index, 0, ...elements);
+    // this._value.splice(index, 0, ...elements);
+    safeInsertToArray(this._value, index, elements);
 
     for (let i = 0; i < elements.length; i++) {
       this.onAdd.emit(new EventAddArray(elements[i], index + i, this));
@@ -592,7 +611,6 @@ export class zzArrayFlat<T> extends zzArrayInstance<T> {
   }
 
   _unsubscribeRecursively(treeArray: ITreeArray<T>) {
-    console.count("unsubscribe");
     if (treeArray instanceof zzArrayInstance) {
       this.indexMap.delete(treeArray);
 

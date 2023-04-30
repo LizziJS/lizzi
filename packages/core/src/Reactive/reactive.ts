@@ -128,10 +128,10 @@ class GetReactiveIsolator extends zzIsolatorStack<zzReactive<any>> {
     isolatedFn: () => void,
     onUpdateFn: (ev: EventChangeValue<any>) => void
   ): DestructorsStack {
-    return new DestructorsStack(
-      ...super
-        .runIsolated(isolatedFn)
-        .map((r) => r.onChange.addListener(onUpdateFn))
+    return new DestructorsStack().addArray(
+      this.runIsolated(isolatedFn).map((r) =>
+        r.onChange.addListener(onUpdateFn)
+      )
     );
   }
 }

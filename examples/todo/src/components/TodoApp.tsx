@@ -4,6 +4,7 @@ import { AddTodo } from "./AddTodo";
 import { SearchComponent } from "./SearchComponent";
 import { Todo } from "../data/Todo";
 import { TodoView } from "./TodoView";
+import { TextNodeView } from "@lizzi/template";
 
 export function TodoApp({ todos }: { todos: zzArray<Todo> }) {
   const searchComponent = (<SearchComponent />) as SearchComponent;

@@ -4,7 +4,12 @@
  * This source code is licensed under the MIT license.
  */
 
-import { EventChangeValue, zzArrayInstance, zzReactive } from "@lizzi/core";
+import {
+  DestructorsStack,
+  EventChangeValue,
+  zzArrayInstance,
+  zzReactive,
+} from "@lizzi/core";
 import { zzNode } from "@lizzi/node";
 import { JSX } from "@lizzi/jsx-runtime";
 
@@ -37,6 +42,12 @@ export class zzHtmlNode<
   THtmlNode extends Node = Element
 > extends zzHtmlComponent {
   readonly element: THtmlNode;
+  protected readonly _destructor = new DestructorsStack();
+
+  destroy(): void {
+    this._destructor.destroy();
+    super.destroy();
+  }
 
   constructor(node: THtmlNode) {
     super();
@@ -59,15 +70,21 @@ export class zzHtmlNode<
 
     const _childNodes = this.childNodes.map(mapNodes).flat();
 
-    _childNodes.onAdd.addListener((ev) => {
-      const beforeElement = this.element.childNodes.item(ev.index);
+    this._destructor.add(
+      _childNodes.onAdd.addListener((ev) => {
+        const beforeElement = this.element.childNodes.item(ev.index);
 
-      this.element.insertBefore(ev.added, beforeElement);
-    });
+        this.element.insertBefore(ev.added, beforeElement);
+      }),
 
-    _childNodes.onRemove.addListener((ev) => {
-      this.element.removeChild(ev.removed);
-    });
+      _childNodes.onRemove.addListener((ev) => {
+        this.element.removeChild(ev.removed);
+      })
+    );
+
+    for (const child of _childNodes) {
+      this.element.appendChild(child);
+    }
   }
 }
 
