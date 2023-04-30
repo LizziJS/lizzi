@@ -15,7 +15,7 @@ export class SearchComponent extends zzHtmlComponent {
           for="search_todo"
           class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
         >
-          Search
+          Search {this.search}
         </label>
         <input
           type="text"

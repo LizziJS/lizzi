@@ -97,14 +97,12 @@ export class ReactiveValueView extends zzNode {
     this.onMount(() => {
       children.onChange
         .addListener((ev) => {
-          if (isTextNow === ev.value instanceof zzNode) {
-            this.childNodes.removeAll();
-          }
-
           if (ev.value instanceof zzNode) {
+            this.childNodes.removeAll();
             this.childNodes.add([ev.value]);
             isTextNow = false;
-          } else {
+          } else if (!isTextNow) {
+            this.childNodes.removeAll();
             this.childNodes.add([new TextNodeView({ children })]);
             isTextNow = true;
           }

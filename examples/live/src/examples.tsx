@@ -1,7 +1,7 @@
-import { zzCompute, zzIf, zzObject } from "@lizzi/core";
-import { onClick, ViewComponent } from "@lizzi/template";
+import { zzCompute, zzObject } from "@lizzi/core";
+import { onClick, zzHtmlComponent } from "@lizzi/template";
 
-class Example extends ViewComponent {
+class Example extends zzHtmlComponent {
   protected embed: string;
   protected modules: string[];
 
@@ -32,7 +32,7 @@ class Example extends ViewComponent {
       <a
         class={[
           "rounded-lg px-2 py-1 cursor-pointer mx-1",
-          zzIf(() => selected.value === this, "bg-orange-300", ""),
+          () => (selected.value === this ? "bg-orange-300" : ""),
         ]}
         use={[onClick(() => (selected.value = this))]}
       >
@@ -52,7 +52,7 @@ function Header2({ name }: { name: string }) {
   return <h3 class={["px-3 py-1 mt-2 font-bold"]}>{name}</h3>;
 }
 
-class ExampleView extends ViewComponent {
+class ExampleView extends zzHtmlComponent {
   constructor(embed: string) {
     super();
 
