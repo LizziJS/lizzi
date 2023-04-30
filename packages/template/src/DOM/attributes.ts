@@ -11,7 +11,7 @@ import {
   zzArrayInstance,
   EventChangeValue,
 } from "@lizzi/core";
-import { zzHtmlNode } from "../..";
+import { zzHtmlNode } from "../view/zzHtmlNode";
 
 type OutputTypes<T extends any[]> = T[number] | zzReactive<T[number]>;
 type InputTypes<T extends any[]> =

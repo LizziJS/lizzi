@@ -1,6 +1,6 @@
 import { zzArray, zzCompute, zzReactive } from "@lizzi/core";
 import { Debounce, EventWrapper } from "@lizzi/core";
-import { zzHtmlNode } from "../../..";
+import { zzHtmlNode } from "../../view/zzHtmlNode";
 
 export function onInput<
   E extends zzHtmlNode<HTMLTextAreaElement | HTMLInputElement>

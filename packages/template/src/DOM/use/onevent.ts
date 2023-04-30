@@ -1,5 +1,5 @@
 import { EventWrapper } from "@lizzi/core";
-import { zzHtmlNode } from "../../..";
+import { zzHtmlNode } from "../../view/zzHtmlNode";
 
 export function on<T extends zzHtmlNode>(
   eventName: Parameters<T["element"]["addEventListener"]>[0],

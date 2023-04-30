@@ -7,7 +7,7 @@
 import { zzReactive } from "@lizzi/core";
 import { AttributeLink, ClassLink, StyleLink } from "./attributes";
 import { JSX } from "@lizzi/jsx-runtime";
-import { zzHtmlNode } from "../view";
+import { zzHtmlNode } from "../view/zzHtmlNode";
 
 export type ElementAttributes<T extends zzHtmlNode> = {
   class?: Array<string | zzReactive<any>>;
