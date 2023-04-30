@@ -1,10 +1,4 @@
-import {
-  zzArray,
-  zzBoolean,
-  zzCompute,
-  zzReactive,
-  zzString,
-} from "@lizzi/core";
+import { zzArray, zzCompute, zzReactive } from "@lizzi/core";
 import { Debounce, EventWrapper } from "@lizzi/core";
 import { zzHtmlNode } from "../../..";
 
