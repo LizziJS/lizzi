@@ -59,6 +59,14 @@ export class zz {
     return new zzType<T>(value);
   }
 
+  static if<T, R>(cond: zzReactive<T> | (() => T), onTrue: R, onFalse: R) {
+    if (typeof cond === "function") {
+      cond = zzCompute(cond as any);
+    }
+
+    return zzCompute(() => (cond ? onTrue : onFalse));
+  }
+
   static event<T extends (...args: any) => void>() {
     return new zzEvent<T>();
   }
