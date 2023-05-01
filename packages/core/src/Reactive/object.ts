@@ -31,8 +31,6 @@ export class zzObject<T> extends zzType<T | null> {
     return this;
   }
 
-  map;
-
   constructor(value: T | null = null) {
     super(value);
 
