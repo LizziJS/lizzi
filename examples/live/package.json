@@ -1,6 +1,6 @@
 {
   "name": "example.live.app",
-  "version": "1.0.10",
+  "version": "1.0.11",
   "main": "index.js",
   "license": "MIT",
   "private": true,
@@ -9,8 +9,8 @@
     "build": "npx webpack --config webpack.prod.js"
   },
   "dependencies": {
-    "@lizzi/core": "^0.1.4",
-    "@lizzi/template": "^0.1.4"
+    "@lizzi/core": "^0.1.5",
+    "@lizzi/template": "^0.1.6"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",

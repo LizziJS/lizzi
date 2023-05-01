@@ -1,6 +1,6 @@
 {
   "name": "@lizzi/jsx-runtime",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "lizzi jsx DOM engine",
   "author": "Stanislav Shishankin",
   "license": "MIT",
@@ -22,8 +22,8 @@
   "module": "dist/esm/index.js",
   "source": "src/index.ts",
   "dependencies": {
-    "@lizzi/core": "^0.1.4",
-    "@lizzi/template": "^0.1.5"
+    "@lizzi/core": "^0.1.5",
+    "@lizzi/template": "^0.1.6"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",
