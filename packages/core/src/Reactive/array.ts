@@ -630,11 +630,13 @@ export class zzArrayFlat<T> extends zzArrayInstance<T> {
         index++;
       }
 
-      const parent = this.parentMap.get(treeArray);
-      if (parent) {
-        const childIndex = parent.toArray().indexOf(treeArray);
+      if (endIndex !== Infinity) {
+        const parent = this.parentMap.get(treeArray);
+        if (parent) {
+          const childIndex = parent.toArray().indexOf(treeArray);
 
-        length += this._recursiverlyGetIndex(parent, childIndex);
+          length += this._recursiverlyGetIndex(parent, childIndex);
+        }
       }
 
       return length;
