@@ -48,7 +48,9 @@ export class zzReactive<TValue>
   implements IReactive<TValue>
 {
   static isReactive(check: any): check is zzReactive<any> {
-    return hasGetter(check, "value") && zzEvent.isEvent(check.onChange);
+    return (
+      check && hasGetter(check, "value") && zzEvent.isEvent(check.onChange)
+    );
   }
 
   readonly onChange = new zzEvent<(event: EventChangeValue<TValue>) => void>();

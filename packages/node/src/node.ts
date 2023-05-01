@@ -28,6 +28,17 @@ export const isNodeConstructor = Symbol("isNodeConstructor");
 export class zzNode extends zzDestructor implements INode {
   static [isNodeConstructor] = true;
 
+  static isNode(check: any) {
+    return (
+      check &&
+      zzArray.isArray(check.childNodes) &&
+      "parentNode" in check &&
+      "nodeState" in check &&
+      typeof check["_mount"] === "function" &&
+      typeof check["_unmount"] === "function"
+    );
+  }
+
   protected readonly _nodeState = new zzReactive<ViewComponentStatuses>(
     "unmounted"
   );

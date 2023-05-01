@@ -98,6 +98,7 @@ export class zzArrayInstance<T>
 
   static isArray(check: any): check is zzArrayInstance<any> {
     return (
+      check &&
       zzEvent.isEvent(check.onAdd) &&
       zzEvent.isEvent(check.onRemove) &&
       zzReactive.isReactive(check)
@@ -217,6 +218,7 @@ export class zzArrayInstance<T>
 export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
   static isArray(check: any): check is zzArray<any> {
     return (
+      check &&
       typeof check.add === "function" &&
       typeof check.remove === "function" &&
       zzArrayInstance.isArray(check)

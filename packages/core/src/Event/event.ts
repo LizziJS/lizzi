@@ -59,6 +59,7 @@ export class zzEvent<TFunc extends (...args: any[]) => void>
 
   static isEvent(check: any): check is zzEvent<any> {
     return (
+      check &&
       typeof check["addListener"] === "function" &&
       typeof check["emit"] === "function"
     );

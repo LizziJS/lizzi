@@ -100,7 +100,7 @@ export class ReactiveValueView extends zzNode {
           if (ev.value === null) {
             this.childNodes.removeAll();
             isTextNow = false;
-          } else if (ev.value instanceof zzNode) {
+          } else if (zzNode.isNode(ev.value)) {
             this.childNodes.removeAll();
             this.childNodes.add([ev.value]);
             isTextNow = false;
@@ -119,7 +119,7 @@ export class ArrayView<T extends zzNode> extends zzNode {
   constructor({ children }: { children: zzArrayInstance<T> | T[] }) {
     super();
 
-    if (children instanceof zzArrayInstance) {
+    if (zzArrayInstance.isArray(children)) {
       this.onMount(() => {
         children.onAdd.addListener((ev) => {
           this.childNodes.add([ev.added], ev.index);
@@ -132,7 +132,7 @@ export class ArrayView<T extends zzNode> extends zzNode {
         this.childNodes.add(children.toArray());
       });
     } else {
-      this.childNodes.add(children);
+      this.childNodes.add(children as any);
     }
   }
 }
@@ -145,7 +145,7 @@ export class TextNodeView extends zzHtmlNode<Text> {
   }) {
     super(document.createTextNode(""));
 
-    if (children instanceof zzReactive) {
+    if (zzReactive.isReactive(children)) {
       this.onMount(() => {
         children.onChange
           .addListener((ev) => {
@@ -160,7 +160,7 @@ export class TextNodeView extends zzHtmlNode<Text> {
 }
 
 export const JSXChildrenToNodeMapper = (children: JSX.Children): zzNode => {
-  if (children instanceof zzArrayInstance || Array.isArray(children)) {
+  if (zzArrayInstance.isArray(children) || Array.isArray(children)) {
     return new ArrayView({ children });
   }
 
@@ -172,7 +172,7 @@ export const JSXChildrenToNodeMapper = (children: JSX.Children): zzNode => {
     return new TextNodeView({ children });
   }
 
-  if (children instanceof zzReactive) {
+  if (zzReactive.isReactive(children)) {
     return new ReactiveValueView({ children });
   }
 
