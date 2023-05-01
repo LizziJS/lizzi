@@ -59,12 +59,27 @@ export class zz {
     return new zzType<T>(value);
   }
 
-  static if<T, R>(cond: zzReactive<T> | (() => T), onTrue: R, onFalse: R) {
-    if (typeof cond === "function") {
-      cond = zzCompute(cond as any);
+  static toReactive<T>(variable: zz.variable<T>) {
+    if (typeof variable === "function") {
+      return zzCompute(variable as any);
+    }
+    if (zzReactive.isReactive(variable)) {
+      return variable;
     }
 
-    return zzCompute(() => (cond ? onTrue : onFalse));
+    return new zzReactive<T>(variable as T);
+  }
+
+  static if<T, R>(
+    cond: zz.variable<T>,
+    onTrue: zz.variable<R>,
+    onFalse: zz.variable<R>
+  ) {
+    const c = zz.toReactive(cond);
+    const t = zz.toReactive(onTrue);
+    const f = zz.toReactive(onFalse);
+
+    return zzCompute(() => (c.value ? t.value : f.value));
   }
 
   static event<T extends (...args: any) => void>() {
@@ -91,4 +106,5 @@ export class zz {
 
 export namespace zz {
   export type reactive<T> = zzReactive<T>;
+  export type variable<T> = zzReactive<T> | T | (() => T);
 }
