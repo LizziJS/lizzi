@@ -1,6 +1,6 @@
 {
   "name": "@lizzi/core",
-  "version": "0.1.5",
+  "version": "0.1.8",
   "description": "lizzi js reactive library",
   "author": "Stanislav Shishankin",
   "license": "MIT",

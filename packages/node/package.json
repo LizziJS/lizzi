@@ -1,6 +1,6 @@
 {
   "name": "@lizzi/node",
-  "version": "0.1.5",
+  "version": "0.1.8",
   "description": "lizzi js viewnode engine",
   "author": "Stanislav Shishankin",
   "license": "MIT",
@@ -23,7 +23,7 @@
   "module": "dist/esm/index.js",
   "source": "src/index.ts",
   "dependencies": {
-    "@lizzi/core": "^0.1.5"
+    "@lizzi/core": "^0.1.8"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",
