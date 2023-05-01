@@ -565,13 +565,16 @@ export function zzComputeArray<T>(fn: () => Array<T>) {
 type ITreeArray<T> = T | zzArrayInstance<ITreeArray<T>>;
 
 export class zzArrayFlat<T> extends zzArrayInstance<T> {
-  protected readonly indexMap = new Map<ITreeArray<T>, number>();
+  protected readonly parentMap = new Map<
+    zzArrayInstance<ITreeArray<T>>,
+    zzArrayInstance<ITreeArray<T>>
+  >();
   protected readonly destructorMap = new Map<ITreeArray<T>, IDestructor>();
 
   destroy(): void {
     super.destroy();
     this.destructorMap.forEach((destructor) => destructor.destroy());
-    this.indexMap.clear();
+    this.parentMap.clear();
   }
 
   protected add(elements: T[], index?: number) {
@@ -600,7 +603,7 @@ export class zzArrayFlat<T> extends zzArrayInstance<T> {
 
   _unsubscribeRecursively(treeArray: ITreeArray<T>) {
     if (treeArray instanceof zzArrayInstance) {
-      this.indexMap.delete(treeArray);
+      this.parentMap.delete(treeArray);
 
       this.destructorMap.get(treeArray)?.destroy();
       this.destructorMap.delete(treeArray);
@@ -609,29 +612,50 @@ export class zzArrayFlat<T> extends zzArrayInstance<T> {
         this._unsubscribeRecursively(element);
       }
     } else {
-      const index = this.remove(treeArray);
-
-      if (index !== -1) {
-        this.indexMap.forEach((oldIndex, key) => {
-          if (oldIndex > index) {
-            this.indexMap.set(key, oldIndex - 1);
-          }
-        });
-      }
+      this.remove(treeArray);
     }
   }
 
-  _subscribeRecursively(treeArray: ITreeArray<T>, index: number) {
+  _recursiverlyGetIndex(treeArray: ITreeArray<T>, endIndex: number): number {
     if (treeArray instanceof zzArrayInstance) {
-      this.indexMap.set(treeArray, index);
+      let length = 0;
 
+      let index = 0;
+      for (const element of treeArray) {
+        if (index === endIndex) {
+          break;
+        }
+
+        length += this._recursiverlyGetIndex(element, Infinity);
+        index++;
+      }
+
+      const parent = this.parentMap.get(treeArray);
+      if (parent) {
+        const childIndex = parent.toArray().indexOf(treeArray);
+
+        length += this._recursiverlyGetIndex(parent, childIndex);
+      }
+
+      return length;
+    } else {
+      return 1;
+    }
+  }
+
+  _subscribeRecursively(
+    treeArray: ITreeArray<T>,
+    index: number,
+    parent: zzArrayInstance<ITreeArray<T>> | null = null
+  ) {
+    if (treeArray instanceof zzArrayInstance) {
       this.destructorMap.set(
         treeArray,
         new DestructorsStack(
           treeArray.onAdd.addListener((ev) => {
-            const index = this.indexMap.get(treeArray) ?? 0;
+            let realIndex = this._recursiverlyGetIndex(treeArray, ev.index);
 
-            this._subscribeRecursively(ev.added, index + ev.index);
+            this._subscribeRecursively(ev.added, realIndex, treeArray);
           }),
           treeArray.onRemove.addListener((ev) => {
             this._unsubscribeRecursively(ev.removed);
@@ -645,20 +669,18 @@ export class zzArrayFlat<T> extends zzArrayInstance<T> {
       );
 
       for (const element of treeArray) {
-        this._subscribeRecursively(element, index);
-
-        if (!(element instanceof zzArrayInstance)) {
-          index++;
-        }
+        index = this._subscribeRecursively(element, index);
       }
+
+      if (parent !== null) {
+        this.parentMap.set(treeArray, parent);
+      }
+
+      return index;
     } else {
       this.add([treeArray], index);
 
-      this.indexMap.forEach((oldIndex, key) => {
-        if (oldIndex >= index) {
-          this.indexMap.set(key, oldIndex + 1);
-        }
-      });
+      return index + 1;
     }
   }
 
