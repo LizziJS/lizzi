@@ -17,17 +17,12 @@ export function TodoView({
       <div class="border border-2 border-black w-5 h-5 rounded p-0.5">
         <div
           class={[
-            zz.compute(() => (todo.done.value ? "bg-blue-700" : "")),
+            zz.if(todo.done, "bg-blue-700", ""),
             "w-full h-full rounded-sm",
           ]}
         ></div>
       </div>
-      <div
-        class={[
-          zz.compute(() => (todo.done.value ? "line-through" : "")),
-          "grow",
-        ]}
-      >
+      <div class={[zz.if(todo.done, "line-through", ""), "grow"]}>
         {todo.todo}
       </div>
       <div
