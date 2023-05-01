@@ -1,6 +1,6 @@
 {
   "name": "example.ui.app",
-  "version": "1.0.31",
+  "version": "1.0.32",
   "main": "index.js",
   "license": "MIT",
   "private": true,
@@ -8,8 +8,8 @@
     "dev": "npx webpack serve --config webpack.dev.js"
   },
   "dependencies": {
-    "@lizzi/core": "^0.1.2",
-    "@lizzi/template": "^0.1.2"
+    "@lizzi/core": "^0.1.3",
+    "@lizzi/template": "^0.1.3"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",
