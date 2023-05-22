@@ -23,6 +23,7 @@
   "source": "src/index.ts",
   "dependencies": {
     "@lizzi/core": "^0.1.8",
+    "@lizzi/node": "^0.1.8",
     "@lizzi/template": "^0.1.8"
   },
   "devDependencies": {

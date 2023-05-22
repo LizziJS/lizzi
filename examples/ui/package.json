@@ -9,10 +9,13 @@
   },
   "dependencies": {
     "@lizzi/core": "^0.1.8",
-    "@lizzi/template": "^0.1.8"
+    "@lizzi/node": "^0.1.8",
+    "@lizzi/template": "^0.1.8",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",
+    "@types/uuid": "^9.0.1",
     "@webpack-cli/serve": "^1.7.0",
     "autoprefixer": "^10.4.12",
     "copy-webpack-plugin": "^11.0.0",

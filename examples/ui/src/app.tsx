@@ -1,6 +1,6 @@
 import { Body } from "@lizzi/template";
 
 import "./app.css";
-import { UIApp } from "./components/UIApp";
+import { RadioComponent } from "./components/Radio";
 
-Body(<UIApp />);
+Body(<RadioComponent />);
