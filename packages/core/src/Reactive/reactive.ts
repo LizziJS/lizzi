@@ -24,15 +24,16 @@ export type InferReactive<P extends any> = P extends zzReactive<infer T>
   ? T
   : P;
 
-export interface IReactiveEvent<T> {
+export interface IWriteOnlyReactive<T> {
+  set value(value: T);
+}
+
+export interface IReadOnlyReactive<T> {
+  get value(): T;
   readonly onChange: zzEvent<(event: EventChangeValue<T>) => void>;
 }
 
-export interface IReactiveValue<T> {
-  value: T;
-}
-
-export type IReactive<T> = IReactiveEvent<T> & IReactiveValue<T>;
+export type IReactive<T> = IWriteOnlyReactive<T> & IReadOnlyReactive<T>;
 
 function hasGetter(obj: any, prop: string): boolean {
   const descriptor = Object.getOwnPropertyDescriptor(obj, prop);
@@ -80,6 +81,10 @@ export class zzReactive<TValue>
 
   toJSON() {
     return this.value;
+  }
+
+  readonly() {
+    return this as IReadOnlyReactive<TValue>;
   }
 
   constructor(value: TValue) {

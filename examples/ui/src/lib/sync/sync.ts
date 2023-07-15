@@ -6,7 +6,6 @@
 
 import { IDestructor, zzArray, zzInteger, zzReactive } from "@lizzi/core";
 import { zzEvent } from "@lizzi/core";
-import { v4 } from "uuid";
 
 export type SyncID = string;
 

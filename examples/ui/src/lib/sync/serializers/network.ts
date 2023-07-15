@@ -132,7 +132,7 @@ export class NetworkSyncSerializer<OType extends object>
   }
 }
 
-export type PacketType = "delete" | "update" | "create";
+export type PacketType = "delete" | "update" | "create" | "reassign";
 
 export class NetworkPacker {
   readonly onSend =

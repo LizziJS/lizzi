@@ -5,11 +5,11 @@
  */
 
 import {
-  IReactiveEvent,
-  IReactiveValue,
   zzReactive,
   EventChangeValue,
   zzGetReactiveObserver,
+  IReadOnlyReactive,
+  IWriteOnlyReactive,
 } from "./reactive";
 import {
   DestructorsStack,
@@ -23,7 +23,7 @@ export class EventAddArray<T> {
   constructor(
     public readonly added: T,
     public readonly index: number,
-    public readonly target: zzArrayInstance<T>
+    public readonly target: zzReadonlyArray<T>
   ) {}
 }
 
@@ -31,16 +31,17 @@ export class EventRemoveArray<T> {
   constructor(
     public readonly removed: T,
     public readonly index: number,
-    public readonly target: zzArrayInstance<T>
+    public readonly target: zzReadonlyArray<T>
   ) {}
 }
 
-export interface IArrayEvent<T> extends IReactiveEvent<T[]> {
+export interface IReadOnlyArray<T> extends IReadOnlyReactive<T[]> {
   readonly onAdd: zzEvent<(event: EventAddArray<T>) => void>;
   readonly onRemove: zzEvent<(event: EventRemoveArray<T>) => void>;
+  toArray(): T[];
 }
 
-export interface IArrayMethods<T> extends IReactiveValue<T[]> {
+export interface IWriteOnlyArray<T> extends IWriteOnlyReactive<T[]> {
   readonly length: number;
 
   add(elements: T[], index?: number): this;
@@ -53,20 +54,18 @@ export interface IArrayMethods<T> extends IReactiveValue<T[]> {
 
   has(element: T): boolean;
   replace(newElements: T[]): this;
-
-  toArray(): T[];
 }
 
-export interface IArrayHelpers<T> {
+export interface IHelpersArray<T> {
   itemsListener(
     addFn: (item: T, array: this) => IDestructor | void,
     removeFn: (item: T, array: this) => void
-  ): IArrayHelpers<T>;
+  ): IHelpersArray<T>;
 
   filter(
     filterFn: (value: T, index: number, array: this) => boolean,
     ...dependencies: (zzReactive<any> | zzEvent<any>)[]
-  ): zzArrayInstance<T>;
+  ): zzReadonlyArray<T>;
 
   includes(value: T | zzReactive<T>): zzReactive<boolean>;
 
@@ -78,25 +77,27 @@ export interface IArrayHelpers<T> {
   sort(
     sortFn: (a: T, b: T) => number,
     ...dependencies: (zzReactive<any> | zzEvent<any>)[]
-  ): zzArrayInstance<T>;
+  ): zzReadonlyArray<T>;
 
   join(join: zzReactive<string>): zzReactive<string>;
 
   map<NewT>(
-    mapFn: (value: T, self: zzArrayInstance<T>) => NewT
-  ): zzArrayInstance<NewT>;
+    mapFn: (value: T, self: zzReadonlyArray<T>) => NewT
+  ): zzReadonlyArray<NewT>;
 }
 
-export type IArray<T> = IArrayEvent<T> & IArrayMethods<T>;
+export type IArray<T> = IReadOnlyArray<T> &
+  IWriteOnlyArray<T> &
+  IHelpersArray<T>;
 
-export class zzArrayInstance<T>
+export class zzReadonlyArray<T>
   extends zzReactive<T[]>
-  implements IArrayEvent<T>, IArrayHelpers<T>
+  implements IReadOnlyArray<T>, IHelpersArray<T>
 {
   readonly onAdd = new zzEvent<(event: EventAddArray<T>) => void>();
   readonly onRemove = new zzEvent<(event: EventRemoveArray<T>) => void>();
 
-  static isArray(check: any): check is zzArrayInstance<any> {
+  static isArray(check: any): check is zzReadonlyArray<any> {
     return (
       check &&
       zzEvent.isEvent(check.onAdd) &&
@@ -202,7 +203,7 @@ export class zzArrayInstance<T>
     return joinedString;
   }
 
-  map<NewT>(mapFn: (value: T, self: zzArrayInstance<T>) => NewT) {
+  map<NewT>(mapFn: (value: T, self: zzReadonlyArray<T>) => NewT) {
     return new zzArrayMap<T, NewT>(this, mapFn);
   }
 
@@ -213,15 +214,22 @@ export class zzArrayInstance<T>
   flat() {
     return new zzArrayFlat(this as any);
   }
+
+  readonly() {
+    return this as IReadOnlyArray<T>;
+  }
 }
 
-export class zzArray<T> extends zzArrayInstance<T> implements IArray<T> {
+export class zzArray<T>
+  extends zzReadonlyArray<T>
+  implements IWriteOnlyArray<T>
+{
   static isArray(check: any): check is zzArray<any> {
     return (
       check &&
       typeof check.add === "function" &&
       typeof check.remove === "function" &&
-      zzArrayInstance.isArray(check)
+      zzReadonlyArray.isArray(check)
     );
   }
 
@@ -389,10 +397,10 @@ export const safeInsertToArray = <T>(
   }
 };
 
-export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
+export class zzArrayMap<T, NewT> extends zzReadonlyArray<NewT> {
   protected readonly destructorMap = new Map<T, IDestructor>();
   protected _destructor = new DestructorsStack();
-  protected sourceArray: zzArrayInstance<T>;
+  protected sourceArray: zzReadonlyArray<T>;
 
   destroy(): void {
     super.destroy();
@@ -425,8 +433,8 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
   }
 
   constructor(
-    sourceArray: zzArrayInstance<T>,
-    mapFn: (value: T, self: zzArrayInstance<T>) => NewT
+    sourceArray: zzReadonlyArray<T>,
+    mapFn: (value: T, self: zzReadonlyArray<T>) => NewT
   ) {
     super([]);
 
@@ -474,7 +482,7 @@ export class zzArrayMap<T, NewT> extends zzArrayInstance<NewT> {
   }
 }
 
-export class zzComputeArrayFn<T> extends zzArrayInstance<T> {
+export class zzComputeArrayFn<T> extends zzReadonlyArray<T> {
   protected _fn: () => T[];
   protected _destructor = new DestructorsStack();
 
@@ -562,12 +570,12 @@ export function zzComputeArray<T>(fn: () => Array<T>) {
   return new zzComputeArrayFn(fn);
 }
 
-type ITreeArray<T> = T | zzArrayInstance<ITreeArray<T>>;
+type ITreeArray<T> = T | zzReadonlyArray<ITreeArray<T>>;
 
-export class zzArrayFlat<T> extends zzArrayInstance<T> {
+export class zzArrayFlat<T> extends zzReadonlyArray<T> {
   protected readonly parentMap = new Map<
-    zzArrayInstance<ITreeArray<T>>,
-    zzArrayInstance<ITreeArray<T>>
+    zzReadonlyArray<ITreeArray<T>>,
+    zzReadonlyArray<ITreeArray<T>>
   >();
   protected readonly destructorMap = new Map<ITreeArray<T>, IDestructor>();
 
@@ -602,7 +610,7 @@ export class zzArrayFlat<T> extends zzArrayInstance<T> {
   }
 
   _unsubscribeRecursively(treeArray: ITreeArray<T>) {
-    if (treeArray instanceof zzArrayInstance) {
+    if (treeArray instanceof zzReadonlyArray) {
       this.parentMap.delete(treeArray);
 
       this.destructorMap.get(treeArray)?.destroy();
@@ -617,7 +625,7 @@ export class zzArrayFlat<T> extends zzArrayInstance<T> {
   }
 
   _recursiverlyGetIndex(treeArray: ITreeArray<T>, endIndex: number): number {
-    if (treeArray instanceof zzArrayInstance) {
+    if (treeArray instanceof zzReadonlyArray) {
       let length = 0;
 
       let index = 0;
@@ -648,9 +656,9 @@ export class zzArrayFlat<T> extends zzArrayInstance<T> {
   _subscribeRecursively(
     treeArray: ITreeArray<T>,
     index: number,
-    parent: zzArrayInstance<ITreeArray<T>> | null = null
+    parent: zzReadonlyArray<ITreeArray<T>> | null = null
   ) {
-    if (treeArray instanceof zzArrayInstance) {
+    if (treeArray instanceof zzReadonlyArray) {
       this.destructorMap.set(
         treeArray,
         new DestructorsStack(

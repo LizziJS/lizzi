@@ -7,7 +7,7 @@
 import {
   DestructorsStack,
   EventChangeValue,
-  zzArrayInstance,
+  zzReadonlyArray,
   zzReactive,
 } from "@lizzi/core";
 import { zzNode } from "@lizzi/node";
@@ -58,7 +58,7 @@ export class zzHtmlNode<
   }
 
   protected _initChildDomMap() {
-    type MapT = Node | zzArrayInstance<MapT>;
+    type MapT = Node | zzReadonlyArray<MapT>;
 
     const mapNodes = (node: zzNode): MapT => {
       if (node instanceof zzHtmlNode) {
@@ -116,10 +116,10 @@ export class ReactiveValueView extends zzNode {
 }
 
 export class ArrayView<T extends zzNode> extends zzNode {
-  constructor({ children }: { children: zzArrayInstance<T> | T[] }) {
+  constructor({ children }: { children: zzReadonlyArray<T> | T[] }) {
     super();
 
-    if (zzArrayInstance.isArray(children)) {
+    if (zzReadonlyArray.isArray(children)) {
       this.onMount(() => {
         children.onAdd.addListener((ev) => {
           this.childNodes.add([ev.added], ev.index);
@@ -160,7 +160,7 @@ export class TextNodeView extends zzHtmlNode<Text> {
 }
 
 export const JSXChildrenToNodeMapper = (children: JSX.Children): zzNode => {
-  if (zzArrayInstance.isArray(children) || Array.isArray(children)) {
+  if (zzReadonlyArray.isArray(children) || Array.isArray(children)) {
     return new ArrayView({ children });
   }
 

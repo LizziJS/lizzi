@@ -22,7 +22,7 @@ export class zzEventListener<
   readonly fn: TFunc;
   readonly willRunOnce: boolean;
 
-  run(...args: Parameters<TFunc>) {
+  run<FuncT extends TFunc>(...args: Parameters<FuncT>) {
     if (this.willRunOnce) {
       this.remove();
     }
@@ -85,7 +85,7 @@ export class zzEvent<TFunc extends (...args: any[]) => void>
     return newEventListener;
   }
 
-  removeListener(fn: TFunc) {
+  removeListener<FuncT extends TFunc>(fn: FuncT) {
     this.listenersMap.delete(fn);
   }
 
@@ -93,7 +93,7 @@ export class zzEvent<TFunc extends (...args: any[]) => void>
     this.listenersMap.clear();
   }
 
-  emit(...args: Parameters<TFunc>) {
+  emit<FuncT extends TFunc>(...args: Parameters<FuncT>) {
     const values = Array.from(this.listenersMap.values());
 
     for (let listener of values) {

@@ -1,6 +1,6 @@
 import { DestructorsStack } from "../Destructor";
 import { EventWrapper, zzEvent } from "../Event";
-import { zzArray } from "./array";
+import { zzArray, zzComputeArray } from "./array";
 import { zzCompute } from "./compute";
 import { zzMap } from "./map";
 import { zzObject } from "./object";
@@ -37,6 +37,10 @@ export class zz {
 
   static compute<T>(callback: () => T) {
     return zzCompute(callback);
+  }
+
+  static computeArray<T>(callback: () => T[]) {
+    return zzComputeArray(callback);
   }
 
   static array<T>(value: T[] = []) {

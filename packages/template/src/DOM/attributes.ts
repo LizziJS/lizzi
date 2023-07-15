@@ -8,7 +8,7 @@ import {
   zzReactive,
   zzCompute,
   zzArray,
-  zzArrayInstance,
+  zzReadonlyArray,
   EventChangeValue,
 } from "@lizzi/core";
 import { zzHtmlNode } from "../view/zzHtmlNode";
@@ -21,11 +21,11 @@ type InputTypes<T extends any[]> =
 type InputArrayTypes<T extends any[]> =
   | InputTypes<T>
   | Array<InputTypes<T>>
-  | zzArrayInstance<InputTypes<T>>;
+  | zzReadonlyArray<InputTypes<T>>;
 
 function convertInputToReactiveArray<T extends any[]>(
   input: InputArrayTypes<T>
-): zzArrayInstance<OutputTypes<T>> {
+): zzReadonlyArray<OutputTypes<T>> {
   if (typeof input === "string" || typeof input === "number") {
     return new zzArray<T | zzReactive<T>>([input]);
   } else if (typeof input === "function") {
@@ -36,7 +36,7 @@ function convertInputToReactiveArray<T extends any[]>(
         typeof value === "function" ? zzCompute(value) : value
       )
     );
-  } else if (zzArrayInstance.isArray(input)) {
+  } else if (zzReadonlyArray.isArray(input)) {
     return input;
   } else if (zzReactive.isReactive(input)) {
     return new zzArray<T | zzReactive<T>>([input]);
