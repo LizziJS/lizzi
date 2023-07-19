@@ -11,7 +11,7 @@ import {
 } from "./reactive";
 
 export class zzType<T> extends zzReactive<T> {
-  protected _typeCheckers: ((value: any) => boolean)[] = [];
+  protected readonly _typeCheckers: ((value: any) => boolean)[] = [];
 
   addValidator(fn: (value: any) => boolean) {
     this._typeCheckers.push(fn);
@@ -26,10 +26,8 @@ export class zzType<T> extends zzReactive<T> {
           newValue + " is not match type " + this.constructor.name
         );
       }
-    } catch (error) {
-      throw new TypeError(
-        newValue + " is not match type " + this.constructor.name + ": " + error
-      );
+    } catch (error: any) {
+      throw new TypeError(error.message);
     }
 
     return true;

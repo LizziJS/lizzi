@@ -1,66 +1,72 @@
-import { DestructorsStack } from "../Destructor";
+import { DestructorsStack, zzDestructor } from "../Destructor";
 import { EventWrapper, zzEvent } from "../Event";
-import { zzArray, zzComputeArray } from "./array";
-import { zzCompute } from "./compute";
+import { zzArray, zzComputeArray, zzComputeArrayFn } from "./array";
+import { zzCompute, zzComputeFn } from "./compute";
 import { zzMap } from "./map";
 import { zzObject } from "./object";
 import { zzReactive } from "./reactive";
 import { zzSet } from "./set";
 import { zzTag } from "./tags";
-import { zzType } from "./type";
-import { zzBoolean, zzFloat, zzInteger, zzNumber, zzString } from "./vars";
+import {
+  zzBigInt,
+  zzBoolean,
+  zzFloat,
+  zzInteger,
+  zzNumber,
+  zzString,
+} from "./vars";
 
 export class zz {
-  static value<T>(value: T) {
+  static Value<T>(value: T) {
     return new zzReactive<T>(value);
   }
 
-  static number<TNumber = number>(value: TNumber = 0 as any) {
+  static Number<TNumber = number>(value: TNumber = 0 as any) {
     return new zzNumber<TNumber>(value);
   }
 
-  static integer(value: number = 0) {
+  static Integer(value: number = 0) {
     return new zzInteger(value);
   }
 
-  static float<TNumber = number>(value: TNumber = 0 as any) {
+  static BigInt(value: BigInt = BigInt(0)) {
+    return new zzBigInt(value);
+  }
+
+  static Float<TNumber = number>(value: TNumber = 0 as any) {
     return new zzFloat<TNumber>(value);
   }
 
-  static string<TString = string>(value: TString = "" as any) {
+  static String<TString = string>(value: TString = "" as any) {
     return new zzString<TString>(value);
   }
 
-  static boolean(value: boolean = false) {
+  static Boolean(value: boolean = false) {
     return new zzBoolean(value);
   }
 
-  static compute<T>(callback: () => T) {
+  static Compute<T>(callback: () => T) {
     return zzCompute(callback);
   }
 
-  static computeArray<T>(callback: () => T[]) {
+  static ComputeArray<T>(callback: () => T[]) {
     return zzComputeArray(callback);
   }
 
-  static array<T>(value: T[] = []) {
+  static Array<T>(value: T[] = []) {
     return new zzArray(value);
   }
 
-  static map<TKey, TValue>(value: [TKey, TValue][] = []) {
+  static Map<TKey, TValue>(value: [TKey, TValue][] = []) {
     return new zzMap(value);
   }
 
-  static set<TValue>(value: TValue[] = []) {
+  static Set<TValue>(value: TValue[] = []) {
     return new zzSet(value);
   }
 
-  static object<T>(value: T | null = null) {
+  static Object<T>(value: T | null = null) {
     return new zzObject<T>(value);
-  }
-
-  static type<T>(value: T) {
-    return new zzType<T>(value);
   }
 
   static toReactive<T>(variable: zz.variable<T>) {
@@ -74,7 +80,7 @@ export class zz {
     return new zzReactive<T>(variable as T);
   }
 
-  static if<T, R>(
+  static If<T, R>(
     cond: zz.variable<T>,
     onTrue: zz.variable<R>,
     onFalse: zz.variable<R>
@@ -86,7 +92,7 @@ export class zz {
     return zzCompute(() => (c.value ? t.value : f.value));
   }
 
-  static event<T extends (...args: any) => void>() {
+  static Event<T extends (...args: any) => void>() {
     return new zzEvent<T>();
   }
 
@@ -99,7 +105,7 @@ export class zz {
     return new EventWrapper(element, eventName, fn, options);
   }
 
-  static destructor() {
+  static Destructor() {
     return new DestructorsStack();
   }
 
@@ -111,4 +117,22 @@ export class zz {
 export namespace zz {
   export type reactive<T> = zzReactive<T>;
   export type variable<T> = zzReactive<T> | T | (() => T);
+}
+
+export namespace zz {
+  export type Value<T> = zzReactive<T>;
+  export type String<T = string> = zzString<T>;
+  export type Number = zzNumber;
+  export type Integer = zzInteger;
+  export type Float = zzFloat;
+  export type BigInt = zzBigInt;
+  export type Boolean = zzBoolean;
+  export type Object<T> = zzObject<T>;
+  export type Map<TKey, TValue> = zzMap<TKey, TValue>;
+  export type Set<TValue> = zzSet<TValue>;
+  export type Array<T> = zzArray<T>;
+  export type Compute<T> = zzComputeFn<T>;
+  export type ComputeArray<T> = zzComputeArrayFn<T>;
+  export type Event<T extends (...args: any) => void> = zzEvent<T>;
+  export type Destructor = DestructorsStack;
 }

@@ -1,21 +1,33 @@
 import { zz } from "@lizzi/core";
-import { net, sync, sync2, sync3 } from "../lib/sync";
 
-@sync.object("song")
+type Props = {
+  id: string;
+  kind: "youtube";
+  title: string;
+  duration: number;
+};
+
 export class Song {
-  @sync.var readonly id = zz.string();
-  @sync.var readonly kind = zz.string<"youtube">();
-  @sync.var readonly title = zz.string();
-  @sync.var readonly duration = zz.integer();
-  readonly isSynced = net.isSynced(this);
-}
+  readonly id;
+  readonly kind;
+  readonly title;
+  readonly duration;
 
-@sync.object("radio")
-export class Radio {
-  @sync.autosync
-  @sync.var
-  readonly songs = zz.array<Song>();
+  protected readonly _isPlaying = zz.Boolean(false);
+  readonly isPlaying = this._isPlaying.readonly();
 
-  @sync.var readonly playingNow = zz.object<Song>();
-  readonly isLocked = net.isLocked(this);
+  constructor({ id, kind, title, duration }: Props) {
+    this.id = id;
+    this.kind = kind;
+    this.title = title;
+    this.duration = duration;
+  }
+
+  startPlaying() {
+    this._isPlaying.value = true;
+  }
+
+  stopPlaying() {
+    this._isPlaying.value = false;
+  }
 }

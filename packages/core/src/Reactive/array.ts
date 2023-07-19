@@ -134,7 +134,7 @@ export class zzReadonlyArray<T>
 
   /* helpers */
   itemsListener(
-    addFn: (item: T, array: this) => IDestructor | void,
+    addFn: (item: T, array: this) => void,
     removeFn: (item: T, array: this) => void = () => {}
   ) {
     const destructionMap = new Map<T, IDestructor>();

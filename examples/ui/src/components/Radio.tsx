@@ -1,32 +1,42 @@
-import { zzNode } from "@lizzi/node";
-import { Radio, Song } from "./Song";
-import { store } from "../lib/sync";
+import { zz } from "@lizzi/core";
+import { Song } from "./Song";
+import { PlayerStore } from "./Player";
 
-export class RadioComponent extends zzNode {
-  readonly radio = new Radio();
+export class RadioStore {
+  readonly songs = zz.Array<Song>();
+  readonly player = new PlayerStore();
+  readonly startPlayingTime = zz.Number();
+  readonly isPlaying = zz.Boolean(false);
+
+  play() {
+    this.isPlaying.value = true;
+  }
+
+  stop() {
+    this.isPlaying.value = false;
+  }
+
+  startPlayingRadio(time: number) {
+    this.startPlayingTime.value = time;
+  }
 
   constructor() {
-    super();
+    this.startPlayingTime.onChange.addListener((ev) => {
+      // find song to play by startPlayingTime from song list from start
+      let leftDuration = Date.now() - ev.value;
 
-    store.sync(this.radio, "root");
+      const song = this.songs.value.find((song) => {
+        if (leftDuration <= song.duration) return true;
 
-    const song = new Song();
+        leftDuration -= song.duration;
+        return false;
+      });
 
-    this.radio.songs.add([song, new Song()]);
-
-    this.radio.playingNow.value = song;
-
-    this.radio.playingNow.value = null;
-
-    this.append(
-      <>
-        {this.radio.songs.map((song) => (
-          <div>
-            <span>{song.title}</span>
-            <span>{song.duration}</span>
-          </div>
-        ))}
-      </>
-    );
+      if (song) {
+        this.player.play(song, leftDuration);
+      } else {
+        this.player.stop();
+      }
+    });
   }
 }
