@@ -49,6 +49,8 @@ export class DestructorsStack extends zzDestructor {
 
   addFunc(...fn: (() => void)[]) {
     this.add(...fn.map(DestructorFn));
+
+    return this;
   }
 
   constructor(...destructors: IDestructor[]) {

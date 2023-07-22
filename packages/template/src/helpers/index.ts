@@ -5,3 +5,4 @@
  */
 
 export * from "./Elements";
+export * from "./flatChildInstanceNodes";

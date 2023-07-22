@@ -9,6 +9,7 @@ import {
   zzArray,
   zzDestructor,
   zzDestructorsObserver,
+  zzEvent,
   zzReactive,
 } from "@lizzi/core";
 
@@ -24,6 +25,9 @@ export interface INode {
 }
 
 export const isNodeConstructor = Symbol("isNodeConstructor");
+export type ComponentUse<TNode extends zzNode> = Array<
+  <T extends TNode>(view: T) => void
+>;
 
 export class zzNode extends zzDestructor implements INode {
   static [isNodeConstructor] = true;
@@ -43,13 +47,17 @@ export class zzNode extends zzDestructor implements INode {
     "unmounted"
   );
 
-  readonly _onMount = zz.event<<T extends this>(view: T) => void>();
-  readonly _unmountDestructor = zz.destructor();
+  readonly _onMount = zz.Event<<T extends this>(view: T) => void>();
+  readonly _unmountDestructor = zz.Destructor();
 
   protected _parentNode: zzNode | null = null;
   readonly childNodes: zzArray<zzNode>;
 
-  constructor() {
+  constructor({
+    use = [],
+  }: {
+    use?: ComponentUse<zzNode>;
+  } = {}) {
     super();
 
     this.childNodes = new zzArray<zzNode>().itemsListener(
@@ -71,6 +79,14 @@ export class zzNode extends zzDestructor implements INode {
         item._setParentNode(null);
       }
     );
+
+    this._initNodeEvents(use);
+  }
+
+  _initNodeEvents(use: ComponentUse<this>) {
+    for (let useFn of use) {
+      this.onMount(useFn);
+    }
   }
 
   destroy(): void {
@@ -161,6 +177,26 @@ export class zzNode extends zzDestructor implements INode {
       } else {
         yield* (child as zzNode).findChildNodes(findFn);
       }
+    }
+  }
+
+  __setProperty(name: string, value: any) {
+    const valueObj = this[name as keyof this];
+
+    if (zzEvent.isEvent(valueObj)) {
+      valueObj.addListener(value);
+      return;
+    }
+
+    if (zzReactive.isReactive(valueObj)) {
+      valueObj.value = value;
+      return;
+    }
+  }
+
+  protected initProps(attributes: { [key: string]: any }) {
+    for (let name in attributes) {
+      this.__setProperty(name, attributes[name]);
     }
   }
 }

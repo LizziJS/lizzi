@@ -4,20 +4,34 @@
  * This source code is licensed under the MIT license.
  */
 
-import {
-  DestructorsStack,
-  EventChangeValue,
-  zzReadonlyArray,
-  zzReactive,
-} from "@lizzi/core";
-import { zzNode } from "@lizzi/node";
+import { EventChangeValue, zzReadonlyArray, zzReactive } from "@lizzi/core";
+import { zzNode, ComponentUse } from "@lizzi/node";
 import { JSX } from "@lizzi/jsx-runtime";
+import { flatChildInstanceNodes } from "../..";
+
+export type zzHtmlComponentProps<T extends zzNode> = {
+  children?: JSX.FuncChildrens<T>;
+  use?: ComponentUse<T>;
+  [key: string]: any;
+};
 
 export class zzHtmlComponent extends zzNode {
-  constructor({ children }: { children?: JSX.Childrens } = {}) {
-    super();
+  protected readonly _children?: JSX.FuncChildrens<this>;
 
-    this.append(children);
+  constructor({
+    children,
+    use = [],
+  }: zzHtmlComponentProps<zzHtmlComponent> = {}) {
+    super({ use });
+
+    this._children = children;
+  }
+
+  get children() {
+    //check children is function and call it
+    return typeof this._children === "function"
+      ? this._children(this)
+      : this._children;
   }
 
   append(childrens?: JSX.Childrens) {
@@ -38,53 +52,24 @@ export class zzHtmlComponent extends zzNode {
   }
 }
 
-export class zzHtmlNode<
-  THtmlNode extends Node = Element
-> extends zzHtmlComponent {
-  readonly element: THtmlNode;
-  protected readonly _destructor = new DestructorsStack();
+export class zzHtmlNode<E extends Node = Element> extends zzHtmlComponent {
+  readonly element: E;
 
-  destroy(): void {
-    this._destructor.destroy();
-    super.destroy();
-  }
-
-  constructor(node: THtmlNode) {
-    super();
+  constructor(node: E, props: zzHtmlComponentProps<zzHtmlNode<E>> = {}) {
+    super(props);
 
     this.element = node;
 
-    this._initChildDomMap();
-  }
+    flatChildInstanceNodes(this.childNodes, zzHtmlNode).itemsListener(
+      (added, index) => {
+        const beforeElement = this.element.childNodes.item(index);
 
-  protected _initChildDomMap() {
-    type MapT = Node | zzReadonlyArray<MapT>;
-
-    const mapNodes = (node: zzNode): MapT => {
-      if (node instanceof zzHtmlNode) {
-        return node.element;
+        this.element.insertBefore(added.element, beforeElement);
+      },
+      (removed) => {
+        this.element.removeChild(removed.element);
       }
-
-      return node.childNodes.map(mapNodes);
-    };
-
-    const _childNodes = this.childNodes.map(mapNodes).flat();
-
-    this._destructor.add(
-      _childNodes.onAdd.addListener((ev) => {
-        const beforeElement = this.element.childNodes.item(ev.index);
-
-        this.element.insertBefore(ev.added, beforeElement);
-      }),
-
-      _childNodes.onRemove.addListener((ev) => {
-        this.element.removeChild(ev.removed);
-      })
     );
-
-    for (const child of _childNodes) {
-      this.element.appendChild(child);
-    }
   }
 }
 
@@ -111,6 +96,8 @@ export class ReactiveValueView extends zzNode {
           }
         })
         .run(EventChangeValue.new(children));
+
+      this.onceUnmount(() => (isTextNow = false));
     });
   }
 }

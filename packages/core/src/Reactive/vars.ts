@@ -15,6 +15,7 @@ import {
   maxStringLengthValidator,
   minNumberValidator,
   minStringLengthValidator,
+  notEmptyValidator,
   numberValidator,
   regexValidator,
   stepValidator,
@@ -121,6 +122,10 @@ export class zzString<TString = string> extends zzType<TString> {
 
   enum(...values: TString[]) {
     return this.addValidator((value) => values.includes(value));
+  }
+
+  required() {
+    return this.addValidator(notEmptyValidator);
   }
 
   regexValidator(regex: RegExp) {

@@ -33,7 +33,9 @@ export declare namespace JSX {
 
   type Childrens = Array<Children> | Children;
 
-  type FuncChildrens<T extends zzNode> = Childrens | ((node: T) => zzNode);
+  type FuncChildrens<T extends zzNode> =
+    | Childrens
+    | (<TNode extends T>(node: TNode) => zzNode);
 
   type zzEventProps<T extends zzNode> = {
     [K in keyof T]: T[K] extends zzEvent<any>
@@ -47,6 +49,10 @@ export declare namespace JSX {
 
   type PropsWithChildren<P extends object = {}> = P & {
     children: Childrens;
+  };
+
+  type PropsWithFuncChildren<T extends zzNode, P extends object = {}> = P & {
+    children: FuncChildrens<T>;
   };
 
   interface ElementClass extends zzNode {}

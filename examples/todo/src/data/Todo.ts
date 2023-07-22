@@ -1,11 +1,13 @@
-import { zzBoolean, zzString } from "@lizzi/core";
+import { zz } from "@lizzi/core";
+
+type Props = { todo: string; done?: boolean };
 
 export class Todo {
-  readonly todo: zzString;
-  readonly done: zzBoolean;
+  readonly todo: zz.String;
+  readonly done: zz.Boolean;
 
-  constructor(todo: string, done: boolean) {
-    this.todo = new zzString(todo);
-    this.done = new zzBoolean(done);
+  constructor({ todo, done = false }: Props) {
+    this.todo = zz.String(todo);
+    this.done = zz.Boolean(done);
   }
 }

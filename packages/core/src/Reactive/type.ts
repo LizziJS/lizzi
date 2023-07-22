@@ -11,17 +11,17 @@ import {
 } from "./reactive";
 
 export class zzType<T> extends zzReactive<T> {
-  protected readonly _typeCheckers: ((value: any) => boolean)[] = [];
+  protected readonly _typeValidators: ((value: any) => boolean)[] = [];
 
   addValidator(fn: (value: any) => boolean) {
-    this._typeCheckers.push(fn);
+    this._typeValidators.push(fn);
 
     return this;
   }
 
   protected checkValueTypes(newValue: T) {
     try {
-      if (!this._typeCheckers.every((fn) => fn(newValue))) {
+      if (!this._typeValidators.every((fn) => fn(newValue))) {
         throw new TypeError(
           newValue + " is not match type " + this.constructor.name
         );

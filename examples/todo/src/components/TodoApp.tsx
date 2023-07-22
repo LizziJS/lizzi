@@ -1,49 +1,55 @@
-import { zzArray, zzCompute } from "@lizzi/core";
+import { zz } from "@lizzi/core";
 import { Else, If } from "@lizzi/node";
 import { AddTodo } from "./AddTodo";
 import { SearchComponent } from "./SearchComponent";
 import { Todo } from "../data/Todo";
 import { TodoView } from "./TodoView";
-import { TextNodeView } from "@lizzi/template";
+import { zzHtmlComponent } from "@lizzi/template";
 
-export function TodoApp({ todos }: { todos: zzArray<Todo> }) {
-  const searchComponent = (<SearchComponent />) as SearchComponent;
+export class TodoApp extends zzHtmlComponent {
+  constructor({ todos }: { todos: zz.Array<Todo> }) {
+    super();
 
-  const filteredTodos = todos.filter((todo) => {
-    return todo.todo.value
-      .toLocaleLowerCase()
-      .startsWith(searchComponent.search.value.toLocaleLowerCase());
-  });
+    const searchComponent = (<SearchComponent />) as SearchComponent;
 
-  const isEmptyTodos = zzCompute(() => todos.length === 0);
-  const isEmptyResults = zzCompute(() => filteredTodos.length === 0);
+    const filteredTodos = todos.filter((todo) => {
+      return todo.todo.value
+        .toLocaleLowerCase()
+        .startsWith(searchComponent.input.value.toLocaleLowerCase());
+    });
 
-  return (
-    <div class="max-w-2xl w-full mx-auto my-10">
-      <div class="my-10">{searchComponent}</div>
-      <div class="my-5 mx-5 flex flex-col">
-        <If condition={isEmptyResults}>
-          <If condition={isEmptyTodos}>
-            <>Empty list</>
+    const isEmptyTodos = zz.Compute(() => todos.length === 0);
+    const isEmptyResults = zz.Compute(() => filteredTodos.length === 0);
+
+    this.append(
+      <div class="max-w-2xl w-full mx-auto my-10">
+        <div class="my-10">{searchComponent}</div>
+        <div class="my-5 mx-5 flex flex-col">
+          <If condition={isEmptyResults}>
+            <If condition={isEmptyTodos}>
+              <>Empty list</>
+              <Else>
+                <>Found 0 result</>
+              </Else>
+            </If>
             <Else>
-              <>Found 0 result</>
+              <>
+                {filteredTodos.map((todo) => (
+                  <TodoView
+                    todo={todo}
+                    onRemove={(todo) => todos.remove([todo])}
+                  />
+                ))}
+              </>
             </Else>
           </If>
-          <Else>
-            <>
-              {filteredTodos.map((todo) => (
-                <TodoView
-                  todo={todo}
-                  onRemove={(removeTodo) => todos.remove([removeTodo])}
-                />
-              ))}
-            </>
-          </Else>
-        </If>
+        </div>
+        <div class="my-10">
+          <AddTodo
+            onAdd={(newTodo) => todos.add([new Todo({ todo: newTodo })])}
+          />
+        </div>
       </div>
-      <div class="my-10">
-        <AddTodo onAdd={(newTodo) => todos.add([new Todo(newTodo, false)])} />
-      </div>
-    </div>
-  );
+    );
+  }
 }

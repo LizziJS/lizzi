@@ -58,8 +58,8 @@ export interface IWriteOnlyArray<T> extends IWriteOnlyReactive<T[]> {
 
 export interface IHelpersArray<T> {
   itemsListener(
-    addFn: (item: T, array: this) => IDestructor | void,
-    removeFn: (item: T, array: this) => void
+    addFn: (item: T, index: number, array: this) => void,
+    removeFn: (item: T, index: number, array: this) => void
   ): IHelpersArray<T>;
 
   filter(
@@ -134,14 +134,14 @@ export class zzReadonlyArray<T>
 
   /* helpers */
   itemsListener(
-    addFn: (item: T, array: this) => void,
-    removeFn: (item: T, array: this) => void = () => {}
+    addFn: (item: T, index: number, array: this) => void,
+    removeFn: (item: T, index: number, array: this) => void = () => {}
   ) {
     const destructionMap = new Map<T, IDestructor>();
 
     const addEvent = this.onAdd.addListener((ev) => {
       const toDestroy = zzDestructorsObserver.catch(() =>
-        addFn.call(this, ev.added, this)
+        addFn.call(this, ev.added, ev.index, this)
       );
 
       if (toDestroy.size > 0) {
@@ -155,7 +155,7 @@ export class zzReadonlyArray<T>
         toDestroy.destroy();
         destructionMap.delete(ev.removed);
       }
-      removeFn.call(this, ev.removed, this);
+      removeFn.call(this, ev.removed, ev.index, this);
     });
 
     const destructor = new DestructorsStack(addEvent, removeEvent);

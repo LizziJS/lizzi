@@ -7,6 +7,7 @@ import { zzObject } from "./object";
 import { zzReactive } from "./reactive";
 import { zzSet } from "./set";
 import { zzTag } from "./tags";
+import { zzType } from "./type";
 import {
   zzBigInt,
   zzBoolean,
@@ -39,6 +40,10 @@ export class zz {
 
   static String<TString = string>(value: TString = "" as any) {
     return new zzString<TString>(value);
+  }
+
+  static Type<TString = string>(value: TString = "" as any) {
+    return new zzType<TString>(value);
   }
 
   static Boolean(value: boolean = false) {
@@ -122,6 +127,7 @@ export namespace zz {
 export namespace zz {
   export type Value<T> = zzReactive<T>;
   export type String<T = string> = zzString<T>;
+  export type Type<T> = zzType<T>;
   export type Number = zzNumber;
   export type Integer = zzInteger;
   export type Float = zzFloat;

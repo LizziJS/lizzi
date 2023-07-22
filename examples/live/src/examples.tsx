@@ -53,7 +53,7 @@ function Header2({ name }: { name: string }) {
 }
 
 class ExampleView extends zzHtmlComponent {
-  constructor(embed: string) {
+  constructor({ embed }: { embed: string }) {
     super();
 
     this.append(
@@ -77,7 +77,7 @@ class ExampleView extends zzHtmlComponent {
 const selected = new zzObject<Example>(null);
 
 const result = zzCompute(() =>
-  selected.value ? new ExampleView(selected.value.createUrl()) : null
+  selected.value ? <ExampleView embed={selected.value.createUrl()} /> : null
 );
 
 export function Examples() {

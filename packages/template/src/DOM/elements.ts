@@ -8,32 +8,34 @@ import { zzReactive } from "@lizzi/core";
 import { AttributeLink, ClassLink, StyleLink } from "./attributes";
 import { JSX } from "@lizzi/jsx-runtime";
 import { zzHtmlNode } from "../view/zzHtmlNode";
+import { on } from "../..";
+import { ComponentUse } from "@lizzi/node";
 
 export type ElementAttributes<T extends zzHtmlNode> = {
   class?: Array<string | zzReactive<any>>;
   style?: { [key: string]: Array<string | zzReactive<any>> };
-  use?: Array<(view: T) => void>;
-  children?: JSX.Childrens;
+  use?: ComponentUse<T>;
+  children?: JSX.FuncChildrens<T>;
   [key: string]: any;
 };
 
 export class HtmlElementView<
   T extends keyof HTMLElementTagNameMap
 > extends zzHtmlNode<HTMLElementTagNameMap[T]> {
-  constructor(tagName: T, attributes: ElementAttributes<HtmlElementView<T>>) {
-    super(document.createElement(tagName));
+  constructor(
+    tagName: T,
+    { children, use, ...attributes }: ElementAttributes<HtmlElementView<T>>
+  ) {
+    super(document.createElement(tagName), { use, children });
 
-    this.append(attributes.children);
+    this.append(this.children);
 
-    this._initAttributes(attributes);
+    this.initProps(attributes);
   }
 
-  protected _initAttributes(attributes: ElementAttributes<HtmlElementView<T>>) {
+  protected initProps(attributes: ElementAttributes<this>) {
     for (let name in attributes) {
       switch (name.toLocaleLowerCase()) {
-        case "children": {
-          break;
-        }
         case "class": {
           this.onMount(ClassLink(attributes.class as any));
           break;
@@ -46,20 +48,11 @@ export class HtmlElementView<
           }
           break;
         }
-        case "use": {
-          for (let useFn of attributes.use as any) {
-            this.onMount(useFn);
-          }
-          break;
-        }
         default: {
           if (name.startsWith("on") && typeof attributes[name] === "function") {
-            console.warn(
-              `using ${name} is deprecated,\nuse 'use={[onEvent('${name
-                .toLocaleLowerCase()
-                .slice(2)}', event_function)]}' instread`
+            this.onMount(
+              on(name.toLocaleLowerCase().slice(2), attributes[name])
             );
-            //this.onMount(onEvent(name.toLocaleLowerCase(), attributes[name]));
             break;
           }
           this.onMount(AttributeLink(name, attributes[name]) as any);
@@ -72,20 +65,27 @@ export class HtmlElementView<
 export class SvgElementView<
   T extends keyof SVGElementTagNameMap
 > extends zzHtmlNode<SVGElementTagNameMap[T]> {
-  constructor(tagName: T, attributes: ElementAttributes<SvgElementView<T>>) {
-    super(document.createElementNS("http://www.w3.org/2000/svg", tagName));
+  constructor(
+    tagName: T,
+    {
+      children,
+      use,
+      ...attributes
+    }: ElementAttributes<zzHtmlNode<SVGElementTagNameMap[T]>>
+  ) {
+    super(document.createElementNS("http://www.w3.org/2000/svg", tagName), {
+      children,
+      use,
+    });
 
-    this.append(attributes.children);
+    this.append(this.children);
 
-    this._initAttributes(attributes);
+    this.initProps(attributes);
   }
 
-  protected _initAttributes(attributes: ElementAttributes<SvgElementView<T>>) {
+  protected initProps(attributes: ElementAttributes<this>) {
     for (let name in attributes) {
       switch (name.toLocaleLowerCase()) {
-        case "children": {
-          break;
-        }
         case "class": {
           this.onMount(ClassLink(attributes.class as any));
           break;
@@ -98,20 +98,11 @@ export class SvgElementView<
           }
           break;
         }
-        case "use": {
-          for (let useFn of attributes.use as any) {
-            this.onMount(useFn);
-          }
-          break;
-        }
         default: {
           if (name.startsWith("on") && typeof attributes[name] === "function") {
-            console.warn(
-              `using ${name} is deprecated,\nuse 'use={[on('${name
-                .toLocaleLowerCase()
-                .slice(2)}', event_function)]}' instread`
+            this.onMount(
+              on(name.toLocaleLowerCase().slice(2), attributes[name])
             );
-            //this.onMount(onEvent(name.toLocaleLowerCase(), attributes[name]));
             break;
           }
           this.onMount(AttributeLink(name, attributes[name]));

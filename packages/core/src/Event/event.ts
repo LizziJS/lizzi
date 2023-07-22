@@ -22,12 +22,12 @@ export class zzEventListener<
   readonly fn: TFunc;
   readonly willRunOnce: boolean;
 
-  run<FuncT extends TFunc>(...args: Parameters<FuncT>) {
+  async run<FuncT extends TFunc>(...args: Parameters<FuncT>) {
     if (this.willRunOnce) {
       this.remove();
     }
 
-    this.fn.call(this.target, ...args);
+    await this.fn.call(this.target, ...args);
 
     return this;
   }
@@ -96,9 +96,7 @@ export class zzEvent<TFunc extends (...args: any[]) => void>
   emit<FuncT extends TFunc>(...args: Parameters<FuncT>) {
     const values = Array.from(this.listenersMap.values());
 
-    for (let listener of values) {
-      listener.run(...args);
-    }
+    return Promise.all(values.map((listener) => listener.run(...args)));
   }
 
   countListeners(): number {

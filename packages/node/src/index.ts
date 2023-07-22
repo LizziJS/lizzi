@@ -6,3 +6,4 @@
 
 export * from "./node";
 export * from "./IfElse";
+export * from "./uses";

@@ -28,7 +28,7 @@ export const jsxs = <T extends zzNode>(
     [k: string]: any;
   }
 ) => {
-  let result;
+  let result: any;
 
   zzGetReactiveObserver.runIsolated(() => {
     if (typeof type === "string") {
@@ -54,7 +54,13 @@ export const jsxs = <T extends zzNode>(
     }
   });
 
-  return result;
+  return result as T;
 };
 
-export const Fragment = zzHtmlComponent;
+export class Fragment extends zzHtmlComponent {
+  constructor(props: { children: JSX.Childrens }) {
+    super(props);
+
+    this.append(this.children);
+  }
+}

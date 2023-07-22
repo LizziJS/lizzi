@@ -9,10 +9,10 @@ import { TodoApp } from "./components/TodoApp";
 const todos = new zzArray<Todo>();
 
 todos.add([
-  new Todo("Check books", true),
-  new Todo("Go to library", true),
-  new Todo("Learn Lizzi", false),
-  new Todo("Find cool job", false),
+  new Todo({ todo: "Check books", done: true }),
+  new Todo({ todo: "Go to library", done: true }),
+  new Todo({ todo: "Learn Lizzi", done: false }),
+  new Todo({ todo: "Find cool job", done: false }),
 ]);
 
 Body(<TodoApp todos={todos} />);
