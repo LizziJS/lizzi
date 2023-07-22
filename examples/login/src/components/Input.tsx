@@ -1,7 +1,7 @@
 import { IReadOnlyReactive, zz } from "@lizzi/core";
 import { If } from "@lizzi/node";
 import { JSX, onInput, zzHtmlComponent } from "@lizzi/template";
-import { z } from "zod";
+import yup from "yup";
 
 type Props = {
   label: string;
@@ -51,7 +51,7 @@ export class InputComponent extends zzHtmlComponent {
 }
 
 export class InputValue implements IReadOnlyReactive<string> {
-  protected readonly validator: z.ZodString;
+  protected readonly validator: yup.StringSchema;
 
   protected readonly _errorMessage = zz.String();
   readonly errorMessage = this._errorMessage.readonly();
@@ -59,7 +59,7 @@ export class InputValue implements IReadOnlyReactive<string> {
 
   readonly onChange = this.input.onChange;
 
-  constructor(validator: z.ZodString) {
+  constructor(validator: yup.StringSchema) {
     this.validator = validator;
 
     return this;
@@ -78,12 +78,13 @@ export class InputValue implements IReadOnlyReactive<string> {
   }
 
   validate() {
-    const result = this.validator.safeParse(this.input.value);
+    try {
+      this.validator.validateSync(this.input.value);
 
-    if (result.success) return true;
-
-    this._errorMessage.value = result.error.errors.at(0)?.message ?? "";
-
+      return true;
+    } catch (error: any) {
+      this._errorMessage.value = error.message;
+    }
     return false;
   }
 }

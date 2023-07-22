@@ -3,27 +3,38 @@ import { InputComponent, InputValue } from "./Input";
 import { Form } from "./Form";
 import { checkEmail } from "../backend/emails";
 import { zz } from "@lizzi/core";
-import { z as validator } from "zod";
+import * as validator from "yup";
 
-export class Login extends zzHtmlComponent {
+export class Register extends zzHtmlComponent {
   constructor() {
     super();
 
     const email = new InputValue(
       validator
         .string()
-        .nonempty({ message: "Email is required" })
-        .email({ message: "Should be valid email" })
+        .required("Email is required")
+        .email("Should be valid email")
     );
 
     const password = new InputValue(
       validator
         .string()
-        .nonempty("Password is required")
+        .required("Password is required")
         .min(6, "Should be at least 6 characters")
-        .regex(
+        .matches(
           /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&]).*$/,
           "Password should contain atleast one number and one special character"
+        )
+    );
+
+    const passwordConfirm = new InputValue(
+      validator
+        .string()
+        .required("Password is required")
+        .test(
+          "passwords-match",
+          "Passwords must match",
+          (value) => password.value === value
         )
     );
 
@@ -56,6 +67,12 @@ export class Login extends zzHtmlComponent {
                   placeholder="Enter your password"
                   label="Password"
                   input={password}
+                />
+                <InputComponent
+                  name="passwordconfirm"
+                  placeholder="Confirm your password"
+                  label="Confirm password"
+                  input={passwordConfirm}
                 />
                 <button
                   disabled={form.isSubmitting}
