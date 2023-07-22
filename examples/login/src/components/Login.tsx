@@ -1,32 +1,31 @@
 import { zzHtmlComponent } from "@lizzi/template";
 import { InputComponent, InputValue } from "./Input";
 import { Form } from "./Form";
-import {
-  emailValidator,
-  minStringLengthValidator,
-  notEmptyValidator,
-} from "@lizzi/core/src/Validators";
 import { checkEmail } from "../backend/emails";
 import { zz } from "@lizzi/core";
+import { z as validator } from "zod";
 
 export class Login extends zzHtmlComponent {
   constructor() {
     super();
 
-    const email = new InputValue()
-      .addValidator(notEmptyValidator, "Email is required")
-      .addValidator(emailValidator, "Should be valid email");
+    const email = new InputValue(
+      validator
+        .string()
+        .nonempty({ message: "Email is required" })
+        .email({ message: "Should be valid email" })
+    );
 
-    const password = new InputValue()
-      .addValidator(notEmptyValidator, "Password is required")
-      .addValidator(
-        minStringLengthValidator(6),
-        "Should be at least 6 characters"
-      )
-      .addValidator(
-        (value) => /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&]).*$/.test(value),
-        "Password should contain atleast one number and one special character"
-      );
+    const password = new InputValue(
+      validator
+        .string()
+        .nonempty("Password is required")
+        .min(6, "Should be at least 6 characters")
+        .regex(
+          /^(?=.*[a-zA-Z])(?=.*\d)(?=.*[@$!%*?&]).*$/,
+          "Password should contain atleast one number and one special character"
+        )
+    );
 
     this.append(
       <div class="flex justify-center items-center min-h-screen bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-500">

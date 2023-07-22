@@ -1,17 +1,17 @@
-export const numberValidator = (value: any) =>
-  typeof value === "number" && !Number.isNaN(value);
+export const numberValidator = {
+  validator: (value: any) => typeof value === "number" && !Number.isNaN(value),
 
-export const integerValidator = (value: any) => Number.isInteger(value);
+  integer: (value: any) => Number.isInteger(value),
 
-export const finiteValidator = (value: any) => Number.isFinite(value);
+  finite: (value: any) => Number.isFinite(value),
 
-export const stepValidator = (step: number) => (value: any) =>
-  value % step === 0;
+  step: (step: number) => (value: any) => value % step === 0,
 
-export const maxNumberValidator = (max: number) => (value: any) => value <= max;
-export const lessNumberValidator = (max: number) => (value: any) => value < max;
+  maxNumber: (max: number) => (value: any) => value <= max,
+  lessNumber: (max: number) => (value: any) => value < max,
 
-export const minNumberValidator = (min: number) => (value: any) => value >= min;
-export const moreNumberValidator = (min: number) => (value: any) => value > min;
+  minNumber: (min: number) => (value: any) => value >= min,
+  moreNumber: (min: number) => (value: any) => value > min,
 
-export const bigintValidator = (value: any) => typeof value === "bigint";
+  bigint: (value: any) => typeof value === "bigint",
+};

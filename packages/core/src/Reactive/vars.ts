@@ -4,58 +4,42 @@
  * This source code is licensed under the MIT license.
  */
 
-import {
-  bigintValidator,
-  booleanValidator,
-  emailValidator,
-  finiteValidator,
-  integerValidator,
-  lessNumberValidator,
-  maxNumberValidator,
-  maxStringLengthValidator,
-  minNumberValidator,
-  minStringLengthValidator,
-  notEmptyValidator,
-  numberValidator,
-  regexValidator,
-  stepValidator,
-  stringValidator,
-} from "../Validators";
+import { validator } from "../Validators";
 import { zzType } from "./type";
 
 export class zzNumber<TNumber = number> extends zzType<TNumber> {
   max(max: number) {
-    return this.addValidator(maxNumberValidator(max));
+    return this.addValidator(validator.number.maxNumber(max));
   }
 
   min(min: number) {
-    return this.addValidator(minNumberValidator(min));
+    return this.addValidator(validator.number.minNumber(min));
   }
 
   less(max: number) {
-    return this.addValidator(lessNumberValidator(max));
+    return this.addValidator(validator.number.lessNumber(max));
   }
 
   more(min: number) {
-    return this.addValidator(minNumberValidator(min));
+    return this.addValidator(validator.number.minNumber(min));
   }
 
   finite() {
-    return this.addValidator(finiteValidator);
+    return this.addValidator(validator.number.finite);
   }
 
   step(step: number) {
-    return this.addValidator(stepValidator(step));
+    return this.addValidator(validator.number.step(step));
   }
 
   integer() {
-    return this.addValidator(integerValidator);
+    return this.addValidator(validator.number.integer);
   }
 
   constructor(value: TNumber = 0 as any) {
     super(value);
 
-    this.addValidator(numberValidator);
+    this.addValidator(validator.number.validator);
   }
 }
 
@@ -71,29 +55,29 @@ export class zzFloat<TNumber = number> extends zzNumber<TNumber> {}
 
 export class zzBigInt<TNumber = BigInt> extends zzType<TNumber> {
   max(max: number) {
-    return this.addValidator(maxNumberValidator(max));
+    return this.addValidator(validator.number.maxNumber(max));
   }
 
   min(min: number) {
-    return this.addValidator(minNumberValidator(min));
+    return this.addValidator(validator.number.minNumber(min));
   }
 
   less(max: number) {
-    return this.addValidator(lessNumberValidator(max));
+    return this.addValidator(validator.number.lessNumber(max));
   }
 
   more(min: number) {
-    return this.addValidator(minNumberValidator(min));
+    return this.addValidator(validator.number.minNumber(min));
   }
 
   step(step: number) {
-    return this.addValidator(stepValidator(step));
+    return this.addValidator(validator.number.step(step));
   }
 
   constructor(value: TNumber = 0 as any) {
     super(value);
 
-    this.addValidator(bigintValidator);
+    this.addValidator(validator.number.bigint);
   }
 }
 
@@ -101,23 +85,19 @@ export class zzString<TString = string> extends zzType<TString> {
   constructor(value: TString = "" as any) {
     super(value);
 
-    this.addValidator(stringValidator);
+    this.addValidator(validator.string.validator);
   }
 
   max(max: number) {
-    return this.addValidator(maxStringLengthValidator(max));
+    return this.addValidator(validator.string.maxStringLength(max));
   }
 
   min(min: number) {
-    return this.addValidator(minStringLengthValidator(min));
+    return this.addValidator(validator.string.minStringLength(min));
   }
 
   length(length: number) {
-    return this.addValidator(maxStringLengthValidator(length));
-  }
-
-  email() {
-    return this.addValidator(emailValidator);
+    return this.addValidator(validator.string.maxStringLength(length));
   }
 
   enum(...values: TString[]) {
@@ -125,11 +105,7 @@ export class zzString<TString = string> extends zzType<TString> {
   }
 
   required() {
-    return this.addValidator(notEmptyValidator);
-  }
-
-  regexValidator(regex: RegExp) {
-    return this.addValidator(regexValidator(regex));
+    return this.addValidator(validator.string.notEmpty);
   }
 }
 
@@ -137,7 +113,7 @@ export class zzBoolean extends zzType<boolean> {
   constructor(value: boolean = false) {
     super(value);
 
-    this.addValidator(booleanValidator);
+    this.addValidator(validator.boolean.validator);
   }
 
   toggle() {

@@ -1,1 +1,3 @@
-export const booleanValidator = (value: any) => typeof value === "boolean";
+export const booleanValidator = {
+  validator: (value: any) => typeof value === "boolean",
+};

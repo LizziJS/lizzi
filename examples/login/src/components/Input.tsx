@@ -1,6 +1,7 @@
 import { IReadOnlyReactive, zz } from "@lizzi/core";
 import { If } from "@lizzi/node";
 import { JSX, onInput, zzHtmlComponent } from "@lizzi/template";
+import { z } from "zod";
 
 type Props = {
   label: string;
@@ -50,16 +51,19 @@ export class InputComponent extends zzHtmlComponent {
 }
 
 export class InputValue implements IReadOnlyReactive<string> {
-  protected readonly validators: {
-    message: string;
-    validator: (value: string) => boolean;
-  }[] = [];
+  protected readonly validator: z.ZodString;
 
   protected readonly _errorMessage = zz.String();
   readonly errorMessage = this._errorMessage.readonly();
   readonly input = zz.String();
 
   readonly onChange = this.input.onChange;
+
+  constructor(validator: z.ZodString) {
+    this.validator = validator;
+
+    return this;
+  }
 
   get value() {
     return this.input.value;
@@ -73,28 +77,13 @@ export class InputValue implements IReadOnlyReactive<string> {
     this._errorMessage.value = "";
   }
 
-  addValidator(fn: (value: any) => boolean, message: string): this {
-    this.validators.push({
-      message,
-      validator: fn,
-    });
-    return this;
-  }
-
   validate() {
-    try {
-      const findError = this.validators.find(
-        ({ validator }) => !validator(this.input.value)
-      );
+    const result = this.validator.safeParse(this.input.value);
 
-      if (findError) {
-        throw new TypeError(findError.message);
-      }
+    if (result.success) return true;
 
-      return true;
-    } catch (e: any) {
-      this._errorMessage.value = e.message;
-    }
+    this._errorMessage.value = result.error.errors.at(0)?.message ?? "";
+
     return false;
   }
 }
