@@ -3,7 +3,7 @@ import { InputComponent, InputValue } from "./Input";
 import { Form } from "./Form";
 import { checkEmail } from "../backend/emails";
 import { zz } from "@lizzi/core";
-import { findRouter } from "@lizzi/router";
+import { zzRouter } from "@lizzi/router";
 import * as validator from "yup";
 
 export class Register extends zzHtmlComponent {
@@ -54,7 +54,7 @@ export class Register extends zzHtmlComponent {
 
               console.log(email.value, password.value);
 
-              findRouter(this).go([]);
+              zzRouter(this).go([]);
             }}
           >
             {(form) => (
