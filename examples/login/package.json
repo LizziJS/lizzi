@@ -10,6 +10,7 @@
   "dependencies": {
     "@lizzi/core": "^0.1.8",
     "@lizzi/node": "^0.1.8",
+    "@lizzi/router": "^0.1.8",
     "@lizzi/template": "^0.1.8",
     "uuid": "^9.0.0",
     "yup": "^1.2.0"

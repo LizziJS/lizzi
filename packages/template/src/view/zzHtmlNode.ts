@@ -7,16 +7,15 @@
 import { EventChangeValue, zzReadonlyArray, zzReactive } from "@lizzi/core";
 import { zzNode, ComponentUse } from "@lizzi/node";
 import { JSX } from "@lizzi/jsx-runtime";
-import { flatChildInstanceNodes } from "../..";
 
 export type zzHtmlComponentProps<T extends zzNode> = {
-  children?: JSX.FuncChildrens<T>;
+  children?: JSX.ChildrenFunction<T>;
   use?: ComponentUse<T>;
   [key: string]: any;
 };
 
 export class zzHtmlComponent extends zzNode {
-  protected readonly _children?: JSX.FuncChildrens<this>;
+  protected readonly _children?: JSX.ChildrenFunction<this>;
 
   constructor({
     children,
@@ -34,7 +33,7 @@ export class zzHtmlComponent extends zzNode {
       : this._children;
   }
 
-  append(childrens?: JSX.Childrens) {
+  append(childrens?: JSX.Children) {
     if (Array.isArray(childrens)) {
       const viewNodes = childrens
         .map((child) => JSXChildrenToNodeMapper(child))
@@ -60,7 +59,7 @@ export class zzHtmlNode<E extends Node = Element> extends zzHtmlComponent {
 
     this.element = node;
 
-    flatChildInstanceNodes(this.childNodes, zzHtmlNode).itemsListener(
+    this.getFlatChildInstances(this.childNodes, zzHtmlNode).itemsListener(
       (added, index) => {
         const beforeElement = this.element.childNodes.item(index);
 
@@ -146,7 +145,9 @@ export class TextNodeView extends zzHtmlNode<Text> {
   }
 }
 
-export const JSXChildrenToNodeMapper = (children: JSX.Children): zzNode => {
+export const JSXChildrenToNodeMapper = (
+  children: JSX.ValueChildrenTypes | JSX.NodeChildrenTypes
+): zzNode => {
   if (zzReadonlyArray.isArray(children) || Array.isArray(children)) {
     return new ArrayView({ children });
   }
@@ -166,7 +167,7 @@ export const JSXChildrenToNodeMapper = (children: JSX.Children): zzNode => {
   return children;
 };
 
-export const MapJSXChildrensToNodes = (childrens: JSX.Childrens): zzNode[] => {
+export const MapJSXChildrensToNodes = (childrens: JSX.Children): zzNode[] => {
   if (Array.isArray(childrens)) {
     return childrens
       .map((child) => JSXChildrenToNodeMapper(child))

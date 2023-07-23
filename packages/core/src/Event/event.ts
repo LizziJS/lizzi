@@ -93,7 +93,7 @@ export class zzEvent<TFunc extends (...args: any[]) => void>
     this.listenersMap.clear();
   }
 
-  emit<FuncT extends TFunc>(...args: Parameters<FuncT>) {
+  emit<FuncT extends TFunc>(...args: Parameters<FuncT>): Promise<any> {
     const values = Array.from(this.listenersMap.values());
 
     return Promise.all(values.map((listener) => listener.run(...args)));

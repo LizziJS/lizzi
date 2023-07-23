@@ -39,6 +39,7 @@ export interface IReadOnlyArray<T> extends IReadOnlyReactive<T[]> {
   readonly onAdd: zzEvent<(event: EventAddArray<T>) => void>;
   readonly onRemove: zzEvent<(event: EventRemoveArray<T>) => void>;
   toArray(): T[];
+  [Symbol.iterator](): IterableIterator<T>;
 }
 
 export interface IWriteOnlyArray<T> extends IWriteOnlyReactive<T[]> {

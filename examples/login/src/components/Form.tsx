@@ -3,7 +3,7 @@ import { InputComponent } from "./Input";
 import { zz } from "@lizzi/core";
 import { ComponentUse } from "@lizzi/node";
 
-type Props = JSX.PropsWithFuncChildren<
+type Props = JSX.PropsWithChildrenFunction<
   Form,
   {
     use?: ComponentUse<Form>;

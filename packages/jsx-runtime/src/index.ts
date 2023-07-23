@@ -24,7 +24,7 @@ export const jsxs = <T extends zzNode>(
   type: string | T,
   props: {
     svg?: boolean | undefined;
-    children: JSX.Childrens;
+    children: JSX.Children;
     [k: string]: any;
   }
 ) => {
@@ -58,7 +58,7 @@ export const jsxs = <T extends zzNode>(
 };
 
 export class Fragment extends zzHtmlComponent {
-  constructor(props: { children: JSX.Childrens }) {
+  constructor(props: { children: JSX.Children }) {
     super(props);
 
     this.append(this.children);

@@ -4,46 +4,57 @@
  * This source code is licensed under the MIT license.
  */
 
-import {
-  DestructorsStack,
-  addListener,
-  zzDestructor,
-  zzString,
-} from "@lizzi/core";
+import { EventWrapper, Locker, addListener, zz, zzEvent } from "@lizzi/core";
+import { zzUrl } from ".";
 
-export class zzRouter extends zzDestructor {
-  readonly destructor = new DestructorsStack();
-  readonly url = new zzString();
+type TUrl = string | Array<string>;
+
+export class zzUrlRouter extends zzUrl {
+  protected destructor = zz.Destructor();
+
+  convertToUrl(url: TUrl): string {
+    return "/" + (Array.isArray(url) ? url.join("/") : url);
+  }
+
+  go(url: TUrl): void {
+    this.value = this.convertToUrl(url);
+  }
+
+  goBack(): void {
+    window.history.back();
+  }
+
+  goForward(): void {
+    window.history.forward();
+  }
+
+  goHome(): void {
+    this.value = window.location.origin;
+  }
 
   destroy(): void {
+    super.destroy();
     this.destructor.destroy();
   }
 
-  protected getPath(path: string) {
-    return (
-      "/" +
-      path
-        .trim()
-        .replace(/[\/\\]+/g, "/")
-        .replace(/^\/+|\/+$/g, "")
-    );
-  }
-
-  go(url?: string) {
-    this.url.value = this.getPath(url ?? window.location.pathname);
-  }
-
   constructor() {
-    super();
+    super(window.location.href);
 
-    this.go();
+    const locker = Locker.new();
 
     this.destructor.add(
-      addListener(window, "popstate", (event: PopStateEvent) => {
-        this.url.value = event.state.url;
-      }),
-      this.url.onChange.addListener((event) => {
-        window.history.pushState({ url: event.value }, "", event.value);
+      addListener(
+        window,
+        "popstate",
+        locker(() => {
+          this.value = window.location.href;
+        })
+      )
+    );
+
+    this.onChange.addListener(
+      locker((ev) => {
+        window.history.pushState(null, "", ev.value);
       })
     );
   }

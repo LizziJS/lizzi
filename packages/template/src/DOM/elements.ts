@@ -15,7 +15,7 @@ export type ElementAttributes<T extends zzHtmlNode> = {
   class?: Array<string | zzReactive<any>>;
   style?: { [key: string]: Array<string | zzReactive<any>> };
   use?: ComponentUse<T>;
-  children?: JSX.FuncChildrens<T>;
+  children?: JSX.ChildrenFunction<T>;
   [key: string]: any;
 };
 

@@ -11,6 +11,7 @@ import {
   zzDestructorsObserver,
   zzEvent,
   zzReactive,
+  zzReadonlyArray,
 } from "@lizzi/core";
 
 type ViewComponentStatuses = "unmounted" | "mounted";
@@ -47,8 +48,8 @@ export class zzNode extends zzDestructor implements INode {
     "unmounted"
   );
 
-  readonly _onMount = zz.Event<<T extends this>(view: T) => void>();
-  readonly _unmountDestructor = zz.Destructor();
+  protected readonly _onMount = zz.Event<<T extends this>(view: T) => void>();
+  protected readonly _unmountDestructor = zz.Destructor();
 
   protected _parentNode: zzNode | null = null;
   readonly childNodes: zzArray<zzNode>;
@@ -83,7 +84,7 @@ export class zzNode extends zzDestructor implements INode {
     this._initNodeEvents(use);
   }
 
-  _initNodeEvents(use: ComponentUse<this>) {
+  protected _initNodeEvents(use: ComponentUse<this>) {
     for (let useFn of use) {
       this.onMount(useFn);
     }
@@ -114,7 +115,7 @@ export class zzNode extends zzDestructor implements INode {
     this._nodeState.value = "unmounted";
   }
 
-  onMount(mountFunc: (view: this) => void) {
+  protected onMount(mountFunc: (view: this) => void) {
     this._onMount.addListener(mountFunc);
   }
 
@@ -156,7 +157,7 @@ export class zzNode extends zzDestructor implements INode {
 
   *findParentNodes<T extends zzNode>(
     findFn: (view: T) => boolean
-  ): Generator<T> {
+  ): Generator<T, void> {
     for (
       let parent = this.parentNode;
       parent !== null;
@@ -170,7 +171,7 @@ export class zzNode extends zzDestructor implements INode {
 
   *findChildNodes<T extends zzNode>(
     findFn: (view: zzNode) => boolean
-  ): Generator<T> {
+  ): Generator<T, void> {
     for (let child of this.childNodes) {
       if (findFn(child as T)) {
         yield child as T;
@@ -180,7 +181,26 @@ export class zzNode extends zzDestructor implements INode {
     }
   }
 
+  getFlatChildInstances<T extends zzNode>(
+    childNodes: zzReadonlyArray<zzNode>,
+    instance: abstract new (...any: any[]) => T
+  ) {
+    type MapT = T | zzReadonlyArray<MapT>;
+
+    const mapNodes = (node: zzNode): MapT => {
+      if (node instanceof instance) {
+        return node;
+      }
+
+      return node.childNodes.map(mapNodes);
+    };
+
+    return childNodes.map(mapNodes).flat();
+  }
+
   __setProperty(name: string, value: any) {
+    if (value === undefined) return;
+
     const valueObj = this[name as keyof this];
 
     if (zzEvent.isEvent(valueObj)) {

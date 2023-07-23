@@ -9,11 +9,11 @@ import { zzHtmlNode } from "../view/zzHtmlNode";
 
 export const AppendToElement = (
   element: HTMLElement,
-  children: JSX.Childrens
+  children: JSX.Children
 ) => {
   return new zzHtmlNode(element).append(children);
 };
 
-export const Body = (children: JSX.Childrens) => {
+export const Body = (children: JSX.Children) => {
   return new zzHtmlNode(document.body).append(children)._mount();
 };
