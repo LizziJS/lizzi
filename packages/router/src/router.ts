@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-import { EventWrapper, Locker, addListener, zz, zzEvent } from "@lizzi/core";
+import { Locker, addListener, zz } from "@lizzi/core";
 import { zzUrl } from ".";
 
 type TUrl = string | Array<string>;
