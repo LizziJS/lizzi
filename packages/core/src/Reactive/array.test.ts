@@ -4,9 +4,10 @@ import {
   EventAddArray,
   EventRemoveArray,
   zzArray,
-  zzArrayInstance,
+  zzArrayFlat,
   zzArrayMap,
   zzComputeArrayFn,
+  zzReadonlyArray,
 } from "./array";
 import { zzComputeFn } from "./compute";
 import { EventChangeValue } from "./reactive";
@@ -186,7 +187,7 @@ describe("zzArray", () => {
       const array = new zzArray();
       const filter = array.filter(filterFn);
 
-      expect(filter).toBeInstanceOf(zzArrayInstance);
+      expect(filter).toBeInstanceOf(zzReadonlyArray);
       expect(filter).toBeInstanceOf(zzComputeArrayFn);
       expect(filter.onAdd).toBeInstanceOf(zzEvent);
       expect(filter.onChange).toBeInstanceOf(zzEvent);
@@ -508,7 +509,7 @@ describe("zzArray", () => {
       const array = new zzArray();
       const map = array.map(mapFn);
 
-      expect(map).toBeInstanceOf(zzArrayInstance);
+      expect(map).toBeInstanceOf(zzReadonlyArray);
       expect(map).toBeInstanceOf(zzArrayMap);
       expect(map.onAdd).toBeInstanceOf(zzEvent);
       expect(map.onChange).toBeInstanceOf(zzEvent);
@@ -835,7 +836,7 @@ describe("zzArray", () => {
       const array = new zzArray();
       const sort = array.sort(sortFn);
 
-      expect(sort).toBeInstanceOf(zzArrayInstance);
+      expect(sort).toBeInstanceOf(zzReadonlyArray);
       expect(sort).toBeInstanceOf(zzComputeArrayFn);
       expect(sort.onAdd).toBeInstanceOf(zzEvent);
       expect(sort.onChange).toBeInstanceOf(zzEvent);
@@ -952,6 +953,175 @@ describe("zzArray", () => {
       expect(listeners.add.mock.calls[4][0]).toEqual(
         new EventAddArray(4, 1, sort)
       );
+    });
+  });
+
+  describe("zzArray flat", () => {
+    it("should create an array flat", () => {
+      const array = new zzArray();
+      const flat = array.flat();
+
+      expect(flat).toBeInstanceOf(zzArrayFlat);
+      expect(flat.onAdd).toBeInstanceOf(zzEvent);
+      expect(flat.onChange).toBeInstanceOf(zzEvent);
+      expect(flat.onRemove).toBeInstanceOf(zzEvent);
+    });
+
+    it("should create an array flat with level 0", () => {
+      const array = new zzArray([5, 9, 0]);
+      const flat = array.flat();
+      const listeners = {
+        add: jest.fn(),
+        remove: jest.fn(),
+        change: jest.fn(),
+      };
+
+      flat.onAdd.addListener(listeners.add);
+      flat.onRemove.addListener(listeners.remove);
+      flat.onChange.addListener(listeners.change);
+
+      expect(listeners.add.mock.calls.length).toBe(0);
+      expect(listeners.remove.mock.calls.length).toBe(0);
+      expect(listeners.change.mock.calls.length).toBe(0);
+
+      array.add([10, 3, 7]);
+
+      expect(array.value).toEqual([5, 9, 0, 10, 3, 7]);
+      expect(flat.value).toEqual([5, 9, 0, 10, 3, 7]);
+      expect(flat.toArray()).toEqual([5, 9, 0, 10, 3, 7]);
+
+      expect(listeners.add.mock.calls.length).toBe(3);
+      expect(listeners.remove.mock.calls.length).toBe(0);
+      expect(listeners.change.mock.calls.length).toBe(1);
+
+      array.add([1, 2], 2);
+      expect(array.value).toEqual([5, 9, 1, 2, 0, 10, 3, 7]);
+      expect(flat.value).toEqual([5, 9, 1, 2, 0, 10, 3, 7]);
+      expect(flat.toArray()).toEqual([5, 9, 1, 2, 0, 10, 3, 7]);
+
+      expect(listeners.add.mock.calls.length).toBe(5);
+      expect(listeners.remove.mock.calls.length).toBe(0);
+      expect(listeners.change.mock.calls.length).toBe(2);
+
+      array.remove([1, 5, 7]);
+      expect(array.value).toEqual([9, 2, 0, 10, 3]);
+      expect(flat.value).toEqual([9, 2, 0, 10, 3]);
+      expect(flat.toArray()).toEqual([9, 2, 0, 10, 3]);
+
+      expect(listeners.add.mock.calls.length).toBe(5);
+      expect(listeners.remove.mock.calls.length).toBe(3);
+      expect(listeners.change.mock.calls.length).toBe(3);
+    });
+
+    it("should flat empty array with level 1", () => {
+      type NotFlat = number | zzArray<NotFlat>;
+
+      const s1 = new zzArray<NotFlat>([]);
+      const array = new zzArray<NotFlat>([5, s1, 9, 0]);
+      const flat = array.flat();
+      const listeners = {
+        add: jest.fn(),
+        remove: jest.fn(),
+        change: jest.fn(),
+      };
+
+      flat.onAdd.addListener(listeners.add);
+      flat.onRemove.addListener(listeners.remove);
+      flat.onChange.addListener(listeners.change);
+
+      expect(listeners.add.mock.calls.length).toBe(0);
+      expect(listeners.remove.mock.calls.length).toBe(0);
+      expect(listeners.change.mock.calls.length).toBe(0);
+
+      expect(array.value).toEqual([5, s1, 9, 0]);
+      expect(flat.value).toEqual([5, 9, 0]);
+      expect(flat.toArray()).toEqual([5, 9, 0]);
+
+      array.remove([s1]);
+      expect(array.value).toEqual([5, 9, 0]);
+      expect(flat.value).toEqual([5, 9, 0]);
+      expect(flat.toArray()).toEqual([5, 9, 0]);
+
+      array.add([s1], 2);
+      expect(array.value).toEqual([5, 9, s1, 0]);
+      expect(flat.value).toEqual([5, 9, 0]);
+      expect(flat.toArray()).toEqual([5, 9, 0]);
+    });
+
+    it("should flat and not empty array with level 1", () => {
+      type NotFlat = number | zzArray<NotFlat>;
+
+      const s1 = new zzArray<NotFlat>([]);
+      const array = new zzArray<NotFlat>([0, s1]);
+      const flat = array.flat();
+      const listeners = {
+        add: jest.fn(),
+        remove: jest.fn(),
+        change: jest.fn(),
+      };
+
+      flat.onAdd.addListener(listeners.add);
+      flat.onRemove.addListener(listeners.remove);
+      flat.onChange.addListener(listeners.change);
+
+      expect(listeners.add.mock.calls.length).toBe(0);
+      expect(listeners.remove.mock.calls.length).toBe(0);
+      expect(listeners.change.mock.calls.length).toBe(0);
+
+      expect(array.value).toEqual([0, s1]);
+      expect(flat.value).toEqual([0]);
+
+      s1.add([2]);
+      expect(array.value).toEqual([0, s1]);
+      expect(flat.value).toEqual([0, 2]);
+    });
+
+    it("should flat and not empty array with level 1", () => {
+      type NotFlat = number | zzArray<NotFlat>;
+
+      const s1 = new zzArray<NotFlat>([1, 2]);
+      const array = new zzArray<NotFlat>([5, s1, 9, 0]);
+      const flat = array.flat();
+      const listeners = {
+        add: jest.fn(),
+        remove: jest.fn(),
+        change: jest.fn(),
+      };
+
+      flat.onAdd.addListener(listeners.add);
+      flat.onRemove.addListener(listeners.remove);
+      flat.onChange.addListener(listeners.change);
+
+      expect(listeners.add.mock.calls.length).toBe(0);
+      expect(listeners.remove.mock.calls.length).toBe(0);
+      expect(listeners.change.mock.calls.length).toBe(0);
+
+      expect(array.value).toEqual([5, s1, 9, 0]);
+      expect(flat.value).toEqual([5, 1, 2, 9, 0]);
+
+      array.remove([s1]);
+      expect(array.value).toEqual([5, 9, 0]);
+      expect(flat.value).toEqual([5, 9, 0]);
+
+      array.add([s1], 2);
+      expect(array.value).toEqual([5, 9, s1, 0]);
+      expect(flat.value).toEqual([5, 9, 1, 2, 0]);
+
+      s1.add([3, 4], 1);
+      expect(array.value).toEqual([5, 9, s1, 0]);
+      expect(flat.value).toEqual([5, 9, 1, 3, 4, 2, 0]);
+
+      s1.remove([1, 4]);
+      expect(array.value).toEqual([5, 9, s1, 0]);
+      expect(flat.value).toEqual([5, 9, 3, 2, 0]);
+
+      s1.remove([3, 2]);
+      expect(array.value).toEqual([5, 9, s1, 0]);
+      expect(flat.value).toEqual([5, 9, 0]);
+
+      s1.add([3], 0);
+      expect(array.value).toEqual([5, 9, s1, 0]);
+      expect(flat.value).toEqual([5, 9, 3, 0]);
     });
   });
 });

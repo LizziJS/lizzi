@@ -6,14 +6,21 @@
 
 import { IReadOnlyArray, zz, zzReactive } from "@lizzi/core";
 import { If, zzNode } from "@lizzi/node";
-import { zzUrlRouter } from ".";
+import { UrlArray, zzRouter, zzUrlRouter } from ".";
+import { RouteAnchor, RouteAnchorName } from "./anchor";
 
 export abstract class RouterComponent extends zzNode {
   readonly routes: IReadOnlyArray<Route>;
   protected subPath: string = "";
+  protected prePath: string = "";
+  route: Array<string | zzReactive<any>>;
 
   checkSubRoutes() {
     if (this.subPath.length === 0) {
+      for (const route of this.routes) {
+        route.close();
+      }
+
       return true;
     }
 
@@ -30,16 +37,17 @@ export abstract class RouterComponent extends zzNode {
     return found;
   }
 
+  go(url: UrlArray) {
+    zzRouter(this).go([this.prePath, ...url]);
+  }
+
   constructor() {
     super();
 
-    this.routes = this.getFlatChildInstances(
-      this.childNodes,
-      RouterComponent
-    ).itemsListener(
-      () => this.checkSubRoutes(),
-      () => this.checkSubRoutes()
-    );
+    this.route = ["root"];
+
+    this.routes = this.getFlatChildInstances(this.childNodes, RouterComponent);
+    this.routes.onChange.addListener(() => this.checkSubRoutes());
   }
 }
 
@@ -47,7 +55,8 @@ export class Route extends RouterComponent {
   protected readonly isOpened = zz.Boolean(false);
   readonly regexp: RegExp;
   readonly values: zzReactive<any>[] = [];
-  protected subPath: string = "";
+
+  static Anchor = RouteAnchor;
 
   checkRoute(path: string) {
     let match = path.match(this.regexp);
@@ -62,7 +71,8 @@ export class Route extends RouterComponent {
       this.values[k].value = match[Number(k) * 1 + 1];
     }
 
-    this.subPath = path.substring(match[0].length);
+    this.prePath = match[0];
+    this.subPath = path.substring(this.prePath.length);
 
     this.open();
     if (this.checkSubRoutes()) {
@@ -125,6 +135,7 @@ export class Route extends RouterComponent {
     super();
 
     this.regexp = this.constructRouteRegexp(route);
+    this.route = route;
 
     this.append(<If condition={this.isOpened}>{children}</If>);
   }
@@ -132,6 +143,14 @@ export class Route extends RouterComponent {
 
 export class Router extends RouterComponent {
   readonly url = new zzUrlRouter();
+
+  findAnchor(name: RouteAnchorName) {
+    return (
+      this.findChildNodes<RouteAnchor>(
+        (node) => node instanceof RouteAnchor && node.isAnchorName(name)
+      ).next().value ?? null
+    );
+  }
 
   constructor({ children }: { children: zzNode | zzNode[] }) {
     super();

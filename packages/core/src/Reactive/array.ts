@@ -680,7 +680,7 @@ export class zzArrayFlat<T> extends zzReadonlyArray<T> {
       );
 
       for (const element of treeArray) {
-        index = this._subscribeRecursively(element, index);
+        index = this._subscribeRecursively(element, index, treeArray);
       }
 
       if (parent !== null) {

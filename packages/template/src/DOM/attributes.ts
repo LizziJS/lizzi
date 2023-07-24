@@ -23,7 +23,7 @@ type InputArrayTypes<T extends any[]> =
   | Array<InputTypes<T>>
   | zzReadonlyArray<InputTypes<T>>;
 
-function convertInputToReactiveArray<T extends any[]>(
+export function toReactiveArray<T extends any[]>(
   input: InputArrayTypes<T>
 ): zzReadonlyArray<OutputTypes<T>> {
   if (typeof input === "string" || typeof input === "number") {
@@ -124,7 +124,7 @@ export function ClassLink<T extends zzHtmlNode>(
   array: InputArrayTypes<[string]>
 ) {
   return (view: T) => {
-    const classArray = convertInputToReactiveArray(array);
+    const classArray = toReactiveArray(array);
 
     const element = view.element;
     const classList = element.classList;

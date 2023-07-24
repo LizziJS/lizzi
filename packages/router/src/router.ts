@@ -7,17 +7,18 @@
 import { Locker, addListener, zz } from "@lizzi/core";
 import { zzUrl } from ".";
 
-type TUrl = string | Array<string>;
+export type UrlArray = Array<string>;
+type TUrl = string | UrlArray;
+
+export function convertToUrl(url: TUrl): string {
+  return "/" + (Array.isArray(url) ? url.join("/") : url).replace(/^\/+/g, "");
+}
 
 export class zzUrlRouter extends zzUrl {
   protected destructor = zz.Destructor();
 
-  convertToUrl(url: TUrl): string {
-    return "/" + (Array.isArray(url) ? url.join("/") : url);
-  }
-
   go(url: TUrl): void {
-    this.value = this.convertToUrl(url);
+    this.value = convertToUrl(url);
   }
 
   goBack(): void {

@@ -8,3 +8,5 @@ export * from "./url";
 export * from "./router";
 export * from "./view";
 export * from "./navigator";
+export * from "./link";
+export * from "./anchor";

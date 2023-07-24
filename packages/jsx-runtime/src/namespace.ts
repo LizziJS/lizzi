@@ -9,6 +9,7 @@ export declare namespace JSX {
 
   type NodeChildrenTypes = zzNode;
   type ValueChildrenTypes = string | number | boolean | zzReactive<any>;
+  type NodeChildren = NodeChildrenTypes | Array<NodeChildrenTypes>;
 
   type Children =
     | Array<NodeChildrenTypes | ValueChildrenTypes>

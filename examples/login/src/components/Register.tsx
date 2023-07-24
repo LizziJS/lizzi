@@ -54,7 +54,7 @@ export class Register extends zzHtmlComponent {
 
               console.log(email.value, password.value);
 
-              zzRouter(this).go([]);
+              zzRouter(this).goAnchor("home", []);
             }}
           >
             {(form) => (
