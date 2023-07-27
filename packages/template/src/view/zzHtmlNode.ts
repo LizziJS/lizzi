@@ -59,7 +59,7 @@ export class zzHtmlNode<E extends Node = Element> extends zzHtmlComponent {
 
     this.element = node;
 
-    this.getFlatChildInstances(this.childNodes, zzHtmlNode).itemsListener(
+    this.flatChildInstances(zzHtmlNode).itemsListener(
       (added, index) => {
         const beforeElement = this.element.childNodes.item(index);
 
@@ -107,18 +107,24 @@ export class ArrayView<T extends zzNode> extends zzNode {
 
     if (zzReadonlyArray.isArray(children)) {
       this.onMount(() => {
-        children.onAdd.addListener((ev) => {
-          this.childNodes.add([ev.added], ev.index);
-        });
-
-        children.onRemove.addListener((ev) => {
-          this.childNodes.remove([ev.removed]);
-        });
-
-        this.childNodes.add(children.toArray());
+        children
+          .map((child) => JSXChildrenToNodeMapper(child))
+          .filter((view) => view !== null && view !== undefined)
+          .itemsListener(
+            (added, index) => {
+              this.childNodes.add([added], index);
+            },
+            (removed) => {
+              this.childNodes.remove([removed]);
+            }
+          );
       });
     } else {
-      this.childNodes.add(children as any);
+      this.childNodes.add(
+        children
+          .map((child) => JSXChildrenToNodeMapper(child))
+          .filter((view) => view !== null && view !== undefined) as any
+      );
     }
   }
 }

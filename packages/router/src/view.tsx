@@ -4,13 +4,13 @@
  * This source code is licensed under the MIT license.
  */
 
-import { IReadOnlyArray, zz, zzReactive } from "@lizzi/core";
+import { zz, zzReactive, zzReadonlyArray } from "@lizzi/core";
 import { If, zzNode } from "@lizzi/node";
 import { UrlArray, zzRouter, zzUrlRouter } from ".";
 import { RouteAnchor, RouteAnchorName } from "./anchor";
 
 export abstract class RouterComponent extends zzNode {
-  readonly routes: IReadOnlyArray<Route>;
+  readonly routes: zzReadonlyArray<Route>;
   protected subPath: string = "";
   protected prePath: string = "";
   route: Array<string | zzReactive<any>>;
@@ -46,7 +46,9 @@ export abstract class RouterComponent extends zzNode {
 
     this.route = ["root"];
 
-    this.routes = this.getFlatChildInstances(this.childNodes, RouterComponent);
+    this.routes = this.flatChildInstances(
+      RouterComponent
+    ) as any as zzReadonlyArray<Route>;
     this.routes.onChange.addListener(() => this.checkSubRoutes());
   }
 }

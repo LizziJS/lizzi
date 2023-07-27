@@ -213,11 +213,11 @@ export class zzReadonlyArray<T>
   }
 
   flat() {
-    return new zzArrayFlat(this as any);
+    return new zzArrayFlat(this.readonly());
   }
 
   readonly() {
-    return this as IReadOnlyArray<T>;
+    return this as zzReadonlyArray<T>;
   }
 }
 
@@ -586,15 +586,14 @@ export class zzArrayFlat<T> extends zzReadonlyArray<T> {
     this.parentMap.clear();
   }
 
-  protected add(elements: T[], index?: number) {
+  protected add(element: T, index?: number) {
     index === undefined && (index = this._value.length);
 
-    // this._value.splice(index, 0, ...elements);
-    safeInsertToArray(this._value, index, elements);
+    this._value.splice(index, 0, element);
 
-    for (let i = 0; i < elements.length; i++) {
-      this.onAdd.emit(new EventAddArray(elements[i], index + i, this));
-    }
+    this.onAdd.emit(new EventAddArray(element, index, this));
+
+    this.onChange.emit(new EventChangeValue(this._value, this._value, this));
 
     return this;
   }
@@ -605,6 +604,8 @@ export class zzArrayFlat<T> extends zzReadonlyArray<T> {
       const removed = this._value.splice(index, 1);
 
       this.onRemove.emit(new EventRemoveArray(removed[0], index, this));
+
+      this.onChange.emit(new EventChangeValue(this._value, this._value, this));
     }
 
     return index;
@@ -670,11 +671,6 @@ export class zzArrayFlat<T> extends zzReadonlyArray<T> {
           }),
           treeArray.onRemove.addListener((ev) => {
             this._unsubscribeRecursively(ev.removed);
-          }),
-          treeArray.onChange.addListener(() => {
-            this.onChange.emit(
-              new EventChangeValue(this._value, this._value, this)
-            );
           })
         )
       );
@@ -689,15 +685,15 @@ export class zzArrayFlat<T> extends zzReadonlyArray<T> {
 
       return index;
     } else {
-      this.add([treeArray], index);
+      this.add(treeArray, index);
 
       return index + 1;
     }
   }
 
-  constructor(sourceArray: ITreeArray<T>) {
+  constructor(sourceArray: zzReadonlyArray<T>) {
     super([]);
 
-    this._subscribeRecursively(sourceArray, 0);
+    this._subscribeRecursively(sourceArray as any, 0);
   }
 }

@@ -1,40 +1,33 @@
-import { Body, zzHtmlComponent } from "@lizzi/template";
+import { Body, zzHtmlComponent, JSX } from "@lizzi/template";
 
 import "./app.css";
-import { Link, Route, RouteAnchor, Router, zzRouter } from "@lizzi/router";
+import { Link, RouteAnchor, Route, Router } from "@lizzi/router";
 import { zz } from "@lizzi/core";
+import { Fragment } from "@lizzi/jsx-runtime";
 
-class Menu extends zzHtmlComponent {
-  constructor() {
-    super();
+class Menu extends Fragment {}
 
-    this.append(
-      <div class={["flex gap-1"]}>
-        <Link to={[]}>home</Link>
-        <Link to={["app", "user"]}>user</Link>
-        <Link to={["signin"]}>signin</Link>
-        <Link to={["123"]}>notdoin</Link>
-      </div>
-    );
-  }
+class Tab extends Fragment {
+  static Menu = Menu;
 }
 
-class UserMenu extends zzHtmlComponent {
-  constructor() {
+class HomeMenu extends zzHtmlComponent {
+  constructor({ children }: JSX.PropsWithChildren) {
     super();
 
+    const menus = <>{children}</>;
+
+    const tabs = menus
+      .flatChildInstances(Tab)
+      .map((tab) => tab.firstChild(Tab.Menu));
+
     this.append(
-      <div class={["flex gap-1"]}>
-        <Link to={["1"]} anchor="user">
-          user1
-        </Link>
-        <Link to={["2"]} anchor="user">
-          user2
-        </Link>
-        <Link to={["3"]} anchor="user">
-          user3
-        </Link>
-      </div>
+      <>
+        <div class={["flex gap-1"]}>Tabs</div>
+        {tabs}
+        <div class={["flex gap-1"]}>Content</div>
+        {menus}
+      </>
     );
   }
 }
@@ -45,29 +38,36 @@ Body(
   <Router>
     <h1>root</h1>
     <RouteAnchor name="home" />
-    <Route route={[""]}>
-      <h1>home</h1>
-      <Menu />
-    </Route>
-
-    <Route route={["app", "user"]}>
-      <RouteAnchor name="user" />
-      <h1>user</h1>
-      <Menu />
-      <UserMenu />
-      <Route route={[userId]}>
-        <h2>user {userId}</h2>
-      </Route>
-    </Route>
-
-    <Route route={["signin"]}>
-      <h1>signin</h1>
-      <Menu />
-    </Route>
-
-    <Route route={["**"]}>
-      <h1>Not found</h1>
-      <Menu />
-    </Route>
+    <HomeMenu>
+      <Tab>
+        <Tab.Menu>
+          <Link to={[]}>-1</Link>
+        </Tab.Menu>
+        <Route route={[]}>
+          <h1>home</h1>
+        </Route>
+      </Tab>
+      <Tab>
+        <Route route={[]}>
+          <h1>home</h1>
+        </Route>
+      </Tab>
+      <Tab>
+        <Tab.Menu>
+          <Link to={["home"]}>-2</Link>
+        </Tab.Menu>
+        <Route route={["home"]}>
+          <h1>home-2</h1>
+        </Route>
+      </Tab>
+      <Tab>
+        <Tab.Menu>
+          <Link to={["signup"]}>-3</Link>
+        </Tab.Menu>
+        <Route route={["signup"]}>
+          <h1>signup</h1>
+        </Route>
+      </Tab>
+    </HomeMenu>
   </Router>
 );

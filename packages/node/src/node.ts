@@ -181,8 +181,21 @@ export class zzNode extends zzDestructor implements INode {
     }
   }
 
-  getFlatChildInstances<T extends zzNode>(
-    childNodes: zzReadonlyArray<zzNode>,
+  firstChild<T extends zzNode>(instance: abstract new (...any: any[]) => T) {
+    return (
+      this.findChildNodes<T>((node) => node instanceof instance).next().value ??
+      null
+    );
+  }
+
+  firstParent<T extends zzNode>(instance: abstract new (...any: any[]) => T) {
+    return (
+      this.findParentNodes<T>((node) => node instanceof instance).next()
+        .value ?? null
+    );
+  }
+
+  flatChildInstances<T extends zzNode>(
     instance: abstract new (...any: any[]) => T
   ) {
     type MapT = T | zzReadonlyArray<MapT>;
@@ -195,7 +208,7 @@ export class zzNode extends zzDestructor implements INode {
       return node.childNodes.map(mapNodes);
     };
 
-    return childNodes.map(mapNodes).flat();
+    return this.childNodes.map(mapNodes).flat() as zzReadonlyArray<T>;
   }
 
   __setProperty(name: string, value: any) {
