@@ -14,10 +14,12 @@ import {
 import {
   DestructorsStack,
   IDestructor,
+  zzDestructor,
   zzDestructorsObserver,
 } from "../Destructor";
 import { zzEvent } from "../Event";
 import { zzCompute } from "./compute";
+import { zzInteger } from "./vars";
 
 export class EventAddArray<T> {
   constructor(
@@ -85,6 +87,8 @@ export interface IHelpersArray<T> {
   map<NewT>(
     mapFn: (value: T, self: zzReadonlyArray<T>) => NewT
   ): zzReadonlyArray<NewT>;
+
+  indexes(): zzArrayIndexes<T>;
 }
 
 export type IArray<T> = IReadOnlyArray<T> &
@@ -134,6 +138,10 @@ export class zzReadonlyArray<T>
   }
 
   /* helpers */
+  indexes(): zzArrayIndexes<T> {
+    return new zzArrayIndexes(this);
+  }
+
   itemsListener(
     addFn: (item: T, index: number, array: this) => void,
     removeFn: (item: T, index: number, array: this) => void = () => {}
@@ -695,5 +703,45 @@ export class zzArrayFlat<T> extends zzReadonlyArray<T> {
     super([]);
 
     this._subscribeRecursively(sourceArray as any, 0);
+  }
+}
+
+export class zzArrayIndexes<T> extends zzDestructor {
+  protected readonly _destructor = new DestructorsStack();
+  protected readonly indexMap = new Map<T, zzInteger>();
+
+  getIndex(item: T) {
+    return this.indexMap.get(item)!.readonly();
+  }
+
+  destroy(): void {
+    this._destructor.destroy();
+
+    this.indexMap.forEach((idx) => idx.destroy());
+
+    this.indexMap.clear();
+  }
+
+  constructor(array: zzReadonlyArray<T>) {
+    super();
+
+    this._destructor.add(
+      array.itemsListener(
+        (item, index) => {
+          for (const idx of this.indexMap.values()) {
+            if (idx.value >= index) idx.value++;
+          }
+
+          this.indexMap.set(item, new zzInteger(index));
+        },
+        (item, index) => {
+          this.indexMap.delete(item);
+
+          for (const idx of this.indexMap.values()) {
+            if (idx.value >= index) idx.value--;
+          }
+        }
+      )
+    );
   }
 }
