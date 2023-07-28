@@ -17,16 +17,15 @@ class HomeMenu extends zzHtmlComponent {
 
     const menus = <>{children}</>;
 
-    const tabs = menus
-      .flatChildInstances(Tab)
-      .map((tab) => tab.firstChild(Tab.Menu));
+    const tabs = menus.flatChildInstances(Tab.Menu);
+    const childs = menus.flatChildInstances(Route);
 
     this.append(
       <>
         <div class={["flex gap-1"]}>Tabs</div>
         {tabs}
         <div class={["flex gap-1"]}>Content</div>
-        {menus}
+        {childs}
       </>
     );
   }

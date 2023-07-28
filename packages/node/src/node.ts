@@ -132,9 +132,7 @@ export class zzNode extends zzDestructor implements INode {
   }
 
   _setParentNode(parent: zzNode | null) {
-    if (this._parentNode !== null) {
-      this._parentNode.childNodes.remove([this]);
-    }
+    this._unmount();
 
     this._parentNode = parent;
   }
