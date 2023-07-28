@@ -17,7 +17,7 @@ export class Form extends zzHtmlComponent {
   readonly onSubmit = zz.Event<() => void>();
 
   constructor({ children, use, onSubmit, ...args }: Props) {
-    super({ children, use });
+    super({ use });
 
     this.initProps({ onSubmit });
 
@@ -58,7 +58,7 @@ export class Form extends zzHtmlComponent {
           }),
         ]}
       >
-        {this.children}
+        {this.callChildren(children)}
       </form>
     );
   }
