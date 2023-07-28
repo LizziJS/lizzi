@@ -84,6 +84,13 @@ export class zzNode extends zzDestructor implements INode {
     this._initNodeEvents(use);
   }
 
+  protected callChildren<C>(children: C | (<T extends this>(node: T) => C)): C {
+    //check children is function and call it
+    return typeof children === "function"
+      ? (children as Function)(this)
+      : children;
+  }
+
   protected _initNodeEvents(use: ComponentUse<this>) {
     for (let useFn of use) {
       this.onMount(useFn);

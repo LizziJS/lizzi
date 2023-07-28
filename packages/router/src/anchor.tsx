@@ -24,7 +24,7 @@ export class RouteAnchor extends zzNode {
     children = [],
   }: {
     name: RouteAnchorName;
-    children?: JSX.NodeChildren;
+    children?: JSX.Children<zzNode>;
   }) {
     super();
 

@@ -9,28 +9,19 @@ import { zzNode, ComponentUse } from "@lizzi/node";
 import { JSX } from "@lizzi/jsx-runtime";
 
 export type zzHtmlComponentProps<T extends zzNode> = {
-  children?: JSX.ChildrenFunction<T>;
+  children?: JSX.Children;
   use?: ComponentUse<T>;
   [key: string]: any;
 };
 
 export class zzHtmlComponent extends zzNode {
-  protected readonly _children?: JSX.ChildrenFunction<this>;
-
   constructor({
     children,
     use = [],
   }: zzHtmlComponentProps<zzHtmlComponent> = {}) {
     super({ use });
 
-    this._children = children;
-  }
-
-  get children() {
-    //check children is function and call it
-    return typeof this._children === "function"
-      ? this._children(this)
-      : this._children;
+    this.append(children);
   }
 
   append(childrens?: JSX.Children) {
@@ -152,7 +143,7 @@ export class TextNodeView extends zzHtmlNode<Text> {
 }
 
 export const JSXChildrenToNodeMapper = (
-  children: JSX.ValueChildrenTypes | JSX.NodeChildrenTypes
+  children: JSX.Values | zzNode
 ): zzNode => {
   if (zzReadonlyArray.isArray(children) || Array.isArray(children)) {
     return new ArrayView({ children });

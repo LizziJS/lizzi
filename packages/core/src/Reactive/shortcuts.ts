@@ -74,12 +74,12 @@ export class zz {
     return new zzObject<T>(value);
   }
 
-  static toReactive<T>(variable: zz.variable<T>) {
+  static toReactive<T>(variable: zz.variable<T>): zz.Reactive<T> {
     if (typeof variable === "function") {
       return zzCompute(variable as any);
     }
     if (Array.isArray(variable)) {
-      return zzComputeArray(variable as any);
+      return zzComputeArray(variable as any) as any;
     }
     if (zzReactive.isReactive(variable)) {
       return variable;
@@ -123,12 +123,8 @@ export class zz {
 }
 
 export namespace zz {
-  export type reactive<T> = zzReactive<T>;
   export type variable<T> = zzReactive<T> | T | (() => T);
-}
-
-export namespace zz {
-  export type Value<T> = zzReactive<T>;
+  export type Reactive<T> = zzReactive<T>;
   export type String<T = string> = zzString<T>;
   export type Type<T> = zzType<T>;
   export type Number = zzNumber;

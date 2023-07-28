@@ -86,6 +86,12 @@ export function AttributeLink<T extends zzHtmlNode>(
       return;
     }
 
+    if (Array.isArray(attrvalue) || zzReadonlyArray.isArray(attrvalue)) {
+      throw new Error(
+        `Wrong attribute "${name}" value type for <${view.element.tagName.toLocaleLowerCase()} ... > element`
+      );
+    }
+
     if (typeof attrvalue === "string" || typeof attrvalue === "number") {
       element.setAttribute(name, String(attrvalue));
 

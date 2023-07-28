@@ -57,10 +57,4 @@ export const jsxs = <T extends zzNode>(
   return result as T;
 };
 
-export class Fragment extends zzHtmlComponent {
-  constructor(props: { children: JSX.Children }) {
-    super(props);
-
-    this.append(this.children);
-  }
-}
+export class Fragment extends zzHtmlComponent {}

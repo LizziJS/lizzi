@@ -7,18 +7,15 @@ type AllElementsTagName = HTMLElementTagNameMap & SVGElementTagNameMap;
 export declare namespace JSX {
   interface Element extends zzNode {}
 
-  type NodeChildrenTypes = zzNode;
-  type ValueChildrenTypes = string | number | boolean | zzReactive<any>;
-  type NodeChildren = NodeChildrenTypes | Array<NodeChildrenTypes>;
+  type Values = string | number | boolean | zzReactive<any>;
 
-  type Children =
-    | Array<NodeChildrenTypes | ValueChildrenTypes>
-    | NodeChildrenTypes
-    | ValueChildrenTypes;
+  type FuncChildrenTypes<T extends zzNode> = <TNode extends T>(
+    node: TNode
+  ) => zzNode;
 
-  type ChildrenFunction<T extends zzNode> =
-    | Children
-    | (<TNode extends T>(node: TNode) => zzNode);
+  type Children<TNodeType = zzNode | Values> = TNodeType | Array<TNodeType>;
+
+  type ChildrenFunction<T extends zzNode> = Children | FuncChildrenTypes<T>;
 
   type PropsWithChildren<Props extends object = {}> = Props & {
     children: Children;

@@ -15,7 +15,7 @@ export type ElementAttributes<T extends zzHtmlNode> = {
   class?: Array<string | zzReactive<any>>;
   style?: { [key: string]: Array<string | zzReactive<any>> };
   use?: ComponentUse<T>;
-  children?: JSX.ChildrenFunction<T>;
+  children?: JSX.Children;
   [key: string]: any;
 };
 
@@ -27,8 +27,6 @@ export class HtmlElementView<
     { children, use, ...attributes }: ElementAttributes<HtmlElementView<T>>
   ) {
     super(document.createElement(tagName), { use, children });
-
-    this.append(this.children);
 
     this.initProps(attributes);
   }
@@ -77,8 +75,6 @@ export class SvgElementView<
       children,
       use,
     });
-
-    this.append(this.children);
 
     this.initProps(attributes);
   }
