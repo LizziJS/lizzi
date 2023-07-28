@@ -1,49 +1,72 @@
 import { zzHtmlComponent, JSX } from "@lizzi/template";
-import { RouteAnchorName, convertToUrl, zzRouter } from ".";
-import { zz, zzReactive, zzReadonlyArray } from "@lizzi/core";
+import { Router, zzUrl } from ".";
+import { zz, zzCompute } from "@lizzi/core";
 
-type ReactiveUrl =
-  | Array<string | zz.reactive<string>>
-  | zzReadonlyArray<string | zz.reactive<string>>;
+type UrlArray = Array<zz.variable<string>>;
 
 type Props = JSX.IntrinsicElements["a"] &
-  JSX.PropsWithChildren<{ to: ReactiveUrl; anchor?: RouteAnchorName }>;
+  JSX.PropsWithChildren<{
+    to?: UrlArray;
+    search?: Record<
+      string,
+      zz.variable<string> | zz.variable<number> | zz.variable<boolean>
+    >;
+  }>;
 
 export class Link extends zzHtmlComponent {
   constructor({
     children,
-    href,
-    anchor,
     to,
+    search,
+    href,
     onClick = () => {},
     ...args
   }: Props) {
     super();
 
-    const toArray = Array.isArray(to) ? new zzReadonlyArray(to) : to;
-    const toComputeArray = zz.ComputeArray<string>(() =>
-      toArray.value.map((v) => (zzReactive.isReactive(v) ? v.value : v))
-    );
-    const zzUrl = zz.Compute(() => convertToUrl(toComputeArray.value));
+    let rQuery = new Map<string, zz.Reactive<any>>();
+    if (search) {
+      for (const name in search) {
+        rQuery.set(name, zz.toReactive(search[name] as any));
+      }
+    }
 
-    this.append(
-      <a
-        href={zzUrl}
-        {...args}
-        onClick={(ev: MouseEvent) => {
-          ev.preventDefault();
+    this.onMount(() => {
+      const rootRouter = this.firstParent<Router>(Router);
 
-          onClick(ev);
+      if (!rootRouter) throw new Error("Link must be inside a Router");
 
-          if (anchor) {
-            zzRouter(this).goAnchor(anchor, toComputeArray.value);
-          } else {
-            zzRouter(this).go(toComputeArray.value);
-          }
-        }}
-      >
-        {children}
-      </a>
-    );
+      const url = new zzUrl();
+
+      zzCompute(() => {
+        url.pathname = to ? "/" + to.join("/") : rootRouter.url.pathname;
+
+        const searchParams = new Map(rootRouter.url.searchParams.toMap());
+
+        rQuery.forEach((value, name) =>
+          searchParams.set(name, String(value.value))
+        );
+
+        searchParams.forEach((value, name) => {
+          url.searchParams.set(name, value);
+        });
+      });
+
+      this.append(
+        <a
+          href={() => url.href}
+          {...args}
+          onClick={(ev: MouseEvent) => {
+            ev.preventDefault();
+
+            onClick(ev);
+
+            rootRouter.url.go(url.pathname + url.search);
+          }}
+        >
+          {children}
+        </a>
+      );
+    });
   }
 }

@@ -6,6 +6,7 @@
 
 import {
   EventChangeValue,
+  Locker,
   zzGetReactiveObserver,
   zzMap,
   zzString,
@@ -156,18 +157,32 @@ export class zzUrl extends zzString {
   constructor(value?: string) {
     super(value ?? window.location.href);
 
-    this.onChange.addListener((ev) => {
-      const url = new URL(ev.value);
+    const lock = Locker.new();
 
-      for (const [key, value] of url.searchParams) {
-        this.searchParams.set(key, value);
-      }
+    this.onChange
+      .addListener(
+        lock((ev) => {
+          const url = new URL(ev.value);
 
-      for (const [key] of this.searchParams) {
-        if (!this.searchParams.has(key)) {
-          this.searchParams.delete(key);
-        }
-      }
-    });
+          for (const [key, value] of url.searchParams) {
+            this.searchParams.set(key, value);
+          }
+
+          for (const [key] of this.searchParams) {
+            if (!url.searchParams.has(key)) {
+              this.searchParams.delete(key);
+            }
+          }
+        })
+      )
+      .run(EventChangeValue.new(this));
+
+    this.searchParams.onChange.addListener(
+      lock((ev) => {
+        const search = new URLSearchParams([...ev.value.entries()]);
+
+        this.search = search.toString();
+      })
+    );
   }
 }
