@@ -1,9 +1,7 @@
 export class zzEventLocker {
   private locked = new Set<Symbol>();
 
-  new() {
-    const locker = Symbol();
-
+  new(locker = Symbol()) {
     return <TFunc extends (...args: any[]) => void>(fn: TFunc) => {
       return this.locker(locker, fn);
     };

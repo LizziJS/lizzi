@@ -97,14 +97,14 @@ export class zzUrl extends zzString {
     this.value = url.href;
   }
 
-  get pathname() {
+  get pathname(): string {
     return new URL(this.value).pathname;
   }
 
-  set pathname(value: string) {
+  set pathname(value: string | string[]) {
     const url = new URL(this.value);
 
-    url.pathname = value;
+    url.pathname = Array.isArray(value) ? value.join("/") : value;
 
     this.value = url.href;
   }

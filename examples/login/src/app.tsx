@@ -17,6 +17,16 @@ const data = [
   "entry-9",
   "entry-10",
   "entry-11",
+  "entry-12",
+  "entry-13",
+  "entry-14",
+  "entry-15",
+  "entry-16",
+  "entry-17",
+  "entry-18",
+  "entry-19",
+  "entry-20",
+  "entry-21",
 ];
 
 class Pagenator {
