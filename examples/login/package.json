@@ -13,11 +13,12 @@
     "@lizzi/router": "^0.1.8",
     "@lizzi/template": "^0.1.8",
     "uuid": "^9.0.0",
-    "yup": "^1.2.0"
+    "validator": "^13.9.0"
   },
   "devDependencies": {
     "@types/jest": "^29.2.2",
     "@types/uuid": "^9.0.1",
+    "@types/validator": "^13.7.17",
     "@webpack-cli/serve": "^1.7.0",
     "autoprefixer": "^10.4.12",
     "copy-webpack-plugin": "^11.0.0",

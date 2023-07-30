@@ -1,5 +1,5 @@
 import { on, JSX, zzHtmlComponent } from "@lizzi/template";
-import { InputComponent } from "./Input";
+import { Input } from "./Input";
 import { zz } from "@lizzi/core";
 import { ComponentUse } from "@lizzi/node";
 
@@ -13,8 +13,10 @@ type Props = JSX.PropsWithChildrenFunction<
   JSX.IntrinsicElements["form"];
 
 export class Form extends zzHtmlComponent {
+  static readonly Input = Input;
+
   readonly isSubmitting = zz.Boolean(false);
-  readonly onSubmit = zz.Event<() => void>();
+  readonly onSubmit = zz.Event<(ev: SubmitEvent) => void>();
 
   constructor({ children, use, onSubmit, ...args }: Props) {
     super({ use });
@@ -34,8 +36,8 @@ export class Form extends zzHtmlComponent {
             this.isSubmitting.value = true;
 
             try {
-              const inputsIterator = this.findChildNodes<InputComponent>(
-                (node) => node instanceof InputComponent
+              const inputsIterator = this.findChildNodes<Input>(
+                (node) => node instanceof Input
               );
 
               const inputs = Array.from(inputsIterator);
@@ -50,7 +52,7 @@ export class Form extends zzHtmlComponent {
               }
 
               if (passValidation) {
-                await this.onSubmit.emit();
+                await this.onSubmit.emit(ev);
               }
             } finally {
               this.isSubmitting.value = false;

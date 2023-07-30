@@ -11,9 +11,9 @@ export const AppendToElement = (
   element: HTMLElement,
   children: JSX.Children
 ) => {
-  return new zzHtmlNode(element).append(children);
+  return new zzHtmlNode(element, { children });
 };
 
 export const Body = (children: JSX.Children) => {
-  return new zzHtmlNode(document.body).append(children)._mount();
+  return new zzHtmlNode(document.body, { children })._mount();
 };

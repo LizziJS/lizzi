@@ -144,7 +144,7 @@ export class zzNode extends zzDestructor implements INode {
     this._parentNode = parent;
   }
 
-  append(node: zzNode | zzNode[]) {
+  protected append(node: zzNode | zzNode[]) {
     if (Array.isArray(node)) {
       this.childNodes.add(node);
     } else {
@@ -152,7 +152,7 @@ export class zzNode extends zzDestructor implements INode {
     }
   }
 
-  remove(node: zzNode | zzNode[]) {
+  protected remove(node: zzNode | zzNode[]) {
     if (Array.isArray(node)) {
       this.childNodes.remove(node);
     } else {
@@ -220,6 +220,11 @@ export class zzNode extends zzDestructor implements INode {
     if (value === undefined) return;
 
     const valueObj = this[name as keyof this];
+
+    if (valueObj === undefined) {
+      this[name as keyof this] = value;
+      return;
+    }
 
     if (zzEvent.isEvent(valueObj)) {
       valueObj.addListener(value);

@@ -16,9 +16,30 @@ export function convertToUrl(url: TUrl): string {
 
 export class zzUrlRouter extends zzUrl {
   protected destructor = zz.Destructor();
+  protected currentState = zz.Object<{ [key: string]: any }>();
 
-  go(url: TUrl): void {
-    this.value = convertToUrl(url);
+  getState(name: string): any {
+    return zz.Compute(() => {
+      const currentState = this.currentState.value;
+
+      return currentState ? currentState[name] ?? null : null;
+    });
+  }
+
+  pushState(state: { [key: string]: any }): void {
+    window.history.pushState(state, "", this.value);
+    this.currentState.value = state;
+  }
+
+  setState(state: { [key: string]: any }): void {
+    window.history.replaceState(state, "", this.value);
+    this.currentState.value = state;
+  }
+
+  go(url: TUrl, state: { [key: string]: any } | null = null): void {
+    const stringUrl = convertToUrl(url);
+
+    window.history.pushState(state, "", stringUrl);
   }
 
   goBack(): void {
@@ -47,15 +68,16 @@ export class zzUrlRouter extends zzUrl {
       addListener(
         window,
         "popstate",
-        locker(() => {
+        locker((ev: PopStateEvent) => {
           this.value = window.location.href;
+          this.currentState.value = ev.state;
         })
       )
     );
 
     this.onChange.addListener(
       locker((ev) => {
-        window.history.pushState(null, "", ev.value);
+        this.go(ev.value);
       })
     );
   }
