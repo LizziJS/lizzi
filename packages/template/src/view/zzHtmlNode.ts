@@ -5,12 +5,12 @@
  */
 
 import { EventChangeValue, zzReadonlyArray, zzReactive } from "@lizzi/core";
-import { zzNode, ComponentUse } from "@lizzi/node";
+import { zzNode, UseNode } from "@lizzi/node";
 import { JSX } from "@lizzi/jsx-runtime";
 
 export type zzHtmlComponentProps<T extends zzNode> = {
   children?: JSX.Children;
-  use?: ComponentUse<T>;
+  use?: UseNode<T>;
   [key: string]: any;
 };
 

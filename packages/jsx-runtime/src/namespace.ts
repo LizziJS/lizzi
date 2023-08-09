@@ -53,7 +53,9 @@ export declare namespace JSX {
         | number
         | zzReactive<any>;
     };
-    use?: Array<(view: zzHtmlNode<AllElementsTagName[T]>) => void>;
+    use?:
+      | Array<(view: zzHtmlNode<AllElementsTagName[T]>) => void>
+      | ((view: zzHtmlNode<AllElementsTagName[T]>) => void);
     [key: string]: any;
   }
 

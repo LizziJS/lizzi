@@ -1,12 +1,12 @@
 import { on, JSX, zzHtmlComponent } from "@lizzi/template";
 import { Input } from "./Input";
 import { zz } from "@lizzi/core";
-import { ComponentUse } from "@lizzi/node";
+import { UseNode } from "@lizzi/node";
 
 type Props = JSX.PropsWithChildrenFunction<
   Form,
   {
-    use?: ComponentUse<Form>;
+    use?: UseNode<Form>;
     onSubmit?: (ev: SubmitEvent) => Promise<void>;
   }
 > &

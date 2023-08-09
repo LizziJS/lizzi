@@ -1,18 +1,28 @@
 import { zz } from "@lizzi/core";
 import { JSX, zzHtmlComponent } from "@lizzi/template";
 import { FormPages } from "./pages";
-import { If } from "@lizzi/node";
+import { UseNode, If } from "@lizzi/node";
 
 export class FormPage extends zzHtmlComponent {
   readonly isActive = zz.Boolean(false);
 
-  next(ev: SubmitEvent) {
-    this.firstParent(FormPages)?.next(ev, this);
+  next() {
+    this.firstParent(FormPages)?.next(this);
   }
 
-  constructor({ children }: { children: JSX.Children<JSX.Element> }) {
-    super();
+  constructor({
+    children,
+    use,
+  }: {
+    children: JSX.ChildrenFunction<FormPage>;
+    use?: UseNode<FormPage>;
+  }) {
+    super({ use });
 
-    this.append(<If condition={this.isActive}>{children}</If>);
+    this.append(
+      <If condition={this.isActive}>
+        <>{this.callChildren(children)}</>
+      </If>
+    );
   }
 }

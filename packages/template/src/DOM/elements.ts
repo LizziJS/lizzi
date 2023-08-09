@@ -9,12 +9,12 @@ import { AttributeLink, ClassLink, StyleLink } from "./attributes";
 import { JSX } from "@lizzi/jsx-runtime";
 import { zzHtmlNode } from "../view/zzHtmlNode";
 import { on } from "../..";
-import { ComponentUse } from "@lizzi/node";
+import { UseNode } from "@lizzi/node";
 
 export type ElementAttributes<T extends zzHtmlNode> = {
   class?: Array<string | zzReactive<any>>;
   style?: { [key: string]: Array<string | zzReactive<any>> };
-  use?: ComponentUse<T>;
+  use?: UseNode<T>;
   children?: JSX.Children;
   [key: string]: any;
 };

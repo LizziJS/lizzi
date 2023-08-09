@@ -3,7 +3,13 @@ import { IReadOnlyReactive, zz } from "@lizzi/core";
 export class ValidatedValue implements IReadOnlyReactive<string> {
   protected readonly _errorMessage = zz.String();
   readonly errorMessage = this._errorMessage.readonly();
-  readonly input = zz.String();
+  readonly input: zz.String;
+  readonly onChange: typeof this.input.onChange;
+
+  constructor(initialValue: string = "") {
+    this.input = zz.String(initialValue);
+    this.onChange = this.input.onChange;
+  }
 
   protected readonly _typeValidators: {
     validator: (value: any, ...args: any[]) => boolean;
@@ -34,8 +40,6 @@ export class ValidatedValue implements IReadOnlyReactive<string> {
 
     return true;
   }
-
-  readonly onChange = this.input.onChange;
 
   get value() {
     return this.input.value;

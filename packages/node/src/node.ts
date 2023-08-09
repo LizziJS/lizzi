@@ -26,9 +26,9 @@ export interface INode {
 }
 
 export const isNodeConstructor = Symbol("isNodeConstructor");
-export type ComponentUse<TNode extends zzNode> = Array<
-  <T extends TNode>(view: T) => void
->;
+export type UseNode<TNode extends zzNode> =
+  | Array<<T extends TNode>(view: T) => void>
+  | (<T extends TNode>(view: T) => void);
 
 export class zzNode extends zzDestructor implements INode {
   static [isNodeConstructor] = true;
@@ -57,7 +57,7 @@ export class zzNode extends zzDestructor implements INode {
   constructor({
     use = [],
   }: {
-    use?: ComponentUse<zzNode>;
+    use?: UseNode<zzNode>;
   } = {}) {
     super();
 
@@ -91,9 +91,15 @@ export class zzNode extends zzDestructor implements INode {
       : children;
   }
 
-  protected _initNodeEvents(use: ComponentUse<this>) {
-    for (let useFn of use) {
-      this.onMount(useFn);
+  protected _initNodeEvents(use: UseNode<this>) {
+    if (!use) return;
+
+    if (!Array.isArray(use)) {
+      this.onMount(use);
+    } else {
+      for (let useFn of use) {
+        this.onMount(useFn);
+      }
     }
   }
 

@@ -4,7 +4,7 @@ import { JSX, zzHtmlComponent } from "@lizzi/template";
 import { FormPage } from "./page";
 
 export class FormPages extends zzHtmlComponent {
-  readonly onSubmit = zz.Event<(ev: SubmitEvent) => void>();
+  readonly onSubmit = zz.Event<(view: this) => void>();
 
   readonly formPage = zz.Object<FormPage>(null).itemListener(
     (page) => {
@@ -27,12 +27,12 @@ export class FormPages extends zzHtmlComponent {
     ];
   }
 
-  next(ev: SubmitEvent, page: FormPage) {
+  next(page: FormPage) {
     const pages = this.pages;
     const index = pages.indexOf(page);
 
     if (index + 1 >= pages.length) {
-      this.onSubmit.emit(ev);
+      this.onSubmit.emit(this);
       return;
     }
 
@@ -46,8 +46,6 @@ export class FormPages extends zzHtmlComponent {
     super();
 
     this.initProps({ onSubmit });
-
-    children = this.callChildren(children);
 
     this.onMount(() => {
       const urlRouter = this.router.url;
@@ -64,7 +62,7 @@ export class FormPages extends zzHtmlComponent {
         this.formPage.value = this.pages[counter.value] ?? null;
       });
 
-      this.append(<>{children}</>);
+      this.append(<>{this.callChildren(children)}</>);
     });
   }
 }
