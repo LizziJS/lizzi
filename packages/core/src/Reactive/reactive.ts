@@ -31,6 +31,8 @@ export interface IWriteOnlyReactive<T> {
 export interface IReadOnlyReactive<T> {
   get value(): T;
   readonly onChange: zzEvent<(event: EventChangeValue<T>) => void>;
+  readonly(): IReadOnlyReactive<T>;
+  mapValue<NewT>(fn: (value: T, last: T) => NewT): zzReactive<NewT>;
 }
 
 export type IReactive<T> = IWriteOnlyReactive<T> & IReadOnlyReactive<T>;
@@ -85,6 +87,16 @@ export class zzReactive<TValue>
 
   readonly() {
     return this as IReadOnlyReactive<TValue>;
+  }
+
+  mapValue<NewT>(fn: (value: TValue, last: TValue) => NewT): zzReactive<NewT> {
+    const newReactive = new zzReactive<NewT>(fn(this.value, this.value));
+
+    this.onChange.addListener(
+      (ev) => (newReactive.value = fn(ev.value, ev.last))
+    );
+
+    return newReactive;
   }
 
   constructor(value: TValue) {

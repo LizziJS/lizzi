@@ -3,7 +3,6 @@ import { FormPages } from "../lib/pages/pages";
 import { FormPage } from "../lib/pages/page";
 import { RegisterEmailForm } from "./RegisterEmailForm";
 import { zz } from "@lizzi/core";
-import { ref } from "@lizzi/node";
 
 class EmptyForm extends zzHtmlComponent {
   constructor({ children }: JSX.PropsWithChildren) {
@@ -43,7 +42,11 @@ export class Register extends zzHtmlComponent {
         >
           <RegisterEmailForm
             use={[
-              RegisterEmailForm.connect(email, password),
+              RegisterEmailForm.initializer(email, password),
+              RegisterEmailForm.submit((form) => {
+                email.value = form.email.value;
+                password.value = form.password.value;
+              }),
               RegisterEmailForm.submit(() => {
                 nextTrigger.emit();
               }),

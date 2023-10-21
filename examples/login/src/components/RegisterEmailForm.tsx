@@ -12,13 +12,13 @@ type Props = {
 };
 
 export class RegisterEmailForm extends zzHtmlComponent {
-  readonly onSubmit = zz.Event<(ev: SubmitEvent, view: this) => void>();
+  readonly onSubmit = zz.Event<(view: this) => void>();
 
   readonly email;
   readonly password;
   readonly passwordConfirm;
 
-  static connect(email: zz.String, password: zz.String) {
+  static initializer(email: zz.String, password: zz.String) {
     return (view: RegisterEmailForm) => {
       view.email.input.value = email.value;
       view.password.input.value = password.value;
@@ -31,7 +31,7 @@ export class RegisterEmailForm extends zzHtmlComponent {
     };
   }
 
-  static submit(onSubmit: (ev: SubmitEvent, view: RegisterEmailForm) => void) {
+  static submit(onSubmit: (view: RegisterEmailForm) => void) {
     return (view: RegisterEmailForm) => {
       view.onSubmit.addListener(onSubmit);
     };
@@ -73,7 +73,7 @@ export class RegisterEmailForm extends zzHtmlComponent {
           <h2 class="text-3xl font-semibold mb-4">Welcome Back!</h2>
           <Form
             onSubmit={async (ev: SubmitEvent) => {
-              this.onSubmit.emit(ev, this);
+              this.onSubmit.emit(this);
             }}
           >
             {(form) => (

@@ -1,7 +1,13 @@
 import { DestructorsStack } from "../Destructor";
-import { EventWrapper, zzEvent } from "../Event";
+import {
+  EventWrapper,
+  EventWrapperObject,
+  EventWrapperParam,
+  zzEvent,
+} from "../Event";
 import { zzArray, zzComputeArray, zzComputeArrayFn } from "./array";
 import { zzCompute, zzComputeFn } from "./compute";
+import { zzFromEvent } from "./event";
 import { zzMap } from "./map";
 import { zzObject } from "./object";
 import { zzReactive } from "./reactive";
@@ -100,17 +106,25 @@ export class zz {
     return zzCompute(() => (c.value ? t.value : f.value));
   }
 
+  static fromEvent<R, T extends EventWrapperObject>(
+    initialValue: R,
+    object: T,
+    eventName: EventWrapperParam<T>[0],
+    fn: (...args: Parameters<EventWrapperParam<T>[1]>) => R,
+    ...params: any
+  ) {
+    return zzFromEvent(initialValue, object, eventName, fn, ...params);
+  }
+
   static Event<T extends (...args: any) => void>() {
     return new zzEvent<T>();
   }
 
-  static wrapEvent<T extends (...args: any) => void>(
-    element: HTMLElement,
-    eventName: Parameters<HTMLElement["addEventListener"]>[0],
-    fn: T,
-    options: boolean = false
+  static wrapEvent<T extends EventWrapperObject>(
+    object: T,
+    ...params: EventWrapperParam<T>
   ) {
-    return new EventWrapper(element, eventName, fn, options);
+    return new EventWrapper(object, ...params);
   }
 
   static Destructor() {
