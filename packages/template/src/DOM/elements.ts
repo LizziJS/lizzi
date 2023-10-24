@@ -35,12 +35,12 @@ export class HtmlElementView<
     for (let name in attributes) {
       switch (name.toLocaleLowerCase()) {
         case "class": {
-          this.onMount(ClassLink(attributes.class as any));
+          this.addToMount(ClassLink(attributes.class as any));
           break;
         }
         case "style": {
           for (let styleName in attributes.style as any) {
-            this.onMount(
+            this.addToMount(
               StyleLink(styleName, (attributes.style as any)[styleName])
             );
           }
@@ -48,12 +48,12 @@ export class HtmlElementView<
         }
         default: {
           if (name.startsWith("on") && typeof attributes[name] === "function") {
-            this.onMount(
+            this.addToMount(
               on(name.toLocaleLowerCase().slice(2), attributes[name])
             );
             break;
           }
-          this.onMount(AttributeLink(name, attributes[name]) as any);
+          this.addToMount(AttributeLink(name, attributes[name]) as any);
         }
       }
     }
@@ -83,12 +83,12 @@ export class SvgElementView<
     for (let name in attributes) {
       switch (name.toLocaleLowerCase()) {
         case "class": {
-          this.onMount(ClassLink(attributes.class as any));
+          this.addToMount(ClassLink(attributes.class as any));
           break;
         }
         case "style": {
           for (let styleName in attributes.style as any) {
-            this.onMount(
+            this.addToMount(
               StyleLink(styleName, (attributes.style as any)[styleName])
             );
           }
@@ -96,12 +96,12 @@ export class SvgElementView<
         }
         default: {
           if (name.startsWith("on") && typeof attributes[name] === "function") {
-            this.onMount(
+            this.addToMount(
               on(name.toLocaleLowerCase().slice(2), attributes[name])
             );
             break;
           }
-          this.onMount(AttributeLink(name, attributes[name]));
+          this.addToMount(AttributeLink(name, attributes[name]));
         }
       }
     }

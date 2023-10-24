@@ -8,7 +8,6 @@ import { zz, zzReactive, zzReadonlyArray } from "@lizzi/core";
 import { If, zzNode } from "@lizzi/node";
 import { UrlArray, zzRouter, zzUrlRouter } from ".";
 import { RouteAnchor, RouteAnchorName } from "./anchor";
-import { JSX } from "@lizzi/jsx-runtime";
 
 export abstract class RouterComponent extends zzNode {
   readonly routes: zzReadonlyArray<Route>;
@@ -43,7 +42,7 @@ export abstract class RouterComponent extends zzNode {
   }
 
   constructor() {
-    super();
+    super({});
 
     this.route = ["root"];
 
@@ -132,7 +131,7 @@ export class Route extends RouterComponent {
     route,
     children,
   }: {
-    children: zzNode | zzNode[];
+    children: zzNode<any> | zzNode<any>[];
     route: Array<string | zzReactive<any>>;
   }) {
     super();
@@ -166,7 +165,7 @@ export class Router extends RouterComponent {
 
     this.append(children);
 
-    this.onMount(() => {
+    this.addToMount(() => {
       this.url.onChange
         .addListener(() => {
           this.subPath = this.url.pathname;

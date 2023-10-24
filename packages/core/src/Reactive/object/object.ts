@@ -4,9 +4,9 @@
  * This source code is licensed under the MIT license.
  */
 
-import { EventChangeValue } from "./reactive";
-import { DestructorsStack, zzDestructorsObserver } from "../Destructor";
-import { zzType } from "./type";
+import { DestructorsStack, zzDestructorsObserver } from "../../Destructor";
+import { ReactiveEventChange } from "../reactive";
+import { zzType } from "../type";
 
 export class zzObject<T> extends zzType<T | null> {
   itemListener(
@@ -27,7 +27,7 @@ export class zzObject<T> extends zzType<T | null> {
           destructor.add(zzDestructorsObserver.catch(() => setFn(ev.value!)));
         }
       })
-      .run(new EventChangeValue(this.value, null, this));
+      .run(new ReactiveEventChange(this.value, null, this));
 
     return this;
   }

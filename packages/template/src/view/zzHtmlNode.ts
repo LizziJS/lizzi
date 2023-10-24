@@ -5,47 +5,23 @@
  */
 
 import { EventChangeValue, zzReadonlyArray, zzReactive } from "@lizzi/core";
-import { zzNode, UseNode } from "@lizzi/node";
+import { zzNode, PropsWithUse } from "@lizzi/node";
 import { JSX } from "@lizzi/jsx-runtime";
 
-export type zzHtmlComponentProps<T extends zzNode> = {
-  children?: JSX.Children;
-  use?: UseNode<T>;
-  [key: string]: any;
-};
+export type zzHtmlNodeProps<TNode extends zzHtmlNode<any>> = PropsWithUse<
+  {
+    children?: JSX.Children;
+    [key: string]: any;
+  },
+  TNode
+>;
 
-export class zzHtmlComponent extends zzNode {
-  constructor({
-    children,
-    use = [],
-  }: zzHtmlComponentProps<zzHtmlComponent> = {}) {
-    super({ use });
-
-    this.append(children);
-  }
-
-  append(childrens?: JSX.Children) {
-    if (Array.isArray(childrens)) {
-      const viewNodes = childrens
-        .map((child) => JSXChildrenToNodeMapper(child))
-        .filter((view) => view);
-
-      super.append(viewNodes);
-    } else if (childrens) {
-      const view = JSXChildrenToNodeMapper(childrens);
-      if (view) {
-        super.append(view);
-      }
-    }
-
-    return this;
-  }
-}
-
-export class zzHtmlNode<E extends Node = Element> extends zzHtmlComponent {
+export class zzHtmlNode<E extends Node = Element> extends zzNode<
+  zzHtmlNodeProps<zzHtmlNode<E>>
+> {
   readonly element: E;
 
-  constructor(node: E, props: zzHtmlComponentProps<zzHtmlNode<E>> = {}) {
+  constructor(node: E, props: zzHtmlNodeProps<zzHtmlNode<E>> = {}) {
     super(props);
 
     this.element = node;
@@ -65,11 +41,11 @@ export class zzHtmlNode<E extends Node = Element> extends zzHtmlComponent {
 
 export class ReactiveValueView extends zzNode {
   constructor({ children }: { children: zzReactive<any> }) {
-    super();
+    super({});
 
     let isTextNow = false;
 
-    this.onMount(() => {
+    this.addToMount(() => {
       children.onChange
         .addListener((ev) => {
           if (ev.value === null) {
@@ -94,10 +70,10 @@ export class ReactiveValueView extends zzNode {
 
 export class ArrayView<T extends zzNode> extends zzNode {
   constructor({ children }: { children: zzReadonlyArray<T> | T[] }) {
-    super();
+    super({});
 
     if (zzReadonlyArray.isArray(children)) {
-      this.onMount(() => {
+      this.addToMount(() => {
         children
           .map((child) => JSXChildrenToNodeMapper(child))
           .filter((view) => view !== null && view !== undefined)
@@ -129,7 +105,7 @@ export class TextNodeView extends zzHtmlNode<Text> {
     super(document.createTextNode(""));
 
     if (zzReactive.isReactive(children)) {
-      this.onMount(() => {
+      this.addToMount(() => {
         children.onChange
           .addListener((ev) => {
             this.element.data = String(ev.value);

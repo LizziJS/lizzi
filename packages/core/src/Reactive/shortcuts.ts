@@ -1,17 +1,13 @@
 import { DestructorsStack } from "../Destructor";
-import {
-  EventWrapper,
-  EventWrapperObject,
-  EventWrapperParam,
-  zzEvent,
-} from "../Event";
-import { zzArray, zzComputeArray, zzComputeArrayFn } from "./array";
-import { zzCompute, zzComputeFn } from "./compute";
-import { zzFromEvent } from "./event";
-import { zzMap } from "./map";
-import { zzObject } from "./object";
-import { zzReactive } from "./reactive";
-import { zzSet } from "./set";
+import { EventWrapper, zzEvent } from "../Event";
+import { zzArray } from "./array/array";
+import { zzComputeArray } from "./array/compute";
+import { IReadOnlyArray } from "./array/readonlyArray";
+import { zzCompute } from "./compute";
+import { zzMap } from "./map/map";
+import { zzObject } from "./object/object";
+import { IReadOnlyReactive, zzReactive } from "./reactive";
+import { zzSet } from "./set/set";
 import { zzTag } from "./tags";
 import { zzType } from "./type";
 import {
@@ -80,7 +76,7 @@ export class zz {
     return new zzObject<T>(value);
   }
 
-  static toReactive<T>(variable: zz.variable<T>): zz.Reactive<T> {
+  static makeReactive<T>(variable: zz.ReactiveOrNot<T>): IReadOnlyReactive<T> {
     if (typeof variable === "function") {
       return zzCompute(variable as any);
     }
@@ -95,36 +91,28 @@ export class zz {
   }
 
   static If<T, R>(
-    cond: zz.variable<T>,
-    onTrue: zz.variable<R>,
-    onFalse: zz.variable<R>
+    cond: zz.ReactiveOrNot<T>,
+    onTrue: zz.ReactiveOrNot<R>,
+    onFalse: zz.ReactiveOrNot<R>
   ) {
-    const c = zz.toReactive(cond);
-    const t = zz.toReactive(onTrue);
-    const f = zz.toReactive(onFalse);
+    const c = zz.makeReactive(cond);
+    const t = zz.makeReactive(onTrue);
+    const f = zz.makeReactive(onFalse);
 
     return zzCompute(() => (c.value ? t.value : f.value));
-  }
-
-  static fromEvent<R, T extends EventWrapperObject>(
-    initialValue: R,
-    object: T,
-    eventName: EventWrapperParam<T>[0],
-    fn: (...args: Parameters<EventWrapperParam<T>[1]>) => R,
-    ...params: any
-  ) {
-    return zzFromEvent(initialValue, object, eventName, fn, ...params);
   }
 
   static Event<T extends (...args: any) => void>() {
     return new zzEvent<T>();
   }
 
-  static wrapEvent<T extends EventWrapperObject>(
-    object: T,
-    ...params: EventWrapperParam<T>
+  static addListener<T extends (...args: any) => void>(
+    element: HTMLElement,
+    eventName: Parameters<HTMLElement["addEventListener"]>[0],
+    fn: T,
+    options: boolean = false
   ) {
-    return new EventWrapper(object, ...params);
+    return new EventWrapper(element, eventName, fn, options);
   }
 
   static Destructor() {
@@ -137,21 +125,28 @@ export class zz {
 }
 
 export namespace zz {
-  export type variable<T> = zzReactive<T> | T | (() => T);
+  export type ReactiveOrNot<T> = IReadOnlyReactive<T> | T | (() => T);
   export type Reactive<T> = zzReactive<T>;
-  export type String<T = string> = zzString<T>;
+  export type ReactiveRead<T> = IReadOnlyReactive<T>;
+  export type String<T extends string = string> = zzString<T>;
+  export type StringRead<T extends string = string> = IReadOnlyReactive<T>;
   export type Type<T> = zzType<T>;
   export type Number = zzNumber;
   export type Integer = zzInteger;
   export type Float = zzFloat;
   export type BigInt = zzBigInt;
   export type Boolean = zzBoolean;
+  export type NumberRead = IReadOnlyReactive<number>;
+  export type IntegerRead = IReadOnlyReactive<number>;
+  export type FloatRead = IReadOnlyReactive<number>;
+  export type BigIntRead = IReadOnlyReactive<BigInt>;
+  export type BooleanRead = IReadOnlyReactive<boolean>;
   export type Object<T> = zzObject<T>;
+  export type ObjectRO<T extends object> = IReadOnlyReactive<T | null>;
   export type Map<TKey, TValue> = zzMap<TKey, TValue>;
   export type Set<TValue> = zzSet<TValue>;
   export type Array<T> = zzArray<T>;
-  export type Compute<T> = zzComputeFn<T>;
-  export type ComputeArray<T> = zzComputeArrayFn<T>;
+  export type ArrayRead<T> = IReadOnlyArray<T>;
   export type Event<T extends (...args: any) => void> = zzEvent<T>;
   export type Destructor = DestructorsStack;
 }

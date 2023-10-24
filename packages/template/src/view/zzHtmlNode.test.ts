@@ -63,14 +63,14 @@ describe("ReactiveValueView", () => {
     expect(addMock).toBeCalledTimes(0);
     expect(removeMock).toBeCalledTimes(0);
 
-    object.value = new zzNode();
+    object.value = new zzNode({});
 
     expect(view.childNodes.length).toBe(1);
     expect(view.childNodes.toArray()[0]).toBe(object.value);
     expect(addMock).toBeCalledTimes(1);
     expect(removeMock).toBeCalledTimes(0);
 
-    object.value = new zzNode();
+    object.value = new zzNode({});
 
     expect(view.childNodes.length).toBe(1);
     expect(view.childNodes.toArray()[0]).toBe(object.value);
@@ -83,7 +83,7 @@ describe("ReactiveValueView", () => {
     expect(addMock).toBeCalledTimes(2);
     expect(removeMock).toBeCalledTimes(2);
 
-    object.value = new zzNode();
+    object.value = new zzNode({});
 
     expect(view.childNodes.length).toBe(1);
     expect(view.childNodes.toArray()[0]).toBe(object.value);
@@ -110,7 +110,7 @@ describe("ReactiveValueView", () => {
     expect(addMock).toBeCalledTimes(1);
     expect(removeMock).toBeCalledTimes(0);
 
-    object.value = new zzNode();
+    object.value = new zzNode({});
 
     expect(view.childNodes.length).toBe(1);
     expect(view.childNodes.toArray()[0]).toBe(object.value);

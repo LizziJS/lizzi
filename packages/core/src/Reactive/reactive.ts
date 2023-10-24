@@ -1,78 +1,63 @@
-/**
- * Copyright (c) Stanislav Shishankin
- *
- * This source code is licensed under the MIT license.
- */
-
-import { zzDestructor, DestructorsStack } from "../Destructor";
-import { zzIsolatorStack } from "../Isolator";
+import { DestructorsStack, IDestructor, zzDestructor } from "../Destructor";
 import { zzEvent } from "../Event";
+import { zzIsolatorStack } from "../Isolator";
+import { hasGetter } from "../Tools/hasGetter";
 
-export class EventChangeValue<T> {
-  static new<R extends zzReactive<any>>(target: R) {
-    return new EventChangeValue(target.value, target.value, target);
-  }
+export interface IReactiveEventChange<TValue, TTarget> {
+  value: TValue;
+  last: TValue;
+  target: TTarget;
+}
 
+export class ReactiveEventChange<TValue, TTarget>
+  implements IReactiveEventChange<TValue, TTarget>
+{
   constructor(
-    public readonly value: T,
-    public readonly last: T,
-    public readonly target: zzReactive<T>
+    public readonly value: TValue,
+    public readonly last: TValue,
+    public readonly target: TTarget
   ) {}
 }
 
-export type InferReactive<P extends any> = P extends zzReactive<infer T>
-  ? T
-  : P;
-
-export interface IWriteOnlyReactive<T> {
-  set value(value: T);
+export interface IReadOnlyReactive<TValue> extends IDestructor {
+  get value(): TValue;
+  readonly onChange: zzEvent<
+    (event: IReactiveEventChange<TValue, IReadOnlyReactive<TValue>>) => void
+  >;
+  mapValue<NewT>(
+    fn: (value: TValue, last: TValue, target: this) => NewT
+  ): IReadOnlyReactive<NewT>;
 }
 
-export interface IReadOnlyReactive<T> {
-  get value(): T;
-  readonly onChange: zzEvent<(event: EventChangeValue<T>) => void>;
-  readonly(): IReadOnlyReactive<T>;
-  mapValue<NewT>(fn: (value: T, last: T) => NewT): zzReactive<NewT>;
-}
-
-export type IReactive<T> = IWriteOnlyReactive<T> & IReadOnlyReactive<T>;
-
-function hasGetter(obj: any, prop: string): boolean {
-  const descriptor = Object.getOwnPropertyDescriptor(obj, prop);
-  if (descriptor) {
-    return Boolean(descriptor.get);
-  }
-  const proto = Object.getPrototypeOf(obj);
-  return proto ? hasGetter(proto, prop) : false;
-}
-
-export class zzReactive<TValue>
+export class zzReadonly<TValue>
   extends zzDestructor
-  implements IReactive<TValue>
+  implements IReadOnlyReactive<TValue>
 {
-  static isReactive(check: any): check is zzReactive<any> {
-    return (
-      check && hasGetter(check, "value") && zzEvent.isEvent(check.onChange)
-    );
-  }
-
-  readonly onChange = new zzEvent<(event: EventChangeValue<TValue>) => void>();
   protected _value: TValue;
+  readonly onChange = new zzEvent<
+    (event: IReactiveEventChange<TValue, IReadOnlyReactive<TValue>>) => void
+  >();
+
+  constructor(value: TValue) {
+    super();
+
+    this._value = value;
+  }
 
   destroy(): void {
     this.onChange.destroy();
   }
 
   get value(): TValue {
-    zzGetReactiveObserver.add(this);
+    zzReactiveValueGetObserver.add(this);
 
     return this._value;
   }
 
-  set value(newValue: TValue) {
-    if (this._value !== newValue) {
-      let ev = new EventChangeValue<TValue>(newValue, this._value, this);
-      this._value = newValue;
+  protected set value(set: TValue) {
+    if (this._value !== set) {
+      let ev = new ReactiveEventChange(set, this._value, this);
+      this._value = set;
       this.onChange.emit(ev);
     }
   }
@@ -85,31 +70,50 @@ export class zzReactive<TValue>
     return this.value;
   }
 
-  readonly() {
-    return this as IReadOnlyReactive<TValue>;
-  }
-
-  mapValue<NewT>(fn: (value: TValue, last: TValue) => NewT): zzReactive<NewT> {
-    const newReactive = new zzReactive<NewT>(fn(this.value, this.value));
+  mapValue<NewT>(
+    fn: (value: TValue, last: TValue, target: this) => NewT
+  ): IReadOnlyReactive<NewT> {
+    const newReactive = new zzReactive<NewT>(fn(this.value, this.value, this));
 
     this.onChange.addListener(
-      (ev) => (newReactive.value = fn(ev.value, ev.last))
+      (ev) => (newReactive.value = fn(ev.value, ev.last, this))
     );
 
-    return newReactive;
+    return newReactive.readonly();
   }
 
-  constructor(value: TValue) {
-    super();
-
-    this._value = value;
+  static isReactive(check: any): check is IReadOnlyReactive<any> {
+    return (
+      check && hasGetter(check, "value") && zzEvent.isEvent(check.onChange)
+    );
   }
 }
 
-class GetReactiveIsolator extends zzIsolatorStack<zzReactive<any>> {
+export interface IWriteOnlyReactive<TValue> {
+  set value(set: TValue);
+}
+
+export class zzReactive<TValue>
+  extends zzReadonly<TValue>
+  implements IWriteOnlyReactive<TValue>
+{
+  set value(set: TValue) {
+    if (this._value !== set) {
+      let ev = new ReactiveEventChange(set, this._value, this);
+      this._value = set;
+      this.onChange.emit(ev);
+    }
+  }
+
+  readonly() {
+    return this as IReadOnlyReactive<TValue>;
+  }
+}
+
+class GetReactiveIsolator extends zzIsolatorStack<zzReadonly<any>> {
   catch(
     isolatedFn: () => void,
-    onUpdateFn: (ev: EventChangeValue<any>) => void
+    onUpdateFn: (ev: ReactiveEventChange<any, any>) => void
   ): DestructorsStack {
     return new DestructorsStack().addArray(
       this.runIsolated(isolatedFn).map((r) =>
@@ -119,4 +123,4 @@ class GetReactiveIsolator extends zzIsolatorStack<zzReactive<any>> {
   }
 }
 
-export const zzGetReactiveObserver = new GetReactiveIsolator();
+export const zzReactiveValueGetObserver = new GetReactiveIsolator();

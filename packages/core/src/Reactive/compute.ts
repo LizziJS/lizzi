@@ -5,13 +5,13 @@
  */
 
 import {
-  EventChangeValue,
-  zzReactive,
-  zzGetReactiveObserver,
+  ReactiveEventChange,
+  zzReactiveValueGetObserver,
+  zzReadonly,
 } from "./reactive";
 import { DestructorsStack } from "../Destructor";
 
-export class zzComputeFn<T> extends zzReactive<T> {
+export class zzComputeFn<T> extends zzReadonly<T> {
   protected _fn: () => T;
   protected _destructor = new DestructorsStack();
 
@@ -24,16 +24,16 @@ export class zzComputeFn<T> extends zzReactive<T> {
     this._destructor.destroy();
 
     this._destructor.add(
-      zzGetReactiveObserver.catch(
+      zzReactiveValueGetObserver.catch(
         () => {
           const lastValue = this._value;
 
           this._value = this._fn.apply(this);
 
           if (lastValue !== this._value) {
-            zzGetReactiveObserver.runIsolated(() => {
+            zzReactiveValueGetObserver.runIsolated(() => {
               this.onChange.emit(
-                new EventChangeValue(this._value, lastValue, this)
+                new ReactiveEventChange(this._value, lastValue, this)
               );
             });
           }
@@ -41,16 +41,6 @@ export class zzComputeFn<T> extends zzReactive<T> {
         () => this._isolate()
       )
     );
-  }
-
-  get value() {
-    zzGetReactiveObserver.add(this);
-
-    return this._value;
-  }
-
-  private set value(set: T) {
-    throw new SyntaxError("You can not set compute value");
   }
 
   constructor(fn: () => T) {

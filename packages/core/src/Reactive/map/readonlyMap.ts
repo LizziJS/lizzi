@@ -8,27 +8,59 @@ import {
   DestructorsStack,
   IDestructor,
   zzDestructorsObserver,
-} from "../Destructor";
-import { zzEvent } from "../Event";
-import { zzComputeArray } from "./array";
-import { zzCompute } from "./compute";
+} from "../../Destructor";
+import { zzEvent } from "../../Event";
+import { zzComputeArray } from "../array/compute";
+import { IReadOnlyArray } from "../array/readonlyArray";
+import { zzCompute } from "../compute";
 import {
-  EventChangeValue,
-  zzReactive,
-  zzGetReactiveObserver,
-} from "./reactive";
+  IReadOnlyReactive,
+  ReactiveEventChange,
+  zzReactiveValueGetObserver,
+  zzReadonly,
+} from "../reactive";
 
-export class EventSetMap<TKey, TValue> {
+export interface IReactiveMapEventSet<TKey, TValue> {
+  value: TValue | undefined;
+  last: TValue | undefined;
+  key: TKey;
+  target: zzReadonlyMap<TKey, TValue>;
+}
+
+export class ReactiveMapEventSet<TKey, TValue>
+  implements IReactiveMapEventSet<TKey, TValue>
+{
   constructor(
     public readonly value: TValue | undefined,
     public readonly last: TValue | undefined,
     public readonly key: TKey,
-    public readonly target: zzMap<TKey, TValue>
+    public readonly target: zzReadonlyMap<TKey, TValue>
   ) {}
 }
 
-export class zzMap<TKey, TValue> extends zzReactive<Map<TKey, TValue>> {
-  readonly onSet = new zzEvent<(event: EventSetMap<TKey, TValue>) => void>();
+export interface IReadOnlyMap<TKey, TValue>
+  extends IReadOnlyReactive<Map<TKey, TValue>> {
+  readonly onSet: zzEvent<(event: ReactiveMapEventSet<TKey, TValue>) => void>;
+  toMap(): Map<TKey, TValue>;
+  itemsListener(
+    addFn: (item: TValue, key: TKey, set: this) => IDestructor | void,
+    removeFn?: (item: TValue, key: TKey, set: this) => void
+  ): this;
+  has(key: TKey): IReadOnlyReactive<boolean>;
+  get(key: TKey): IReadOnlyReactive<undefined | TValue>;
+  values(): IReadOnlyArray<TValue>;
+  keys(): IReadOnlyArray<TKey>;
+  entries(): IReadOnlyArray<[TKey, TValue]>;
+  get size(): number;
+}
+
+export class zzReadonlyMap<TKey, TValue>
+  extends zzReadonly<Map<TKey, TValue>>
+  implements IReadOnlyMap<TKey, TValue>
+{
+  readonly onSet = new zzEvent<
+    (event: ReactiveMapEventSet<TKey, TValue>) => void
+  >();
 
   destroy(): void {
     super.destroy();
@@ -42,49 +74,53 @@ export class zzMap<TKey, TValue> extends zzReactive<Map<TKey, TValue>> {
   }
 
   toMap() {
-    zzGetReactiveObserver.add(this);
+    zzReactiveValueGetObserver.add(this);
 
     return this._value;
   }
 
-  set(key: TKey, element: TValue) {
+  protected set(key: TKey, element: TValue) {
     const lastValue = this._value.get(key);
 
     if (lastValue !== element) {
       this._value.set(key, element);
 
-      this.onSet.emit(new EventSetMap(element, lastValue, key, this));
+      this.onSet.emit(new ReactiveMapEventSet(element, lastValue, key, this));
 
-      this.onChange.emit(new EventChangeValue(this._value, this._value, this));
+      this.onChange.emit(
+        new ReactiveEventChange(this._value, this._value, this)
+      );
     }
 
     return this;
   }
 
-  delete(key: TKey) {
+  protected delete(key: TKey) {
     if (this._value.has(key)) {
       const lastValue = this._value.get(key);
 
       this._value.delete(key);
 
-      this.onSet.emit(new EventSetMap(undefined, lastValue, key, this));
+      this.onSet.emit(new ReactiveMapEventSet(undefined, lastValue, key, this));
 
-      this.onChange.emit(new EventChangeValue(this._value, this._value, this));
+      this.onChange.emit(
+        new ReactiveEventChange(this._value, this._value, this)
+      );
     }
 
     return this;
   }
 
-  clear() {
+  protected clear() {
     const entries = [...this._value.entries()];
 
     this._value.clear();
 
     for (const [key, value] of entries) {
-      this.onSet.emit(new EventSetMap(undefined, value, key, this));
+      this.onSet.emit(new ReactiveMapEventSet(undefined, value, key, this));
     }
 
-    this.onChange.emit(new EventChangeValue(this._value, this._value, this));
+    this.onChange.emit(new ReactiveEventChange(this._value, this._value, this));
 
     return this;
   }
@@ -120,12 +156,12 @@ export class zzMap<TKey, TValue> extends zzReactive<Map<TKey, TValue>> {
     const destructor = new DestructorsStack(addEvent);
 
     this.toMap().forEach((element, key) =>
-      addEvent.run(new EventSetMap(element, undefined, key, this))
+      addEvent.run(new ReactiveMapEventSet(element, undefined, key, this))
     );
 
     destructor.addFunc(() => {
       this.toMap().forEach((element, key) =>
-        addEvent.run(new EventSetMap(undefined, element, key, this))
+        addEvent.run(new ReactiveMapEventSet(undefined, element, key, this))
       );
     });
 
@@ -141,7 +177,7 @@ export class zzMap<TKey, TValue> extends zzReactive<Map<TKey, TValue>> {
   }
 
   values() {
-    return zzComputeArray(() => [...this.toMap()]);
+    return zzComputeArray(() => [...this.toMap().values()]);
   }
 
   keys() {

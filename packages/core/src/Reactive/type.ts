@@ -5,15 +5,30 @@
  */
 
 import {
-  EventChangeValue,
-  zzGetReactiveObserver,
+  IReadOnlyReactive,
+  IWriteOnlyReactive,
+  ReactiveEventChange,
   zzReactive,
+  zzReactiveValueGetObserver,
 } from "./reactive";
 
-export class zzType<T> extends zzReactive<T> {
+export interface ITypedReactive<T> {
+  addValidator(fn: (value: T) => boolean): this;
+}
+
+export class zzType<T>
+  extends zzReactive<T>
+  implements ITypedReactive<T>, IWriteOnlyReactive<T>, IReadOnlyReactive<T>
+{
   protected readonly _typeValidators: ((value: any) => boolean)[] = [];
 
-  addValidator(fn: (value: any) => boolean) {
+  constructor(value: T) {
+    super(value);
+
+    this.checkValueTypes(value);
+  }
+
+  addValidator(fn: (value: T) => boolean) {
     this._typeValidators.push(fn);
 
     return this;
@@ -34,24 +49,18 @@ export class zzType<T> extends zzReactive<T> {
   }
 
   get value(): T {
-    zzGetReactiveObserver.add(this);
+    zzReactiveValueGetObserver.add(this);
 
     return this._value;
   }
 
   set value(newValue: T) {
     if (this._value !== newValue && this.checkValueTypes(newValue)) {
-      let ev = new EventChangeValue<T>(newValue, this._value, this);
+      let ev = new ReactiveEventChange(newValue, this._value, this);
       this._value = newValue;
 
       this.onChange.emit(ev);
     }
-  }
-
-  constructor(value: T) {
-    super(value);
-
-    this.checkValueTypes(value);
   }
 }
 

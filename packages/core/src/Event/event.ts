@@ -6,18 +6,25 @@
 
 import { zzDestructor } from "../Destructor";
 
+export interface IEventListener<TFunc extends (...args: any[]) => void> {
+  run<T extends TFunc>(...args: Parameters<T>): Promise<any>;
+  remove(): void;
+  destroy(): void;
+}
+
 export interface IEvent<TFunc extends (...args: any[]) => void> {
-  addListener(fn: TFunc): zzEventListener<TFunc>;
-  addListenerOnce(fn: TFunc): zzEventListener<TFunc>;
+  addListener(fn: TFunc): IEventListener<TFunc>;
+  addListenerOnce(fn: TFunc): IEventListener<TFunc>;
   removeListener(fn: TFunc): void;
   removeAllListeners(): void;
   emit(...args: Parameters<TFunc>): void;
   countListeners(): number;
 }
 
-export class zzEventListener<
-  TFunc extends (...args: any[]) => void
-> extends zzDestructor {
+export class zzEventListener<TFunc extends (...args: any[]) => void>
+  extends zzDestructor
+  implements IEventListener<TFunc>
+{
   readonly target: zzEvent<TFunc>;
   readonly fn: TFunc;
   readonly willRunOnce: boolean;
@@ -69,23 +76,23 @@ export class zzEvent<TFunc extends (...args: any[]) => void>
     this.removeAllListeners();
   }
 
-  addListener<FuncT extends TFunc>(fn: FuncT): zzEventListener<FuncT> {
-    const newEventListener = new zzEventListener<FuncT>(this, fn);
+  addListener<T extends TFunc>(fn: T): zzEventListener<T> {
+    const newEventListener = new zzEventListener<T>(this, fn);
 
     this.listenersMap.set(fn, newEventListener);
 
     return newEventListener;
   }
 
-  addListenerOnce<FuncT extends TFunc>(fn: FuncT): zzEventListener<FuncT> {
-    const newEventListener = new zzEventListener<FuncT>(this, fn, true);
+  addListenerOnce<T extends TFunc>(fn: T): zzEventListener<T> {
+    const newEventListener = new zzEventListener<T>(this, fn, true);
 
     this.listenersMap.set(fn, newEventListener);
 
     return newEventListener;
   }
 
-  removeListener<FuncT extends TFunc>(fn: FuncT) {
+  removeListener<T extends TFunc>(fn: T) {
     this.listenersMap.delete(fn);
   }
 
@@ -93,7 +100,7 @@ export class zzEvent<TFunc extends (...args: any[]) => void>
     this.listenersMap.clear();
   }
 
-  emit<FuncT extends TFunc>(...args: Parameters<FuncT>): Promise<any> {
+  emit<T extends TFunc>(...args: Parameters<T>): Promise<any> {
     const values = Array.from(this.listenersMap.values());
 
     return Promise.all(values.map((listener) => listener.run(...args)));

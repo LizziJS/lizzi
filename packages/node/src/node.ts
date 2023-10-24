@@ -30,7 +30,17 @@ export type UseNode<TNode extends zzNode> =
   | Array<<T extends TNode>(view: T) => void>
   | (<T extends TNode>(view: T) => void);
 
-export class zzNode extends zzDestructor implements INode {
+export type PropsWithUse<
+  Props extends Record<string, any> = {},
+  TNode extends zzNode<any> = zzNode<any>
+> = Props & {
+  use?: UseNode<TNode>;
+};
+
+export class zzNode<NodeProps extends Record<string, any> = {}>
+  extends zzDestructor
+  implements INode
+{
   static [isNodeConstructor] = true;
 
   static isNode(check: any) {
@@ -44,6 +54,7 @@ export class zzNode extends zzDestructor implements INode {
     );
   }
 
+  protected readonly props: NodeProps;
   protected readonly _nodeState = new zzReactive<ViewComponentStatuses>(
     "unmounted"
   );
@@ -52,16 +63,29 @@ export class zzNode extends zzDestructor implements INode {
   protected readonly _unmountDestructor = zz.Destructor();
 
   protected _parentNode: zzNode | null = null;
-  readonly childNodes: zzArray<zzNode>;
+  readonly childNodes: zzArray<zzNode> = new zzArray<zzNode>();
 
   constructor({
     use = [],
-  }: {
-    use?: UseNode<zzNode>;
-  } = {}) {
+    ...props
+  }: PropsWithUse<NodeProps, zzNode<NodeProps>>) {
     super();
 
-    this.childNodes = new zzArray<zzNode>().itemsListener(
+    this._initChildNodes();
+    this._initNodeEvents(use);
+    this.props = props as NodeProps;
+    this._initMountFunc();
+  }
+
+  protected callChildren<C>(children: C | (<T extends this>(node: T) => C)): C {
+    //check children is function and call it
+    return typeof children === "function"
+      ? (children as Function)(this)
+      : children;
+  }
+
+  protected _initChildNodes() {
+    this.childNodes.itemsListener(
       (item) => {
         item._setParentNode(this);
 
@@ -80,27 +104,22 @@ export class zzNode extends zzDestructor implements INode {
         item._setParentNode(null);
       }
     );
-
-    this._initNodeEvents(use);
-  }
-
-  protected callChildren<C>(children: C | (<T extends this>(node: T) => C)): C {
-    //check children is function and call it
-    return typeof children === "function"
-      ? (children as Function)(this)
-      : children;
   }
 
   protected _initNodeEvents(use: UseNode<this>) {
     if (!use) return;
 
     if (!Array.isArray(use)) {
-      this.onMount(use);
+      this.addToMount(use);
     } else {
       for (let useFn of use) {
-        this.onMount(useFn);
+        this.addToMount(useFn);
       }
     }
+  }
+
+  protected _initMountFunc() {
+    this.addToMount(() => this.onMount(this.props));
   }
 
   destroy(): void {
@@ -128,13 +147,15 @@ export class zzNode extends zzDestructor implements INode {
     this._nodeState.value = "unmounted";
   }
 
-  protected onMount(mountFunc: (view: this) => void) {
+  protected addToMount(mountFunc: (view: this) => void) {
     this._onMount.addListener(mountFunc);
   }
 
   onceUnmount(unmountFunc: () => void) {
     this._unmountDestructor.addFunc(unmountFunc);
   }
+
+  onMount(props: NodeProps) {}
 
   get nodeState() {
     return this._nodeState.value;
@@ -222,13 +243,13 @@ export class zzNode extends zzDestructor implements INode {
     return this.childNodes.map(mapNodes).flat() as zzReadonlyArray<T>;
   }
 
-  __setProperty(name: string, value: any) {
+  __setProperty(name: keyof this, value: any) {
     if (value === undefined) return;
 
-    const valueObj = this[name as keyof this];
+    const valueObj = this[name];
 
     if (valueObj === undefined) {
-      this[name as keyof this] = value;
+      this[name] = value;
       return;
     }
 
@@ -245,7 +266,7 @@ export class zzNode extends zzDestructor implements INode {
 
   protected initProps(attributes: { [key: string]: any }) {
     for (let name in attributes) {
-      this.__setProperty(name, attributes[name]);
+      this.__setProperty(name as keyof this, attributes[name]);
     }
   }
 }

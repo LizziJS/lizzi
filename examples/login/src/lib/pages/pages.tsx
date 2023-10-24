@@ -47,7 +47,7 @@ export class FormPages extends zzHtmlComponent {
 
     this.initProps({ onSubmit });
 
-    this.onMount(() => {
+    this.addToMount(() => {
       const urlRouter = this.router.url;
 
       const counter = urlRouter.getState("formPage");

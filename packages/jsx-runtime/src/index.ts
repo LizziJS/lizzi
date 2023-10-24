@@ -1,11 +1,7 @@
 export * from "./namespace";
 
 import { JSX } from "./namespace";
-import {
-  zzHtmlComponent,
-  HtmlElementView,
-  SvgElementView,
-} from "@lizzi/template";
+import { HtmlElementView, SvgElementView } from "@lizzi/template";
 import { isSvgTag } from "./SvgTags";
 import { isNodeConstructor, zzNode } from "@lizzi/node";
 import { zzGetReactiveObserver } from "@lizzi/core";
@@ -57,4 +53,4 @@ export const jsxs = <T extends zzNode>(
   return result as T;
 };
 
-export class Fragment extends zzHtmlComponent {}
+export class Fragment extends zzNode {}
