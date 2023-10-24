@@ -10,6 +10,7 @@ import { zzArrayMap } from "./map";
 import {
   ReactiveArrayEventAdd,
   ReactiveArrayEventRemove,
+  zzReadonlyArray,
 } from "./readonlyArray";
 
 describe("zzArray", () => {
@@ -186,7 +187,7 @@ describe("zzArray", () => {
       const array = new zzArray();
       const filter = array.filter(filterFn);
 
-      expect(filter).toBeInstanceOf(zzArray);
+      expect(filter).toBeInstanceOf(zzReadonlyArray);
       expect(filter).toBeInstanceOf(zzComputeArrayFn);
       expect(filter.onAdd).toBeInstanceOf(zzEvent);
       expect(filter.onChange).toBeInstanceOf(zzEvent);
@@ -508,7 +509,7 @@ describe("zzArray", () => {
       const array = new zzArray();
       const map = array.map(mapFn);
 
-      expect(map).toBeInstanceOf(zzArray);
+      expect(map).toBeInstanceOf(zzReadonlyArray);
       expect(map).toBeInstanceOf(zzArrayMap);
       expect(map.onAdd).toBeInstanceOf(zzEvent);
       expect(map.onChange).toBeInstanceOf(zzEvent);
@@ -835,7 +836,7 @@ describe("zzArray", () => {
       const array = new zzArray();
       const sort = array.sort(sortFn);
 
-      expect(sort).toBeInstanceOf(zzArray);
+      expect(sort).toBeInstanceOf(zzReadonlyArray);
       expect(sort).toBeInstanceOf(zzComputeArrayFn);
       expect(sort.onAdd).toBeInstanceOf(zzEvent);
       expect(sort.onChange).toBeInstanceOf(zzEvent);

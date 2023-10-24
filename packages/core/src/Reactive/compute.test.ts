@@ -1,7 +1,7 @@
 import { zzEvent } from "../Event";
 import { zzComputeFn } from "./compute";
 import { zzObject } from "./object";
-import { zzReactive } from "./reactive";
+import { zzReadonly } from "./reactive";
 import { zzBoolean, zzInteger, zzString } from "./vars";
 
 describe("zzCompute", () => {
@@ -10,7 +10,8 @@ describe("zzCompute", () => {
       expect(zzComputeFn).toBeInstanceOf(Function);
       const compute = new zzComputeFn(() => false);
 
-      expect(compute).toBeInstanceOf(zzReactive);
+      expect(compute).toBeInstanceOf(zzComputeFn);
+      expect(compute).toBeInstanceOf(zzReadonly);
       expect(compute.onChange).toBeInstanceOf(zzEvent);
     });
 
@@ -54,17 +55,12 @@ describe("zzCompute", () => {
       const listener = jest.fn();
       const reactiveValue = new zzInteger(0);
       let value = 0;
-      let event = new zzEvent();
       const compute = new zzComputeFn(() => value + reactiveValue.value);
 
       expect(compute.value).toBe(0);
       compute.onChange.addListener(listener);
 
       value = 1;
-      expect(compute.value).toBe(0);
-      expect(listener.mock.calls.length).toBe(0);
-
-      event.emit();
       expect(compute.value).toBe(0);
       expect(listener.mock.calls.length).toBe(0);
     });
@@ -142,6 +138,14 @@ describe("zzCompute", () => {
       expect(value3.onChange.countListeners()).toBe(1);
 
       value1.value = false;
+      expect(compute.value).toBe(false);
+      expect(listener.mock.calls.length).toBe(2);
+      expect(computeFn.mock.calls.length).toBe(5);
+      expect(value1.onChange.countListeners()).toBe(1);
+      expect(value2.onChange.countListeners()).toBe(0);
+      expect(value3.onChange.countListeners()).toBe(0);
+
+      value3.value = false;
       expect(compute.value).toBe(false);
       expect(listener.mock.calls.length).toBe(2);
       expect(computeFn.mock.calls.length).toBe(5);
