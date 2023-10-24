@@ -97,12 +97,26 @@ export class zzReactive<TValue>
   extends zzReadonly<TValue>
   implements IWriteOnlyReactive<TValue>
 {
+  get value(): TValue {
+    zzReactiveValueGetObserver.add(this);
+
+    return this._value;
+  }
+
   set value(set: TValue) {
     if (this._value !== set) {
       let ev = new ReactiveEventChange(set, this._value, this);
       this._value = set;
       this.onChange.emit(ev);
     }
+  }
+
+  static isReactive(
+    check: any
+  ): check is IReadOnlyReactive<any> & IWriteOnlyReactive<any> {
+    return (
+      check && hasGetter(check, "value") && zzEvent.isEvent(check.onChange)
+    );
   }
 
   readonly() {

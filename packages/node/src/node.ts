@@ -25,22 +25,14 @@ export interface INode {
   _unmount(): void;
 }
 
+export type NodeUsePropSingle<TNode extends zzNode> = (view: TNode) => void;
+export type NodeUseProp<TNode extends zzNode> =
+  | Array<NodeUsePropSingle<TNode>>
+  | NodeUsePropSingle<TNode>;
+
 export const isNodeConstructor = Symbol("isNodeConstructor");
-export type UseNode<TNode extends zzNode> =
-  | Array<<T extends TNode>(view: T) => void>
-  | (<T extends TNode>(view: T) => void);
 
-export type PropsWithUse<
-  Props extends Record<string, any> = {},
-  TNode extends zzNode<any> = zzNode<any>
-> = Props & {
-  use?: UseNode<TNode>;
-};
-
-export class zzNode<NodeProps extends Record<string, any> = {}>
-  extends zzDestructor
-  implements INode
-{
+export class zzNode extends zzDestructor implements INode {
   static [isNodeConstructor] = true;
 
   static isNode(check: any) {
@@ -54,7 +46,6 @@ export class zzNode<NodeProps extends Record<string, any> = {}>
     );
   }
 
-  protected readonly props: NodeProps;
   protected readonly _nodeState = new zzReactive<ViewComponentStatuses>(
     "unmounted"
   );
@@ -65,23 +56,10 @@ export class zzNode<NodeProps extends Record<string, any> = {}>
   protected _parentNode: zzNode | null = null;
   readonly childNodes: zzArray<zzNode> = new zzArray<zzNode>();
 
-  constructor({
-    use = [],
-    ...props
-  }: PropsWithUse<NodeProps, zzNode<NodeProps>>) {
+  constructor() {
     super();
 
     this._initChildNodes();
-    this._initNodeEvents(use);
-    this.props = props as NodeProps;
-    this._initMountFunc();
-  }
-
-  protected callChildren<C>(children: C | (<T extends this>(node: T) => C)): C {
-    //check children is function and call it
-    return typeof children === "function"
-      ? (children as Function)(this)
-      : children;
   }
 
   protected _initChildNodes() {
@@ -104,22 +82,6 @@ export class zzNode<NodeProps extends Record<string, any> = {}>
         item._setParentNode(null);
       }
     );
-  }
-
-  protected _initNodeEvents(use: UseNode<this>) {
-    if (!use) return;
-
-    if (!Array.isArray(use)) {
-      this.addToMount(use);
-    } else {
-      for (let useFn of use) {
-        this.addToMount(useFn);
-      }
-    }
-  }
-
-  protected _initMountFunc() {
-    this.addToMount(() => this.onMount(this.props));
   }
 
   destroy(): void {
@@ -147,15 +109,13 @@ export class zzNode<NodeProps extends Record<string, any> = {}>
     this._nodeState.value = "unmounted";
   }
 
-  protected addToMount(mountFunc: (view: this) => void) {
+  protected onMount(mountFunc: (view: this) => void) {
     this._onMount.addListener(mountFunc);
   }
 
   onceUnmount(unmountFunc: () => void) {
     this._unmountDestructor.addFunc(unmountFunc);
   }
-
-  onMount(props: NodeProps) {}
 
   get nodeState() {
     return this._nodeState.value;
@@ -186,6 +146,8 @@ export class zzNode<NodeProps extends Record<string, any> = {}>
       this.childNodes.remove([node]);
     }
   }
+
+  // Helpers for find nodes
 
   *findParentNodes<T extends zzNode>(
     findFn: (view: T) => boolean
@@ -243,15 +205,14 @@ export class zzNode<NodeProps extends Record<string, any> = {}>
     return this.childNodes.map(mapNodes).flat() as zzReadonlyArray<T>;
   }
 
-  __setProperty(name: keyof this, value: any) {
+  // Helpers for Props JSX
+
+  protected __setProperty(name: keyof this, value: any) {
     if (value === undefined) return;
 
     const valueObj = this[name];
 
-    if (valueObj === undefined) {
-      this[name] = value;
-      return;
-    }
+    if (valueObj === undefined) return;
 
     if (zzEvent.isEvent(valueObj)) {
       valueObj.addListener(value);
@@ -264,9 +225,33 @@ export class zzNode<NodeProps extends Record<string, any> = {}>
     }
   }
 
-  protected initProps(attributes: { [key: string]: any }) {
+  protected setConfigProps<K extends keyof this>(
+    attributes: Partial<Record<K, any>>
+  ) {
     for (let name in attributes) {
       this.__setProperty(name as keyof this, attributes[name]);
     }
+  }
+
+  protected configUseProp(use?: NodeUseProp<this>) {
+    if (!use) return;
+
+    if (!Array.isArray(use)) {
+      this.onMount(use);
+    } else {
+      for (let useFn of use) {
+        this.onMount(useFn);
+      }
+    }
+  }
+
+  protected prepareChildren(
+    children: zzNode | zzNode[] | ((view: this) => zzNode | zzNode[])
+  ) {
+    if (typeof children === "function") {
+      return children(this);
+    }
+
+    return children;
   }
 }

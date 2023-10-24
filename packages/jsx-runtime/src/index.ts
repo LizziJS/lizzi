@@ -4,7 +4,7 @@ import { JSX } from "./namespace";
 import { HtmlElementView, SvgElementView } from "@lizzi/template";
 import { isSvgTag } from "./SvgTags";
 import { isNodeConstructor, zzNode } from "@lizzi/node";
-import { zzGetReactiveObserver } from "@lizzi/core";
+import { zzReactiveValueGetObserver } from "@lizzi/core";
 
 export const jsx = <T extends zzNode>(
   type: string | T,
@@ -26,7 +26,7 @@ export const jsxs = <T extends zzNode>(
 ) => {
   let result: any;
 
-  zzGetReactiveObserver.runIsolated(() => {
+  zzReactiveValueGetObserver.runIsolated(() => {
     if (typeof type === "string") {
       if (isSvgTag.has(type as any) || props.svg) {
         result = new SvgElementView(type as any, props);

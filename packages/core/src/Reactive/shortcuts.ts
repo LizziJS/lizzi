@@ -1,5 +1,5 @@
 import { DestructorsStack } from "../Destructor";
-import { EventWrapper, zzEvent } from "../Event";
+import { EventWrapper, zzEvent, ExtractEventListener } from "../Event";
 import { zzArray } from "./array/array";
 import { zzComputeArray } from "./array/compute";
 import { IReadOnlyArray } from "./array/readonlyArray";
@@ -148,5 +148,7 @@ export namespace zz {
   export type Array<T> = zzArray<T>;
   export type ArrayRead<T> = IReadOnlyArray<T>;
   export type Event<T extends (...args: any) => void> = zzEvent<T>;
+  export type ExtractEventListenerFunc<T extends zzEvent<any>> =
+    ExtractEventListener<T>;
   export type Destructor = DestructorsStack;
 }

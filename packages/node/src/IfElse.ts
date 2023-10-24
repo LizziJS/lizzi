@@ -7,13 +7,16 @@
 import { zzCompute, zzReactive } from "@lizzi/core";
 import { zzNode } from "./node";
 
-type Props = {
-  condition: zzReactive<any> | (() => boolean) | any;
-  children: zzNode | zzNode[];
-};
+export class If extends zzNode {
+  constructor({
+    condition,
+    children,
+  }: {
+    condition: zzReactive<any> | (() => boolean) | any;
+    children: zzNode | zzNode[];
+  }) {
+    super();
 
-export class If extends zzNode<Props> {
-  onMount({ condition, children }: Props) {
     const nodes = Array.isArray(children) ? children : [children];
 
     const elseNodes = nodes.filter((node) => node instanceof Else);
@@ -26,7 +29,7 @@ export class If extends zzNode<Props> {
     if (zzReactive.isReactive(condition)) {
       let last: boolean | null = null;
 
-      this.addToMount(() => {
+      this.onMount(() => {
         const onChange = () => {
           const visible = Boolean(condition.value);
 
@@ -55,10 +58,10 @@ export class If extends zzNode<Props> {
   }
 }
 
-type ElseProps = { children: zzNode | zzNode[] };
+export class Else extends zzNode {
+  constructor({ children }: { children: zzNode | zzNode[] }) {
+    super();
 
-export class Else extends zzNode<ElseProps> {
-  onMount({ children }: ElseProps) {
     this.append(children);
   }
 }

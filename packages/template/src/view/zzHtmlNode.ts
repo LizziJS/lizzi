@@ -105,7 +105,7 @@ export class TextNodeView extends zzHtmlNode<Text> {
     super(document.createTextNode(""));
 
     if (zzReactive.isReactive(children)) {
-      this.addToMount(() => {
+      this.onMount(() => {
         children.onChange
           .addListener((ev) => {
             this.element.data = String(ev.value);

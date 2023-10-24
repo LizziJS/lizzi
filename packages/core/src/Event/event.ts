@@ -21,6 +21,12 @@ export interface IEvent<TFunc extends (...args: any[]) => void> {
   countListeners(): number;
 }
 
+export type ExtractEventListener<T extends zzEvent<any>> = T extends zzEvent<
+  infer Func
+>
+  ? Func
+  : never;
+
 export class zzEventListener<TFunc extends (...args: any[]) => void>
   extends zzDestructor
   implements IEventListener<TFunc>
