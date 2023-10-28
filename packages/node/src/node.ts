@@ -245,7 +245,7 @@ export class zzNode extends zzDestructor implements INode {
     }
   }
 
-  protected prepareChildren(
+  protected callChildrenFunction(
     children: zzNode | zzNode[] | ((view: this) => zzNode | zzNode[])
   ) {
     if (typeof children === "function") {

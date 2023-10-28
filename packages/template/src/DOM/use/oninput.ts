@@ -1,4 +1,4 @@
-import { zzArray, zzCompute, zzReactive } from "@lizzi/core";
+import { IReadOnlyReactive, zzArray, zzCompute, zzReactive } from "@lizzi/core";
 import { Debounce, EventWrapper } from "@lizzi/core";
 import { zzHtmlNode } from "../../view/zzHtmlNode";
 
@@ -71,7 +71,7 @@ export function onInput<
 
 export function updateInputValue<
   E extends zzHtmlNode<HTMLTextAreaElement | HTMLInputElement>
->(value: zzReactive<string> | (() => string)) {
+>(value: IReadOnlyReactive<string> | (() => string)) {
   return (view: E) => {
     const element = view.element;
 

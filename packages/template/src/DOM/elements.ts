@@ -8,13 +8,13 @@ import { zzReactive } from "@lizzi/core";
 import { AttributeLink, ClassLink, StyleLink } from "./attributes";
 import { JSX } from "@lizzi/jsx-runtime";
 import { zzHtmlNode } from "../view/zzHtmlNode";
-import { on } from "../..";
-import { UseNode } from "@lizzi/node";
+import { NodeUseProp } from "@lizzi/node";
+import { on } from "./use";
 
 export type ElementAttributes<T extends zzHtmlNode> = {
   class?: Array<string | zzReactive<any>>;
   style?: { [key: string]: Array<string | zzReactive<any>> };
-  use?: UseNode<T>;
+  use?: NodeUseProp<T>;
   children?: JSX.Children;
   [key: string]: any;
 };
@@ -26,7 +26,7 @@ export class HtmlElementView<
     tagName: T,
     { children, use, ...attributes }: ElementAttributes<HtmlElementView<T>>
   ) {
-    super(document.createElement(tagName), { use, children });
+    super(document.createElement(tagName));
 
     this.initProps(attributes);
   }
@@ -71,10 +71,7 @@ export class SvgElementView<
       ...attributes
     }: ElementAttributes<zzHtmlNode<SVGElementTagNameMap[T]>>
   ) {
-    super(document.createElementNS("http://www.w3.org/2000/svg", tagName), {
-      children,
-      use,
-    });
+    super(document.createElementNS("http://www.w3.org/2000/svg", tagName));
 
     this.initProps(attributes);
   }

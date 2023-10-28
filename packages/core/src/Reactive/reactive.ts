@@ -12,6 +12,12 @@ export interface IReactiveEventChange<TValue, TTarget> {
 export class ReactiveEventChange<TValue, TTarget>
   implements IReactiveEventChange<TValue, TTarget>
 {
+  static new<TValue>(
+    target: IReadOnlyReactive<TValue>
+  ): ReactiveEventChange<TValue, IReadOnlyReactive<TValue>> {
+    return new ReactiveEventChange(target.value, target.value, target);
+  }
+
   constructor(
     public readonly value: TValue,
     public readonly last: TValue,

@@ -76,7 +76,9 @@ export class zz {
     return new zzObject<T>(value);
   }
 
-  static makeReactive<T>(variable: zz.ReactiveOrNot<T>): IReadOnlyReactive<T> {
+  static makeReactive<T>(
+    variable: zz.ReactiveOrValue<T>
+  ): IReadOnlyReactive<T> {
     if (typeof variable === "function") {
       return zzCompute(variable as any);
     }
@@ -91,9 +93,9 @@ export class zz {
   }
 
   static If<T, R>(
-    cond: zz.ReactiveOrNot<T>,
-    onTrue: zz.ReactiveOrNot<R>,
-    onFalse: zz.ReactiveOrNot<R>
+    cond: zz.ReactiveOrValue<T>,
+    onTrue: zz.ReactiveOrValue<R>,
+    onFalse: zz.ReactiveOrValue<R>
   ) {
     const c = zz.makeReactive(cond);
     const t = zz.makeReactive(onTrue);
@@ -125,7 +127,7 @@ export class zz {
 }
 
 export namespace zz {
-  export type ReactiveOrNot<T> = IReadOnlyReactive<T> | T | (() => T);
+  export type ReactiveOrValue<T> = IReadOnlyReactive<T> | T | (() => T);
   export type Reactive<T> = zzReactive<T>;
   export type ReactiveRead<T> = IReadOnlyReactive<T>;
   export type String<T extends string = string> = zzString<T>;

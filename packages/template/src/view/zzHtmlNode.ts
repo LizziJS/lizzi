@@ -4,25 +4,20 @@
  * This source code is licensed under the MIT license.
  */
 
-import { EventChangeValue, zzReadonlyArray, zzReactive } from "@lizzi/core";
-import { zzNode, PropsWithUse } from "@lizzi/node";
+import {
+  zzReadonlyArray,
+  zzReactive,
+  ReactiveEventChange,
+  zzArray,
+} from "@lizzi/core";
+import { ArrayView, zzNode } from "@lizzi/node";
 import { JSX } from "@lizzi/jsx-runtime";
 
-export type zzHtmlNodeProps<TNode extends zzHtmlNode<any>> = PropsWithUse<
-  {
-    children?: JSX.Children;
-    [key: string]: any;
-  },
-  TNode
->;
-
-export class zzHtmlNode<E extends Node = Element> extends zzNode<
-  zzHtmlNodeProps<zzHtmlNode<E>>
-> {
+export class zzHtmlNode<E extends Node = Element> extends zzNode {
   readonly element: E;
 
-  constructor(node: E, props: zzHtmlNodeProps<zzHtmlNode<E>> = {}) {
-    super(props);
+  constructor(node: E, { children }: { children?: JSX.Children } = {}) {
+    super();
 
     this.element = node;
 
@@ -36,62 +31,9 @@ export class zzHtmlNode<E extends Node = Element> extends zzNode<
         this.element.removeChild(removed.element);
       }
     );
-  }
-}
 
-export class ReactiveValueView extends zzNode {
-  constructor({ children }: { children: zzReactive<any> }) {
-    super({});
-
-    let isTextNow = false;
-
-    this.addToMount(() => {
-      children.onChange
-        .addListener((ev) => {
-          if (ev.value === null) {
-            this.childNodes.removeAll();
-            isTextNow = false;
-          } else if (zzNode.isNode(ev.value)) {
-            this.childNodes.removeAll();
-            this.childNodes.add([ev.value]);
-            isTextNow = false;
-          } else if (!isTextNow) {
-            this.childNodes.removeAll();
-            this.childNodes.add([new TextNodeView({ children })]);
-            isTextNow = true;
-          }
-        })
-        .run(EventChangeValue.new(children));
-
-      this.onceUnmount(() => (isTextNow = false));
-    });
-  }
-}
-
-export class ArrayView<T extends zzNode> extends zzNode {
-  constructor({ children }: { children: zzReadonlyArray<T> | T[] }) {
-    super({});
-
-    if (zzReadonlyArray.isArray(children)) {
-      this.addToMount(() => {
-        children
-          .map((child) => JSXChildrenToNodeMapper(child))
-          .filter((view) => view !== null && view !== undefined)
-          .itemsListener(
-            (added, index) => {
-              this.childNodes.add([added], index);
-            },
-            (removed) => {
-              this.childNodes.remove([removed]);
-            }
-          );
-      });
-    } else {
-      this.childNodes.add(
-        children
-          .map((child) => JSXChildrenToNodeMapper(child))
-          .filter((view) => view !== null && view !== undefined) as any
-      );
+    if (children) {
+      this.append(children);
     }
   }
 }
@@ -110,11 +52,44 @@ export class TextNodeView extends zzHtmlNode<Text> {
           .addListener((ev) => {
             this.element.data = String(ev.value);
           })
-          .run(EventChangeValue.new(children));
+          .run(ReactiveEventChange.new(children));
       });
     } else {
       this.element.data = String(children);
     }
+  }
+}
+
+export class Value extends zzNode {
+  constructor({ children }: { children: zzReactive<any> }) {
+    super();
+
+    if (zzArray.isArray(children)) {
+      throw new TypeError("Value children can't be array");
+    }
+
+    let isTextNow = false;
+
+    this.onMount(() => {
+      children.onChange
+        .addListener((ev) => {
+          if (ev.value === null) {
+            this.childNodes.removeAll();
+            isTextNow = false;
+          } else if (zzNode.isNode(ev.value)) {
+            this.childNodes.removeAll();
+            this.childNodes.add([ev.value]);
+            isTextNow = false;
+          } else if (!isTextNow) {
+            this.childNodes.removeAll();
+            this.childNodes.add([new TextNodeView({ children })]);
+            isTextNow = true;
+          }
+        })
+        .run(ReactiveEventChange.new(children));
+
+      this.onceUnmount(() => (isTextNow = false));
+    });
   }
 }
 
@@ -134,7 +109,7 @@ export const JSXChildrenToNodeMapper = (
   }
 
   if (zzReactive.isReactive(children)) {
-    return new ReactiveValueView({ children });
+    return new Value({ children });
   }
 
   return children;

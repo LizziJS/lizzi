@@ -5,5 +5,6 @@
  */
 
 export * from "./node";
-export * from "./IfElse";
 export * from "./uses";
+export * from "./IfElse";
+export * from "./ArrayView";

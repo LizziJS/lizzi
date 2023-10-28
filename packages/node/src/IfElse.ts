@@ -4,7 +4,7 @@
  * This source code is licensed under the MIT license.
  */
 
-import { zzCompute, zzReactive } from "@lizzi/core";
+import { zzCompute, zzReactive, zz } from "@lizzi/core";
 import { zzNode } from "./node";
 
 export class If extends zzNode {
@@ -12,7 +12,7 @@ export class If extends zzNode {
     condition,
     children,
   }: {
-    condition: zzReactive<any> | (() => boolean) | any;
+    condition: zz.ReactiveOrValue<any>;
     children: zzNode | zzNode[];
   }) {
     super();
@@ -49,7 +49,7 @@ export class If extends zzNode {
         condition.onChange.addListener(onChange).run();
       });
     } else {
-      if (condition) {
+      if (Boolean(condition)) {
         this.append(condNodes);
       } else {
         this.append(elseNodes);

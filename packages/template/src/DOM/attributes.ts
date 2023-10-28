@@ -9,7 +9,8 @@ import {
   zzCompute,
   zzArray,
   zzReadonlyArray,
-  EventChangeValue,
+  ReactiveEventChange,
+  IReadOnlyReactive,
 } from "@lizzi/core";
 import { zzHtmlNode } from "../view/zzHtmlNode";
 
@@ -29,9 +30,9 @@ export function toReactiveArray<T extends any[]>(
   if (typeof input === "string" || typeof input === "number") {
     return new zzArray<T | zzReactive<T>>([input]);
   } else if (typeof input === "function") {
-    return new zzArray<T | zzReactive<T>>([zzCompute(input)]);
+    return new zzArray<T | IReadOnlyReactive<T>>([zzCompute(input)]);
   } else if (Array.isArray(input)) {
-    return new zzArray<T | zzReactive<T>>(
+    return new zzArray<T | IReadOnlyReactive<T>>(
       input.map((value) =>
         typeof value === "function" ? zzCompute(value) : value
       )
@@ -156,7 +157,7 @@ export function ClassLink<T extends zzHtmlNode>(
                 );
             }
           })
-          .run(EventChangeValue.new(item));
+          .run(ReactiveEventChange.new(item));
       } else {
         String(item)
           .split(/\s+/)

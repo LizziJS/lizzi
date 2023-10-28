@@ -19,7 +19,7 @@ export const jsx = <T extends zzNode>(
 export const jsxs = <T extends zzNode>(
   type: string | T,
   props: {
-    svg?: boolean | undefined;
+    xmlns?: string;
     children: JSX.Children;
     [k: string]: any;
   }
@@ -28,7 +28,10 @@ export const jsxs = <T extends zzNode>(
 
   zzReactiveValueGetObserver.runIsolated(() => {
     if (typeof type === "string") {
-      if (isSvgTag.has(type as any) || props.svg) {
+      if (
+        isSvgTag.has(type as any) ||
+        props.xmlns === "http://www.w3.org/2000/svg"
+      ) {
         result = new SvgElementView(type as any, props);
         return;
       }
@@ -53,4 +56,10 @@ export const jsxs = <T extends zzNode>(
   return result as T;
 };
 
-export class Fragment extends zzNode {}
+export class Fragment extends zzNode {
+  constructor({ children }: { children: JSX.Children }) {
+    super();
+
+    this.append(children);
+  }
+}
