@@ -5,7 +5,7 @@ import { zzNode } from "@lizzi/node";
 export declare namespace JSX {
   interface Element extends zzNode {}
 
-  type Values = string | number | boolean | zzReactive<any>;
+  type Values = string | number | boolean | zzReadonly<any>;
 
   type FuncChildrenTypes<T extends zzNode> = <TNode extends T>(
     node: TNode

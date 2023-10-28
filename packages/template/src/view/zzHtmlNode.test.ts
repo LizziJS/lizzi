@@ -1,19 +1,19 @@
 import { zzObject, zzReactive, zzString } from "@lizzi/core";
-import { ValueView } from "./zzHtmlNode";
-import { TextNodeView } from ".";
+import { ReactiveView } from "./zzHtmlNode";
+import { TextView } from ".";
 import { zzNode } from "@lizzi/node";
 
 describe("ReactiveValueView", () => {
   it("should create an ReactiveValueView", () => {
-    expect(ValueView).toBeInstanceOf(Function);
-    const view = new ValueView({ children: new zzString("test") });
+    expect(ReactiveView).toBeInstanceOf(Function);
+    const view = new ReactiveView({ children: new zzString("test") });
 
-    expect(view).toBeInstanceOf(ValueView);
+    expect(view).toBeInstanceOf(ReactiveView);
   });
 
   it("should use text node for zzString", () => {
     const string = new zzString("test");
-    const view = new ValueView({ children: string });
+    const view = new ReactiveView({ children: string });
 
     const addMock = jest.fn();
     const removeMock = jest.fn();
@@ -26,28 +26,28 @@ describe("ReactiveValueView", () => {
     view._mount();
 
     expect(view.childNodes.length).toBe(1);
-    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextNodeView);
+    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextView);
     expect(addMock).toBeCalledTimes(1);
     expect(removeMock).toBeCalledTimes(0);
 
     string.value = "test2";
 
     expect(view.childNodes.length).toBe(1);
-    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextNodeView);
+    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextView);
     expect(addMock).toBeCalledTimes(1);
     expect(removeMock).toBeCalledTimes(0);
 
     string.value = "test4";
 
     expect(view.childNodes.length).toBe(1);
-    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextNodeView);
+    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextView);
     expect(addMock).toBeCalledTimes(1);
     expect(removeMock).toBeCalledTimes(0);
   });
 
   it("should use object node for zzObject", () => {
     const object = new zzObject<zzNode>(null);
-    const view = new ValueView({ children: object });
+    const view = new ReactiveView({ children: object });
 
     const addMock = jest.fn();
     const removeMock = jest.fn();
@@ -93,7 +93,7 @@ describe("ReactiveValueView", () => {
 
   it("should change to text and back to object", () => {
     const object = new zzReactive<zzNode | string | null>("initial test");
-    const view = new ValueView({ children: object });
+    const view = new ReactiveView({ children: object });
 
     const addMock = jest.fn();
     const removeMock = jest.fn();
@@ -106,7 +106,7 @@ describe("ReactiveValueView", () => {
     view._mount();
 
     expect(view.childNodes.length).toBe(1);
-    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextNodeView);
+    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextView);
     expect(addMock).toBeCalledTimes(1);
     expect(removeMock).toBeCalledTimes(0);
 
@@ -120,7 +120,7 @@ describe("ReactiveValueView", () => {
     object.value = "back to text";
 
     expect(view.childNodes.length).toBe(1);
-    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextNodeView);
+    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextView);
     expect(addMock).toBeCalledTimes(3);
     expect(removeMock).toBeCalledTimes(2);
 
@@ -133,14 +133,14 @@ describe("ReactiveValueView", () => {
     object.value = "back to text again";
 
     expect(view.childNodes.length).toBe(1);
-    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextNodeView);
+    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextView);
     expect(addMock).toBeCalledTimes(4);
     expect(removeMock).toBeCalledTimes(3);
 
     object.value = "should not change instance";
 
     expect(view.childNodes.length).toBe(1);
-    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextNodeView);
+    expect(view.childNodes.toArray()[0]).toBeInstanceOf(TextView);
     expect(addMock).toBeCalledTimes(4);
     expect(removeMock).toBeCalledTimes(3);
   });

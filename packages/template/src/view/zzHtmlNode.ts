@@ -9,7 +9,6 @@ import {
   zzReactive,
   ReactiveEventChange,
   zzArray,
-  zzString,
   zzReadonly,
 } from "@lizzi/core";
 import { ArrayView, zzNode } from "@lizzi/node";
@@ -40,30 +39,15 @@ export class zzHtmlNode<E extends Node = Element> extends zzNode {
   }
 }
 
-export class TextNodeView extends zzHtmlNode<Text> {
+export class TextView extends zzHtmlNode<Text> {
   constructor({
     children,
   }: {
-    children:
-      | string
-      | number
-      | boolean
-      | zzReadonly<any>
-      | Array<string | number | boolean | zzReadonly<any>>;
+    children: string | number | boolean | zzReadonly<any>;
   }) {
     super(document.createTextNode(""));
 
-    if (Array.isArray(children)) {
-      this.onMount(() => {
-        const array = new zzArray(children).join(new zzString(""));
-
-        array.onChange
-          .addListener((ev) => {
-            this.element.data = String(ev.value);
-          })
-          .run(ReactiveEventChange.new(array));
-      });
-    } else if (zzReactive.isReactive(children)) {
+    if (zzReactive.isReactive(children)) {
       this.onMount(() => {
         children.onChange
           .addListener((ev) => {
@@ -77,7 +61,7 @@ export class TextNodeView extends zzHtmlNode<Text> {
   }
 }
 
-export class ValueView extends zzNode {
+export class ReactiveView extends zzNode {
   constructor({ children }: { children: zzReadonly<any> }) {
     super();
 
@@ -99,7 +83,7 @@ export class ValueView extends zzNode {
             isTextNow = false;
           } else if (!isTextNow) {
             this.childNodes.removeAll();
-            this.childNodes.add([new TextNodeView({ children })]);
+            this.childNodes.add([new TextView({ children })]);
             isTextNow = true;
           }
         })
@@ -107,6 +91,18 @@ export class ValueView extends zzNode {
 
       this.onceUnmount(() => (isTextNow = false));
     });
+  }
+}
+
+export class TextV extends zzNode {
+  constructor({
+    children,
+  }: {
+    children: JSX.Values | zzNode | Array<JSX.Values | zzNode>;
+  }) {
+    super();
+
+    this.append(MapJSXChildrensToNodes(children));
   }
 }
 
@@ -122,17 +118,19 @@ export const JSXChildrenToNodeMapper = (
     typeof children === "string" ||
     typeof children === "number"
   ) {
-    return new TextNodeView({ children });
+    return new TextView({ children });
   }
 
   if (zzReactive.isReactive(children)) {
-    return new ValueView({ children });
+    return new ReactiveView({ children });
   }
 
   return children;
 };
 
-export const MapJSXChildrensToNodes = (childrens: JSX.Children): zzNode[] => {
+export const MapJSXChildrensToNodes = (
+  childrens: JSX.Values | zzNode | Array<JSX.Values | zzNode>
+): zzNode[] => {
   if (Array.isArray(childrens)) {
     return childrens
       .map((child) => JSXChildrenToNodeMapper(child))

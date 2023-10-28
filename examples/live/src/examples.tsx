@@ -1,6 +1,6 @@
 import { zz, zzCompute, zzObject } from "@lizzi/core";
 import { zzNode } from "@lizzi/node";
-import { TextNodeView, ValueView, onClick } from "@lizzi/template";
+import { ReactiveView, onClick, Text } from "@lizzi/template";
 
 class Example extends zzNode {
   protected embed: string;
@@ -42,7 +42,7 @@ class Example extends zzNode {
           }),
         ]}
       >
-        <TextNodeView>{name}</TextNodeView>
+        <Text>{name}</Text>
       </a>
     );
   }
@@ -51,7 +51,7 @@ class Example extends zzNode {
 function Header1({ name }: { name: string }) {
   return (
     <h2 class={["bg-sky-300 px-3 py-1 mt-2 font-bold text-lg"]}>
-      <TextNodeView>{name}</TextNodeView>
+      <Text>{name}</Text>
     </h2>
   );
 }
@@ -59,7 +59,7 @@ function Header1({ name }: { name: string }) {
 function Header2({ name }: { name: string }) {
   return (
     <h3 class={["px-3 py-1 mt-2 font-bold"]}>
-      <TextNodeView>{name}</TextNodeView>
+      <Text>{name}</Text>
     </h3>
   );
 }
@@ -271,7 +271,7 @@ export function Examples() {
         />
       </div>
       <div class="flex-grow h-full relative">
-        <ValueView>{result}</ValueView>
+        <Text>{result}</Text>
       </div>
     </div>
   );
