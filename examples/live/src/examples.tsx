@@ -1,7 +1,8 @@
-import { zzCompute, zzObject } from "@lizzi/core";
-import { onClick, zzHtmlComponent } from "@lizzi/template";
+import { zz, zzCompute, zzObject } from "@lizzi/core";
+import { zzNode } from "@lizzi/node";
+import { TextNodeView, ValueView, onClick } from "@lizzi/template";
 
-class Example extends zzHtmlComponent {
+class Example extends zzNode {
   protected embed: string;
   protected modules: string[];
 
@@ -32,11 +33,16 @@ class Example extends zzHtmlComponent {
       <a
         class={[
           "rounded-lg px-2 py-1 cursor-pointer mx-1",
-          () => (selected.value === this ? "bg-orange-300" : ""),
+          zz.If(() => selected.value === this, "bg-orange-300", ""),
         ]}
-        use={[onClick(() => (selected.value = this))]}
+        use={[
+          onClick(() => {
+            console.log("click", this);
+            selected.value = this;
+          }),
+        ]}
       >
-        {name}
+        <TextNodeView>{name}</TextNodeView>
       </a>
     );
   }
@@ -44,15 +50,21 @@ class Example extends zzHtmlComponent {
 
 function Header1({ name }: { name: string }) {
   return (
-    <h2 class={["bg-sky-300 px-3 py-1 mt-2 font-bold text-lg"]}>{name}</h2>
+    <h2 class={["bg-sky-300 px-3 py-1 mt-2 font-bold text-lg"]}>
+      <TextNodeView>{name}</TextNodeView>
+    </h2>
   );
 }
 
 function Header2({ name }: { name: string }) {
-  return <h3 class={["px-3 py-1 mt-2 font-bold"]}>{name}</h3>;
+  return (
+    <h3 class={["px-3 py-1 mt-2 font-bold"]}>
+      <TextNodeView>{name}</TextNodeView>
+    </h3>
+  );
 }
 
-class ExampleView extends zzHtmlComponent {
+class ExampleView extends zzNode {
   constructor({ embed }: { embed: string }) {
     super();
 
@@ -258,7 +270,9 @@ export function Examples() {
           ]}
         />
       </div>
-      <div class="flex-grow h-full relative">{result}</div>
+      <div class="flex-grow h-full relative">
+        <ValueView>{result}</ValueView>
+      </div>
     </div>
   );
 }

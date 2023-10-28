@@ -10,7 +10,7 @@ import {
   zzDestructorsObserver,
 } from "../../Destructor";
 import { zzEvent } from "../../Event";
-import { zzComputeArray } from "../array/compute";
+import { zzComputeArray } from "../array";
 import { IReadOnlyArray } from "../array/readonlyArray";
 import { zzCompute } from "../compute";
 import {

@@ -1,19 +1,19 @@
 import { zzObject, zzReactive, zzString } from "@lizzi/core";
-import { Value } from "./zzHtmlNode";
+import { ValueView } from "./zzHtmlNode";
 import { TextNodeView } from ".";
 import { zzNode } from "@lizzi/node";
 
 describe("ReactiveValueView", () => {
   it("should create an ReactiveValueView", () => {
-    expect(Value).toBeInstanceOf(Function);
-    const view = new Value({ children: new zzString("test") });
+    expect(ValueView).toBeInstanceOf(Function);
+    const view = new ValueView({ children: new zzString("test") });
 
-    expect(view).toBeInstanceOf(Value);
+    expect(view).toBeInstanceOf(ValueView);
   });
 
   it("should use text node for zzString", () => {
     const string = new zzString("test");
-    const view = new Value({ children: string });
+    const view = new ValueView({ children: string });
 
     const addMock = jest.fn();
     const removeMock = jest.fn();
@@ -47,7 +47,7 @@ describe("ReactiveValueView", () => {
 
   it("should use object node for zzObject", () => {
     const object = new zzObject<zzNode>(null);
-    const view = new Value({ children: object });
+    const view = new ValueView({ children: object });
 
     const addMock = jest.fn();
     const removeMock = jest.fn();
@@ -93,7 +93,7 @@ describe("ReactiveValueView", () => {
 
   it("should change to text and back to object", () => {
     const object = new zzReactive<zzNode | string | null>("initial test");
-    const view = new Value({ children: object });
+    const view = new ValueView({ children: object });
 
     const addMock = jest.fn();
     const removeMock = jest.fn();

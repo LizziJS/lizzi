@@ -1,4 +1,5 @@
-import { zzReactive } from "@lizzi/core";
+import { zzReactive, zzReadonly } from "@lizzi/core";
+import { zzHtmlNode } from "@lizzi/template";
 import { zzNode } from "@lizzi/node";
 
 export declare namespace JSX {
@@ -10,7 +11,7 @@ export declare namespace JSX {
     node: TNode
   ) => zzNode;
 
-  type Children<TNodeType = zzNode> = TNodeType | Array<TNodeType>;
+  type Children<TNodeType = zzNode> = zzNode | Array<zzNode>;
 
   type ChildrenFunction<T extends zzNode> = Children | FuncChildrenTypes<T>;
 
@@ -29,4 +30,29 @@ export declare namespace JSX {
   interface ElementChildrenAttribute {
     children: {};
   }
+}
+
+type AllElementsTagName = HTMLElementTagNameMap &
+  SVGElementTagNameMap & { [key: string]: HTMLElement };
+
+export declare namespace JSX {
+  interface Attributes<T extends keyof AllElementsTagName> {
+    class?: Array<string | zzReadonly<any>> | string | zzReadonly<any>;
+    style?: {
+      [key: string]:
+        | Array<string | zzReadonly<any>>
+        | string
+        | number
+        | zzReadonly<any>;
+    };
+    use?:
+      | Array<(view: zzHtmlNode<AllElementsTagName[T]>) => void>
+      | ((view: zzHtmlNode<AllElementsTagName[T]>) => void);
+    children?: Children<AllElementsTagName[T]>;
+    [key: string]: any;
+  }
+
+  type IntrinsicElements = {
+    [T in keyof AllElementsTagName]: JSX.Attributes<T>;
+  };
 }

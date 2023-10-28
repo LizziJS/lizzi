@@ -1,7 +1,7 @@
 import { DestructorsStack } from "../Destructor";
 import { EventWrapper, zzEvent, ExtractEventListener } from "../Event";
 import { zzArray } from "./array/array";
-import { zzComputeArray } from "./array/compute";
+import { zzComputeArray } from "./array";
 import { IReadOnlyArray } from "./array/readonlyArray";
 import { zzCompute } from "./compute";
 import { zzMap } from "./map/map";

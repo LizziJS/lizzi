@@ -7,6 +7,7 @@
 import {
   DestructorsStack,
   IDestructor,
+  zzDestructor,
   zzDestructorsObserver,
 } from "../../Destructor";
 import {
@@ -14,7 +15,11 @@ import {
   zzReadonly,
   IReadOnlyReactive,
   ReactiveEventChange,
+  zzReactive,
 } from "../reactive";
+import { zzEvent } from "../../Event";
+import { zzCompute } from "../compute";
+import { safeInsertToArray } from "./tools";
 
 export interface IReactiveArrayEventAdd<TValue, TTarget> {
   added: TValue;
@@ -360,10 +365,354 @@ export class zzReadonlyArray<T>
   }
 }
 
-import { zzEvent } from "../../Event";
-import { zzCompute } from "../compute";
-import { zzComputeArrayFn } from "./compute";
-import { zzArrayFlat } from "./flat";
-import { zzArrayMap } from "./map";
-import { zzArrayIndex } from "./indexes";
-import { safeInsertToArray } from "./tools";
+export class zzArrayMap<T, NewT> extends zzReadonlyArray<NewT> {
+  protected readonly destructorMap = new Map<T, IDestructor>();
+  protected _destructor = new DestructorsStack();
+  protected sourceArray: zzReadonlyArray<T>;
+
+  destroy(): void {
+    super.destroy();
+    this._destructor.destroy();
+
+    this.destructorMap.forEach((destructor) => destructor.destroy());
+  }
+
+  protected add(elements: NewT[], index?: number) {
+    index === undefined && (index = this._value.length);
+
+    //this._value.splice(index, 0, ...elements);
+    safeInsertToArray(this._value, index, elements);
+
+    for (let i = 0; i < elements.length; i++) {
+      this.onAdd.emit(new ReactiveArrayEventAdd(elements[i], index + i, this));
+    }
+
+    return this;
+  }
+
+  protected removeByIndex(index: number) {
+    const removed = this._value.splice(index, 1);
+
+    if (removed.length > 0) {
+      this.onRemove.emit(new ReactiveArrayEventRemove(removed[0], index, this));
+    }
+
+    return this;
+  }
+
+  constructor(
+    sourceArray: zzReadonlyArray<T>,
+    mapFn: (value: T, self: zzReadonlyArray<T>) => NewT
+  ) {
+    super([]);
+
+    this.sourceArray = sourceArray;
+
+    for (const element of sourceArray) {
+      let newValue: NewT;
+
+      const elementDestructor = zzDestructorsObserver.catch(() => {
+        newValue = mapFn(element, sourceArray);
+      });
+
+      if (elementDestructor.size > 0) {
+        this.destructorMap.set(element, elementDestructor);
+      }
+
+      this.add([newValue!]);
+    }
+
+    this._destructor.add(
+      this.sourceArray.onAdd.addListener((ev) => {
+        let newValue: NewT;
+
+        const elementDestructor = zzDestructorsObserver.catch(() => {
+          newValue = mapFn(ev.added, sourceArray);
+        });
+
+        if (elementDestructor.size > 0) {
+          this.destructorMap.set(ev.added, elementDestructor);
+        }
+
+        this.add([newValue!], ev.index);
+      }),
+      this.sourceArray.onRemove.addListener((ev) => {
+        this.destructorMap.get(ev.removed)?.destroy();
+
+        this.removeByIndex(ev.index);
+      }),
+      this.sourceArray.onChange.addListener(() => {
+        this.onChange.emit(
+          new ReactiveEventChange(this._value, this._value, this)
+        );
+      })
+    );
+  }
+}
+
+type ITreeArray<T> = T | zzReadonlyArray<ITreeArray<T>>;
+
+export class zzArrayFlat<T> extends zzReadonlyArray<T> {
+  protected readonly parentMap = new Map<
+    zzReadonlyArray<ITreeArray<T>>,
+    zzReadonlyArray<ITreeArray<T>>
+  >();
+  protected readonly destructorMap = new Map<ITreeArray<T>, IDestructor>();
+
+  destroy(): void {
+    super.destroy();
+    this.destructorMap.forEach((destructor) => destructor.destroy());
+    this.parentMap.clear();
+  }
+
+  protected addElement(element: T, index?: number) {
+    index === undefined && (index = this._value.length);
+
+    this._value.splice(index, 0, element);
+
+    this.onAdd.emit(new ReactiveArrayEventAdd(element, index, this));
+
+    this.onChange.emit(new ReactiveEventChange(this._value, this._value, this));
+
+    return this;
+  }
+
+  protected removeElement(element: T) {
+    const index = this._value.indexOf(element);
+    if (index !== -1) {
+      const removed = this._value.splice(index, 1);
+
+      this.onRemove.emit(new ReactiveArrayEventRemove(removed[0], index, this));
+
+      this.onChange.emit(
+        new ReactiveEventChange(this._value, this._value, this)
+      );
+    }
+
+    return index;
+  }
+
+  _unsubscribeRecursively(treeArray: ITreeArray<T>) {
+    if (treeArray instanceof zzReadonlyArray) {
+      this.parentMap.delete(treeArray);
+
+      this.destructorMap.get(treeArray)?.destroy();
+      this.destructorMap.delete(treeArray);
+
+      for (const element of treeArray) {
+        this._unsubscribeRecursively(element);
+      }
+    } else {
+      this.removeElement(treeArray);
+    }
+  }
+
+  _recursiverlyGetIndex(treeArray: ITreeArray<T>, endIndex: number): number {
+    if (treeArray instanceof zzReadonlyArray) {
+      let length = 0;
+
+      let index = 0;
+      for (const element of treeArray) {
+        if (index === endIndex) {
+          break;
+        }
+
+        length += this._recursiverlyGetIndex(element, Infinity);
+        index++;
+      }
+
+      if (endIndex !== Infinity) {
+        const parent = this.parentMap.get(treeArray);
+        if (parent) {
+          const childIndex = parent.toArray().indexOf(treeArray);
+
+          length += this._recursiverlyGetIndex(parent, childIndex);
+        }
+      }
+
+      return length;
+    } else {
+      return 1;
+    }
+  }
+
+  _subscribeRecursively(
+    treeArray: ITreeArray<T>,
+    index: number,
+    parent: zzReadonlyArray<ITreeArray<T>> | null = null
+  ) {
+    if (treeArray instanceof zzReadonlyArray) {
+      this.destructorMap.set(
+        treeArray,
+        new DestructorsStack(
+          treeArray.onAdd.addListener((ev) => {
+            let realIndex = this._recursiverlyGetIndex(treeArray, ev.index);
+
+            this._subscribeRecursively(ev.added, realIndex, treeArray);
+          }),
+          treeArray.onRemove.addListener((ev) => {
+            this._unsubscribeRecursively(ev.removed);
+          })
+        )
+      );
+
+      for (const element of treeArray) {
+        index = this._subscribeRecursively(element, index, treeArray);
+      }
+
+      if (parent !== null) {
+        this.parentMap.set(treeArray, parent);
+      }
+
+      return index;
+    } else {
+      this.addElement(treeArray, index);
+
+      return index + 1;
+    }
+  }
+
+  constructor(sourceArray: zzReadonlyArray<T>) {
+    super([]);
+
+    this._subscribeRecursively(sourceArray as any, 0);
+  }
+}
+
+export class zzComputeArrayFn<T> extends zzReadonlyArray<T> {
+  protected _fn: () => T[];
+  protected _destructor = new DestructorsStack();
+
+  destroy(): void {
+    super.destroy();
+    this._destructor.destroy();
+  }
+
+  protected _isolate() {
+    this._destructor.destroy();
+
+    this._destructor.add(
+      zzReactiveValueGetObserver.catch(
+        () => {
+          const newValue = this._fn.apply(this);
+
+          zzReactiveValueGetObserver.runIsolated(() => {
+            this.replace(newValue);
+          });
+        },
+        () => this._isolate()
+      )
+    );
+  }
+
+  protected _silentReplace(newElements: T[]) {
+    let currentIndex = 0;
+    let deletedItems = 0;
+    const array = this._value;
+    this._value = newElements.slice();
+
+    for (let i = 0; i < newElements.length; i++) {
+      //follow new array and find it in old array
+      const index = array.indexOf(newElements[i], currentIndex);
+      if (index !== -1) {
+        for (let k = currentIndex; k < index; k++) {
+          this.onRemove.emit(
+            new ReactiveArrayEventRemove(
+              array[k],
+              currentIndex - deletedItems,
+              this
+            )
+          );
+        }
+
+        deletedItems += index - currentIndex;
+        currentIndex = index + 1;
+      }
+    }
+
+    //remove all last elements
+    for (let k = currentIndex; k < array.length; k++) {
+      this.onRemove.emit(
+        new ReactiveArrayEventRemove(
+          array[k],
+          currentIndex - deletedItems,
+          this
+        )
+      );
+    }
+
+    //add new elements
+    currentIndex = 0;
+    for (let i = 0; i < newElements.length; i++) {
+      //follow new array and find it in old array
+      const index = array.indexOf(newElements[i], currentIndex);
+      if (index === -1) {
+        this.onAdd.emit(new ReactiveArrayEventAdd(newElements[i], i, this));
+      } else {
+        currentIndex = index + 1;
+      }
+    }
+  }
+
+  protected replace(newElements: T[]) {
+    this._silentReplace(newElements);
+
+    this.onChange.emit(new ReactiveEventChange(this._value, this._value, this));
+
+    return this;
+  }
+
+  constructor(fn: () => T[]) {
+    super([]);
+
+    this._fn = fn;
+
+    this._isolate();
+  }
+}
+
+export function zzComputeArray<T>(fn: () => Array<T>) {
+  return new zzComputeArrayFn(fn);
+}
+
+export class zzArrayIndex<T> extends zzDestructor {
+  protected readonly _destructor = new DestructorsStack();
+  protected readonly indexMap = new Map<T, zzReactive<number>>();
+
+  getIndex(item: T) {
+    return this.indexMap.get(item)!.readonly();
+  }
+
+  destroy(): void {
+    this._destructor.destroy();
+
+    this.indexMap.forEach((idx) => idx.destroy());
+
+    this.indexMap.clear();
+  }
+
+  constructor(array: IReadOnlyArray<T>) {
+    super();
+
+    this._destructor.addArray(
+      zzDestructorsObserver.runIsolated(() => {
+        array.itemsListener(
+          (item, index) => {
+            for (const idx of this.indexMap.values()) {
+              if (idx.value >= index) idx.value++;
+            }
+
+            this.indexMap.set(item, new zzReactive(index));
+          },
+          (item, index) => {
+            this.indexMap.delete(item);
+
+            for (const idx of this.indexMap.values()) {
+              if (idx.value >= index) idx.value--;
+            }
+          }
+        );
+      })
+    );
+  }
+}

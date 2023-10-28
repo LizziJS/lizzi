@@ -26,9 +26,10 @@ export class HtmlElementView<
     tagName: T,
     { children, use, ...attributes }: ElementAttributes<HtmlElementView<T>>
   ) {
-    super(document.createElement(tagName));
+    super(document.createElement(tagName), { children });
 
     this.initProps(attributes);
+    this.configUseProp(use);
   }
 
   protected initProps(attributes: ElementAttributes<this>) {
@@ -71,9 +72,12 @@ export class SvgElementView<
       ...attributes
     }: ElementAttributes<zzHtmlNode<SVGElementTagNameMap[T]>>
   ) {
-    super(document.createElementNS("http://www.w3.org/2000/svg", tagName));
+    super(document.createElementNS("http://www.w3.org/2000/svg", tagName), {
+      children,
+    });
 
     this.initProps(attributes);
+    this.configUseProp(use);
   }
 
   protected initProps(attributes: ElementAttributes<this>) {

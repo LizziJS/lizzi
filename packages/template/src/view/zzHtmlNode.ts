@@ -9,6 +9,8 @@ import {
   zzReactive,
   ReactiveEventChange,
   zzArray,
+  zzString,
+  zzReadonly,
 } from "@lizzi/core";
 import { ArrayView, zzNode } from "@lizzi/node";
 import { JSX } from "@lizzi/jsx-runtime";
@@ -42,11 +44,26 @@ export class TextNodeView extends zzHtmlNode<Text> {
   constructor({
     children,
   }: {
-    children: string | number | boolean | zzReactive<any>;
+    children:
+      | string
+      | number
+      | boolean
+      | zzReadonly<any>
+      | Array<string | number | boolean | zzReadonly<any>>;
   }) {
     super(document.createTextNode(""));
 
-    if (zzReactive.isReactive(children)) {
+    if (Array.isArray(children)) {
+      this.onMount(() => {
+        const array = new zzArray(children).join(new zzString(""));
+
+        array.onChange
+          .addListener((ev) => {
+            this.element.data = String(ev.value);
+          })
+          .run(ReactiveEventChange.new(array));
+      });
+    } else if (zzReactive.isReactive(children)) {
       this.onMount(() => {
         children.onChange
           .addListener((ev) => {
@@ -60,8 +77,8 @@ export class TextNodeView extends zzHtmlNode<Text> {
   }
 }
 
-export class Value extends zzNode {
-  constructor({ children }: { children: zzReactive<any> }) {
+export class ValueView extends zzNode {
+  constructor({ children }: { children: zzReadonly<any> }) {
     super();
 
     if (zzArray.isArray(children)) {
@@ -109,7 +126,7 @@ export const JSXChildrenToNodeMapper = (
   }
 
   if (zzReactive.isReactive(children)) {
-    return new Value({ children });
+    return new ValueView({ children });
   }
 
   return children;
