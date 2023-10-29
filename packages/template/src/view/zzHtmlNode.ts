@@ -13,20 +13,33 @@ import {
 } from "@lizzi/core";
 import { ArrayView, zzNode } from "@lizzi/node";
 import { JSX } from "@lizzi/jsx-runtime";
+import { NodeDebug } from "@lizzi/node/src/debug";
 
 export class zzHtmlNode<E extends Node = Element> extends zzNode {
   readonly element: E;
+
+  get debugName() {
+    return "<" + this.element.nodeName.toLocaleLowerCase() + ">";
+  }
 
   constructor(node: E, { children }: { children?: JSX.Children } = {}) {
     super();
 
     this.element = node;
 
+    this._initDebugLevel();
+
     if (children) {
       this.append(children);
     }
 
     this.initFlatChildInstances();
+  }
+
+  protected _initDebugLevel(): void {
+    if (this.element) {
+      this.childNodes.change(NodeDebug.trace(`${this.debugName}.childNodes`));
+    }
   }
 
   protected initFlatChildInstances() {

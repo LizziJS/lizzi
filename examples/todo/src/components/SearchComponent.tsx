@@ -4,6 +4,7 @@ import { Text, onInput } from "@lizzi/template";
 
 export class SearchComponent extends zzNode {
   protected readonly _input = zz.String("");
+  readonly input = this._input.readonly();
 
   constructor() {
     super();
@@ -26,9 +27,5 @@ export class SearchComponent extends zzNode {
         />
       </div>
     );
-  }
-
-  get input() {
-    return this._input.readonly();
   }
 }

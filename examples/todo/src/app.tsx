@@ -1,18 +1,16 @@
 import { Body } from "@lizzi/template";
-import { zzArray } from "@lizzi/core";
-
-import { Todo } from "./data/Todo";
+import { Todo, Todos } from "./data/Todo";
 
 import "./app.css";
 import { TodoApp } from "./components/TodoApp";
 
-const todos = new zzArray<Todo>();
+const todos = new Todos();
 
 todos.add([
-  new Todo({ todo: "Check books", done: true }),
-  new Todo({ todo: "Go to library", done: true }),
-  new Todo({ todo: "Learn Lizzi", done: false }),
-  new Todo({ todo: "Find cool job", done: false }),
+  new Todo("Check books", true),
+  new Todo("Go to library", true),
+  new Todo("Learn Lizzi", false),
+  new Todo("Find cool job", false),
 ]);
 
 Body(<TodoApp todos={todos} />);

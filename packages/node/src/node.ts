@@ -13,6 +13,7 @@ import {
   zzReactive,
   zzReadonlyArray,
 } from "@lizzi/core";
+import { NodeDebug } from "./debug";
 
 type ViewComponentStatuses = "unmounted" | "mounted";
 
@@ -64,9 +65,15 @@ export class zzNode extends zzDestructor implements INode {
     this._initChildNodes();
   }
 
+  get debugName() {
+    return this.constructor.name;
+  }
+
   protected _initChildNodes() {
     this.childNodes.itemsListener(
       (item) => {
+        NodeDebug.log(`add child ${item.debugName}`);
+
         item._setParentNode(this);
 
         this._nodeState.onChange
@@ -80,19 +87,28 @@ export class zzNode extends zzDestructor implements INode {
           .run();
       },
       (item) => {
-        item._unmount();
+        NodeDebug.log(`remove child ${item.debugName}`);
+
         item._setParentNode(null);
       }
     );
+
+    this._initDebugLevel();
+  }
+
+  protected _initDebugLevel() {
+    this.childNodes.change(NodeDebug.trace(`${this.debugName}.childNodes`));
   }
 
   destroy(): void {
-    this._unmount();
     this.parentNode?.remove(this);
+    this._unmount();
   }
 
   _mount(): void {
     if (this._nodeState.value !== "unmounted") return;
+
+    NodeDebug.log(`mount ${this.debugName}`);
 
     zzDestructorsObserver.isolate(() => {
       this._nodeState.value = "mounted";
@@ -107,6 +123,8 @@ export class zzNode extends zzDestructor implements INode {
 
   _unmount(): void {
     if (this._nodeState.value !== "mounted") return;
+
+    NodeDebug.log(`unmount ${this.debugName}`);
 
     this._unmountDestructor.destroy();
 

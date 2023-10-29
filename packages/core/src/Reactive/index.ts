@@ -8,3 +8,4 @@ export * from "./shortcuts";
 export * from "./tags";
 export * from "./type";
 export * from "./vars";
+export * from "./debug";

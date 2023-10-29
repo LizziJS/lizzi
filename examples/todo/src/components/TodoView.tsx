@@ -8,8 +8,8 @@ type Props = {
     todo: zz.StringRead;
     done: zz.BooleanRead;
   };
-  onRemove: (todo: { todo: zz.StringRead; done: zz.BooleanRead }) => void;
-  onDone: (todo: { todo: zz.StringRead; done: zz.BooleanRead }) => void;
+  onRemove: () => void;
+  onDone: () => void;
 };
 
 export class TodoView extends zzNode {
@@ -20,7 +20,7 @@ export class TodoView extends zzNode {
       const created = (
         <div
           class="flex items-center gap-3 cursor-pointer p-1 hover:bg-blue-100 rounded"
-          use={[onClick(() => onDone(todo))]}
+          use={[onClick(() => onDone())]}
         >
           <div class="border-2 border-black w-5 h-5 rounded p-0.5">
             <div
@@ -35,7 +35,7 @@ export class TodoView extends zzNode {
           </div>
           <div
             class="text-xl bg-red-500 w-5 h-5 rounded leading-none text-white text-center"
-            use={[onClick(() => onRemove(todo))]}
+            use={[onClick(() => onRemove())]}
           >
             <Text>✕</Text>
           </div>

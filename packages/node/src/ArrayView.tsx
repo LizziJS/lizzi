@@ -1,5 +1,6 @@
 import { zzReadonlyArray } from "@lizzi/core";
 import { zzNode } from "./node";
+import { NodeDebug } from "./debug";
 
 export class ArrayView<T extends zzNode> extends zzNode {
   constructor({ children }: { children: zzReadonlyArray<T> | T[] }) {
@@ -14,6 +15,7 @@ export class ArrayView<T extends zzNode> extends zzNode {
               this.childNodes.add([added], index);
             },
             (removed) => {
+              NodeDebug.log(`ArrayView removed ${removed.debugName}`);
               this.childNodes.remove([removed]);
             }
           );

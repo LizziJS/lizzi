@@ -38,6 +38,7 @@ export interface IReadOnlyReactive<TValue> extends IDestructor {
   mapValue<NewT>(
     fn: (value: TValue, last: TValue, target: this) => NewT
   ): IReadOnlyReactive<NewT>;
+  change(fn: (value: TValue, last: TValue, target: this) => void): this;
 }
 
 export class zzReadonly<TValue>
@@ -91,6 +92,12 @@ export class zzReadonly<TValue>
     );
 
     return newReactive.readonly();
+  }
+
+  change(fn: (value: TValue, last: TValue, target: this) => void): this {
+    this.onChange.addListener((ev) => fn(ev.value, ev.last, this));
+
+    return this;
   }
 
   static isReactive(check: any): check is IReadOnlyReactive<any> {

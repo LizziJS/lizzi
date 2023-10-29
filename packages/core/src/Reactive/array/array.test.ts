@@ -4,12 +4,12 @@ import { zzComputeFn } from "../compute";
 import { ReactiveEventChange } from "../reactive";
 import { zzInteger } from "../vars";
 import { zzArray } from "./array";
-import { zzComputeArrayFn } from "./compute";
-import { zzArrayFlat } from "./flat";
-import { zzArrayMap } from "./map";
 import {
   ReactiveArrayEventAdd,
   ReactiveArrayEventRemove,
+  zzArrayFlat,
+  zzArrayMap,
+  zzComputeArrayFn,
   zzReadonlyArray,
 } from "./readonlyArray";
 
