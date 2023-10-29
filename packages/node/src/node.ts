@@ -92,13 +92,15 @@ export class zzNode extends zzDestructor implements INode {
   _mount(): void {
     if (this._nodeState.value !== "unmounted") return;
 
-    this._nodeState.value = "mounted";
+    zzDestructorsObserver.isolate(() => {
+      this._nodeState.value = "mounted";
 
-    this._unmountDestructor.add(
-      zzDestructorsObserver.catch(() => {
-        this._onMount.emit(this);
-      })
-    );
+      this._unmountDestructor.add(
+        zzDestructorsObserver.catch(() => {
+          this._onMount.emit(this);
+        })
+      );
+    });
   }
 
   _unmount(): void {

@@ -17,6 +17,10 @@ export class zzIsolatorStack<T> {
     this.isolated.pop()!;
   }
 
+  get isolatedCount() {
+    return this.isolated.at(-1)!.length;
+  }
+
   add(...items: T[]) {
     if (this.isolated.at(-1) === null) return;
 

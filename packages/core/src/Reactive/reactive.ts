@@ -1,4 +1,9 @@
-import { DestructorsStack, IDestructor, zzDestructor } from "../Destructor";
+import {
+  DestructorsStack,
+  IDestructor,
+  SilentDestructorsStack,
+  zzDestructor,
+} from "../Destructor";
 import { zzEvent } from "../Event";
 import { zzIsolatorStack } from "../Isolator";
 import { hasGetter } from "../Tools/hasGetter";
@@ -135,7 +140,7 @@ class GetReactiveIsolator extends zzIsolatorStack<zzReadonly<any>> {
     isolatedFn: () => void,
     onUpdateFn: (ev: ReactiveEventChange<any, any>) => void
   ): DestructorsStack {
-    return new DestructorsStack().addArray(
+    return new SilentDestructorsStack(true).addArray(
       this.isolateAndGet(isolatedFn).map((r) =>
         r.onChange.addListener(onUpdateFn)
       )

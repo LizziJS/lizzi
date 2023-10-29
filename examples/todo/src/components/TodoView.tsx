@@ -16,7 +16,7 @@ export class TodoView extends zzNode {
   constructor({ todo, onRemove, onDone }: Props) {
     super();
 
-    this.append(
+    const created = (
       <div
         class="flex items-center gap-3 cursor-pointer p-1 hover:bg-blue-100 rounded"
         use={[onClick(() => onDone(todo))]}
@@ -40,5 +40,7 @@ export class TodoView extends zzNode {
         </div>
       </div>
     );
+
+    this.append(created);
   }
 }

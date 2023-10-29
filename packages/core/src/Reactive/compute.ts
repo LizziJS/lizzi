@@ -9,11 +9,11 @@ import {
   zzReactiveValueGetObserver,
   zzReadonly,
 } from "./reactive";
-import { DestructorsStack } from "../Destructor";
+import { SilentDestructorsStack } from "../Destructor";
 
 export class zzComputeFn<T> extends zzReadonly<T> {
   protected _fn: () => T;
-  protected _destructor = new DestructorsStack();
+  protected _destructor = new SilentDestructorsStack(true);
 
   destroy(): void {
     super.destroy();
@@ -31,7 +31,7 @@ export class zzComputeFn<T> extends zzReadonly<T> {
           this._value = this._fn.apply(this);
 
           if (lastValue !== this._value) {
-            zzReactiveValueGetObserver.isolateAndGet(() => {
+            zzReactiveValueGetObserver.isolate(() => {
               this.onChange.emit(
                 new ReactiveEventChange(this._value, lastValue, this)
               );

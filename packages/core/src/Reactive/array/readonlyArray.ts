@@ -7,6 +7,7 @@
 import {
   DestructorsStack,
   IDestructor,
+  SilentDestructorsStack,
   zzDestructor,
   zzDestructorsObserver,
 } from "../../Destructor";
@@ -367,7 +368,7 @@ export class zzReadonlyArray<T>
 
 export class zzArrayMap<T, NewT> extends zzReadonlyArray<NewT> {
   protected readonly destructorMap = new Map<T, IDestructor>();
-  protected _destructor = new DestructorsStack();
+  protected _destructor = new SilentDestructorsStack(true);
   protected sourceArray: zzReadonlyArray<T>;
 
   destroy(): void {
@@ -437,9 +438,9 @@ export class zzArrayMap<T, NewT> extends zzReadonlyArray<NewT> {
         this.add([newValue!], ev.index);
       }),
       this.sourceArray.onRemove.addListener((ev) => {
-        this.destructorMap.get(ev.removed)?.destroy();
-
         this.removeByIndex(ev.index);
+
+        this.destructorMap.get(ev.removed)?.destroy();
       }),
       this.sourceArray.onChange.addListener(() => {
         this.onChange.emit(
@@ -581,7 +582,7 @@ export class zzArrayFlat<T> extends zzReadonlyArray<T> {
 
 export class zzComputeArrayFn<T> extends zzReadonlyArray<T> {
   protected _fn: () => T[];
-  protected _destructor = new DestructorsStack();
+  protected _destructor = new SilentDestructorsStack(true);
 
   destroy(): void {
     super.destroy();
@@ -676,7 +677,7 @@ export function zzComputeArray<T>(fn: () => Array<T>) {
 }
 
 export class zzArrayIndex<T> extends zzDestructor {
-  protected readonly _destructor = new DestructorsStack();
+  protected readonly _destructor = new SilentDestructorsStack(true);
   protected readonly indexMap = new Map<T, zzReactive<number>>();
 
   getIndex(item: T) {

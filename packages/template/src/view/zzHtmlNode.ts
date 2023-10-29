@@ -8,7 +8,6 @@ import {
   zzReadonlyArray,
   zzReactive,
   ReactiveEventChange,
-  zzArray,
   zzReadonly,
   IReadOnlyReactive,
 } from "@lizzi/core";
@@ -23,6 +22,14 @@ export class zzHtmlNode<E extends Node = Element> extends zzNode {
 
     this.element = node;
 
+    if (children) {
+      this.append(children);
+    }
+
+    this.initFlatChildInstances();
+  }
+
+  protected initFlatChildInstances() {
     this.flatChildInstances(zzHtmlNode).itemsListener(
       (added, index) => {
         const beforeElement = this.element.childNodes.item(index);
@@ -33,10 +40,6 @@ export class zzHtmlNode<E extends Node = Element> extends zzNode {
         this.element.removeChild(removed.element);
       }
     );
-
-    if (children) {
-      this.append(children);
-    }
   }
 }
 
@@ -60,15 +63,13 @@ export class TextView extends zzHtmlNode<Text> {
       this.element.data = String(children);
     }
   }
+
+  protected initFlatChildInstances() {}
 }
 
 export class ReactiveView extends zzNode {
   constructor({ children }: { children: IReadOnlyReactive<any> }) {
     super();
-
-    if (zzArray.isArray(children)) {
-      throw new TypeError("Value children can't be array");
-    }
 
     let isTextNow = false;
 
@@ -90,7 +91,11 @@ export class ReactiveView extends zzNode {
         })
         .run(ReactiveEventChange.new(children));
 
-      this.onceUnmount(() => (isTextNow = false));
+      this.onceUnmount(() => {
+        this.childNodes.removeAll();
+
+        isTextNow = false;
+      });
     });
   }
 }

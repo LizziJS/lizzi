@@ -13,12 +13,14 @@ export interface IDestructor {
 export abstract class zzDestructor implements IDestructor {
   abstract destroy(): void;
 
-  constructor() {
-    zzDestructorsObserver.add(this);
+  constructor(silent: boolean = false) {
+    if (!silent) {
+      zzDestructorsObserver.add(this);
+    }
   }
 }
 
-export class DestructorsStack extends zzDestructor {
+export class SilentDestructorsStack extends zzDestructor {
   readonly destructors = new Set<IDestructor>();
 
   get size() {
@@ -52,9 +54,11 @@ export class DestructorsStack extends zzDestructor {
 
     return this;
   }
+}
 
+export class DestructorsStack extends SilentDestructorsStack {
   constructor(...destructors: IDestructor[]) {
-    super();
+    super(false);
 
     this.addArray(destructors);
   }
