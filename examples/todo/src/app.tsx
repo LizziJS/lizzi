@@ -15,8 +15,4 @@ todos.add([
   new Todo({ todo: "Find cool job", done: false }),
 ]);
 
-for (let i = 0; i < 10000; i++) {
-  todos.add([new Todo({ todo: `Todo ${i}`, done: false })]);
-}
-
 Body(<TodoApp todos={todos} />);
