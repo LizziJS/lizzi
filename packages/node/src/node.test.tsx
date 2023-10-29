@@ -128,6 +128,7 @@ describe("zzNode", () => {
     expect(unmountFn).toHaveBeenCalledTimes(2);
     expect(node.nodeState).toBe("unmounted");
   });
+
   it("should setup event parameters", () => {
     const onTest = jest.fn();
     const node = new TestEventNode({ onTest, testValue: "test0" });
