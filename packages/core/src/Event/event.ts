@@ -7,7 +7,7 @@
 import { zzDestructor } from "../Destructor";
 
 export interface IEventListener<TFunc extends (...args: any[]) => void> {
-  run<T extends TFunc>(...args: Parameters<T>): Promise<any>;
+  run<T extends TFunc>(...args: Parameters<T>): void;
   remove(): void;
   destroy(): void;
 }
@@ -35,12 +35,12 @@ export class zzEventListener<TFunc extends (...args: any[]) => void>
   readonly fn: TFunc;
   readonly willRunOnce: boolean;
 
-  async run<FuncT extends TFunc>(...args: Parameters<FuncT>) {
+  run<FuncT extends TFunc>(...args: Parameters<FuncT>) {
     if (this.willRunOnce) {
       this.remove();
     }
 
-    await this.fn.call(this.target, ...args);
+    this.fn.call(this.target, ...args);
 
     return this;
   }
@@ -106,10 +106,12 @@ export class zzEvent<TFunc extends (...args: any[]) => void>
     this.listenersMap.clear();
   }
 
-  emit<T extends TFunc>(...args: Parameters<T>): Promise<any> {
+  emit<T extends TFunc>(...args: Parameters<T>) {
     const values = Array.from(this.listenersMap.values());
 
-    return Promise.all(values.map((listener) => listener.run(...args)));
+    for (const listener of values) {
+      listener.run(...args);
+    }
   }
 
   countListeners(): number {

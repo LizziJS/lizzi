@@ -35,14 +35,12 @@ export class zzType<T>
   }
 
   protected checkValueTypes(newValue: T) {
-    try {
-      if (!this._typeValidators.every((fn) => fn(newValue))) {
+    for (const fn of this._typeValidators) {
+      if (!fn(newValue)) {
         throw new TypeError(
           newValue + " is not match type " + this.constructor.name
         );
       }
-    } catch (error: any) {
-      throw new TypeError(error.message);
     }
 
     return true;
