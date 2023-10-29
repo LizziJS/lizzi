@@ -43,7 +43,7 @@ export class zzHtmlNode<E extends Node = Element> extends zzNode {
   }
 }
 
-export class TextView extends zzHtmlNode<Text> {
+export class TextNodeView extends zzHtmlNode<Text> {
   constructor({
     children,
   }: {
@@ -85,7 +85,7 @@ export class ReactiveView extends zzNode {
             isTextNow = false;
           } else if (!isTextNow) {
             this.childNodes.removeAll();
-            this.childNodes.add([new TextView({ children })]);
+            this.childNodes.add([new TextNodeView({ children })]);
             isTextNow = true;
           }
         })
@@ -100,7 +100,7 @@ export class ReactiveView extends zzNode {
   }
 }
 
-export class TextV extends zzNode {
+export class TextView extends zzNode {
   constructor({
     children,
   }: {
@@ -124,7 +124,7 @@ export const JSXChildrenToNodeMapper = (
     typeof children === "string" ||
     typeof children === "number"
   ) {
-    return new TextView({ children });
+    return new TextNodeView({ children });
   }
 
   if (zzReadonly.isReactive(children)) {

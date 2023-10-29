@@ -16,31 +16,33 @@ export class TodoView extends zzNode {
   constructor({ todo, onRemove, onDone }: Props) {
     super();
 
-    const created = (
-      <div
-        class="flex items-center gap-3 cursor-pointer p-1 hover:bg-blue-100 rounded"
-        use={[onClick(() => onDone(todo))]}
-      >
-        <div class="border border-2 border-black w-5 h-5 rounded p-0.5">
-          <div
-            class={[
-              zz.If(todo.done, "bg-blue-700", ""),
-              "w-full h-full rounded-sm",
-            ]}
-          ></div>
-        </div>
-        <div class={[zz.If(todo.done, "line-through", ""), "grow"]}>
-          <Text>{todo.todo}</Text>
-        </div>
+    this.onMount(() => {
+      const created = (
         <div
-          class="text-xl bg-red-500 w-5 h-5 rounded leading-none text-white text-center"
-          use={[onClick(() => onRemove(todo))]}
+          class="flex items-center gap-3 cursor-pointer p-1 hover:bg-blue-100 rounded"
+          use={[onClick(() => onDone(todo))]}
         >
-          <Text>✕</Text>
+          <div class="border-2 border-black w-5 h-5 rounded p-0.5">
+            <div
+              class={[
+                zz.If(todo.done, "bg-blue-700", ""),
+                "w-full h-full rounded-sm",
+              ]}
+            ></div>
+          </div>
+          <div class={[zz.If(todo.done, "line-through", ""), "grow"]}>
+            <Text>{todo.todo}</Text>
+          </div>
+          <div
+            class="text-xl bg-red-500 w-5 h-5 rounded leading-none text-white text-center"
+            use={[onClick(() => onRemove(todo))]}
+          >
+            <Text>✕</Text>
+          </div>
         </div>
-      </div>
-    );
+      );
 
-    this.append(created);
+      this.append(created);
+    });
   }
 }

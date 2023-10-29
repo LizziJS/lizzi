@@ -5,7 +5,7 @@
  */
 
 import {
-  zz,
+  SilentDestructorsStack,
   zzArray,
   zzDestructor,
   zzDestructorsObserver,
@@ -50,8 +50,10 @@ export class zzNode extends zzDestructor implements INode {
     "unmounted"
   );
 
-  protected readonly _onMount = zz.Event<<T extends this>(view: T) => void>();
-  protected readonly _unmountDestructor = zz.Destructor();
+  protected readonly _onMount = new zzEvent<
+    <T extends this>(view: T) => void
+  >();
+  protected readonly _unmountDestructor = new SilentDestructorsStack(true);
 
   protected _parentNode: zzNode | null = null;
   readonly childNodes: zzArray<zzNode> = new zzArray<zzNode>();
