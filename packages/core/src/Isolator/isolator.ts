@@ -1,7 +1,7 @@
 export class zzIsolatorStack<T> {
-  protected isolated: T[][] = [];
+  protected isolated: (T[] | null)[] = [null];
 
-  runIsolated(fn: () => void): T[] {
+  isolateAndGet(fn: () => void): T[] {
     this.isolated.push([]);
 
     fn();
@@ -9,8 +9,16 @@ export class zzIsolatorStack<T> {
     return this.isolated.pop()!;
   }
 
+  isolate(fn: () => void) {
+    this.isolated.push(null);
+
+    fn();
+
+    this.isolated.pop()!;
+  }
+
   add(...items: T[]) {
-    if (this.isolated.length === 0) return;
+    if (this.isolated.at(-1) === null) return;
 
     this.isolated.at(-1)!.push(...items);
   }

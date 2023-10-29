@@ -1,12 +1,12 @@
 import { zz } from "@lizzi/core";
-import { Else, If } from "@lizzi/node";
+import { Else, If, zzNode } from "@lizzi/node";
 import { AddTodo } from "./AddTodo";
 import { SearchComponent } from "./SearchComponent";
 import { Todo } from "../data/Todo";
 import { TodoView } from "./TodoView";
-import { zzHtmlComponent } from "@lizzi/template";
+import { Text } from "@lizzi/template";
 
-export class TodoApp extends zzHtmlComponent {
+export class TodoApp extends zzNode {
   constructor({ todos }: { todos: zz.Array<Todo> }) {
     super();
 
@@ -27,20 +27,21 @@ export class TodoApp extends zzHtmlComponent {
         <div class="my-5 mx-5 flex flex-col">
           <If condition={isEmptyResults}>
             <If condition={isEmptyTodos}>
-              <>Empty list</>
+              <Text>Empty list</Text>
               <Else>
-                <>Found 0 result</>
+                <Text>Found 0 result</Text>
               </Else>
             </If>
             <Else>
-              <>
+              <Text>
                 {filteredTodos.map((todo) => (
                   <TodoView
                     todo={todo}
-                    onRemove={(todo) => todos.remove([todo])}
+                    onRemove={() => todos.remove([todo])}
+                    onDone={() => todo.done.toggle()}
                   />
                 ))}
-              </>
+              </Text>
             </Else>
           </If>
         </div>

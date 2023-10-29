@@ -31,7 +31,7 @@ export class zzComputeFn<T> extends zzReadonly<T> {
           this._value = this._fn.apply(this);
 
           if (lastValue !== this._value) {
-            zzReactiveValueGetObserver.runIsolated(() => {
+            zzReactiveValueGetObserver.isolateAndGet(() => {
               this.onChange.emit(
                 new ReactiveEventChange(this._value, lastValue, this)
               );

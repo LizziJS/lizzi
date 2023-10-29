@@ -1,7 +1,8 @@
 import { zz } from "@lizzi/core";
-import { onInput, zzHtmlComponent } from "@lizzi/template";
+import { zzNode } from "@lizzi/node";
+import { Text, onInput } from "@lizzi/template";
 
-export class SearchComponent extends zzHtmlComponent {
+export class SearchComponent extends zzNode {
   protected readonly _input = zz.String("");
 
   constructor() {
@@ -13,7 +14,7 @@ export class SearchComponent extends zzHtmlComponent {
           for="search_todo"
           class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300"
         >
-          Search {this._input}
+          <Text>Search {this._input}</Text>
         </label>
         <input
           type="text"

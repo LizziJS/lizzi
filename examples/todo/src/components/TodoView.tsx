@@ -1,20 +1,25 @@
-import { onClick, zzHtmlComponent } from "@lizzi/template";
+import { Text, onClick } from "@lizzi/template";
 import { Todo } from "../data/Todo";
 import { zz } from "@lizzi/core";
+import { zzNode } from "@lizzi/node";
 
 type Props = {
-  todo: Todo;
-  onRemove: (todo: Todo) => void;
+  todo: {
+    todo: zz.StringRead;
+    done: zz.BooleanRead;
+  };
+  onRemove: (todo: { todo: zz.StringRead; done: zz.BooleanRead }) => void;
+  onDone: (todo: { todo: zz.StringRead; done: zz.BooleanRead }) => void;
 };
 
-export class TodoView extends zzHtmlComponent {
-  constructor({ todo, onRemove }: Props) {
+export class TodoView extends zzNode {
+  constructor({ todo, onRemove, onDone }: Props) {
     super();
 
     this.append(
       <div
         class="flex items-center gap-3 cursor-pointer p-1 hover:bg-blue-100 rounded"
-        use={[onClick(() => (todo.done.value = !todo.done.value))]}
+        use={[onClick(() => onDone(todo))]}
       >
         <div class="border border-2 border-black w-5 h-5 rounded p-0.5">
           <div
@@ -25,13 +30,13 @@ export class TodoView extends zzHtmlComponent {
           ></div>
         </div>
         <div class={[zz.If(todo.done, "line-through", ""), "grow"]}>
-          {todo.todo}
+          <Text>{todo.todo}</Text>
         </div>
         <div
           class="text-xl bg-red-500 w-5 h-5 rounded leading-none text-white text-center"
           use={[onClick(() => onRemove(todo))]}
         >
-          ✕
+          <Text>✕</Text>
         </div>
       </div>
     );

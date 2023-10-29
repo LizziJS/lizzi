@@ -1,13 +1,14 @@
 import { zz } from "@lizzi/core";
-import { on, onInput, zzHtmlComponent } from "@lizzi/template";
+import { zzNode } from "@lizzi/node";
+import { Text, on, onInput } from "@lizzi/template";
 
-export class AddTodo extends zzHtmlComponent {
+export class AddTodo extends zzNode {
   readonly onAdd = zz.Event<(newTodo: string) => void>();
 
   constructor({ onAdd }: { onAdd: (newTodo: string) => void }) {
     super();
 
-    this.onAdd.addListener(onAdd);
+    this.setConfigProps({ onAdd });
 
     const newTodo = zz.String("");
 
@@ -35,7 +36,7 @@ export class AddTodo extends zzHtmlComponent {
           use={[onInput(newTodo)]}
         />
         <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">
-          Add
+          <Text>Add</Text>
         </button>
       </form>
     );

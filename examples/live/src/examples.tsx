@@ -1,6 +1,6 @@
 import { zz, zzCompute, zzObject } from "@lizzi/core";
 import { zzNode } from "@lizzi/node";
-import { ReactiveView, onClick, Text } from "@lizzi/template";
+import { onClick, Text } from "@lizzi/template";
 
 class Example extends zzNode {
   protected embed: string;
@@ -37,7 +37,6 @@ class Example extends zzNode {
         ]}
         use={[
           onClick(() => {
-            console.log("click", this);
             selected.value = this;
           }),
         ]}

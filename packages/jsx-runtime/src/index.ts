@@ -26,7 +26,7 @@ export const jsxs = <T extends zzNode>(
 ) => {
   let result: any;
 
-  zzReactiveValueGetObserver.runIsolated(() => {
+  zzReactiveValueGetObserver.isolate(() => {
     if (typeof type === "string") {
       if (
         isSvgTag.has(type as any) ||

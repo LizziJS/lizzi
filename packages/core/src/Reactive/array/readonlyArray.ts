@@ -596,7 +596,7 @@ export class zzComputeArrayFn<T> extends zzReadonlyArray<T> {
         () => {
           const newValue = this._fn.apply(this);
 
-          zzReactiveValueGetObserver.runIsolated(() => {
+          zzReactiveValueGetObserver.isolateAndGet(() => {
             this.replace(newValue);
           });
         },
@@ -695,7 +695,7 @@ export class zzArrayIndex<T> extends zzDestructor {
     super();
 
     this._destructor.addArray(
-      zzDestructorsObserver.runIsolated(() => {
+      zzDestructorsObserver.isolateAndGet(() => {
         array.itemsListener(
           (item, index) => {
             for (const idx of this.indexMap.values()) {

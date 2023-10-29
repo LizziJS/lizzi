@@ -10,6 +10,7 @@ import {
   ReactiveEventChange,
   zzArray,
   zzReadonly,
+  IReadOnlyReactive,
 } from "@lizzi/core";
 import { ArrayView, zzNode } from "@lizzi/node";
 import { JSX } from "@lizzi/jsx-runtime";
@@ -43,7 +44,7 @@ export class TextView extends zzHtmlNode<Text> {
   constructor({
     children,
   }: {
-    children: string | number | boolean | zzReadonly<any>;
+    children: string | number | boolean | IReadOnlyReactive<any>;
   }) {
     super(document.createTextNode(""));
 
@@ -62,7 +63,7 @@ export class TextView extends zzHtmlNode<Text> {
 }
 
 export class ReactiveView extends zzNode {
-  constructor({ children }: { children: zzReadonly<any> }) {
+  constructor({ children }: { children: IReadOnlyReactive<any> }) {
     super();
 
     if (zzArray.isArray(children)) {
@@ -121,7 +122,7 @@ export const JSXChildrenToNodeMapper = (
     return new TextView({ children });
   }
 
-  if (zzReactive.isReactive(children)) {
+  if (zzReadonly.isReactive(children)) {
     return new ReactiveView({ children });
   }
 

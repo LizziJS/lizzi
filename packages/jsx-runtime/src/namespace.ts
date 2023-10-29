@@ -1,17 +1,17 @@
-import { zzReactive, zzReadonly } from "@lizzi/core";
+import { IReadOnlyReactive } from "@lizzi/core";
 import { zzHtmlNode } from "@lizzi/template";
 import { zzNode } from "@lizzi/node";
 
 export declare namespace JSX {
   interface Element extends zzNode {}
 
-  type Values = string | number | boolean | zzReadonly<any>;
+  type Values = string | number | boolean | IReadOnlyReactive<any>;
 
   type FuncChildrenTypes<T extends zzNode> = <TNode extends T>(
     node: TNode
   ) => zzNode;
 
-  type Children<TNodeType = zzNode> = zzNode | Array<zzNode>;
+  type Children = zzNode | Array<zzNode>;
 
   type ChildrenFunction<T extends zzNode> = Children | FuncChildrenTypes<T>;
 
@@ -30,6 +30,10 @@ export declare namespace JSX {
   interface ElementChildrenAttribute {
     children: {};
   }
+
+  interface Fragment {
+    new (props: { children: Children }): zzNode;
+  }
 }
 
 type AllElementsTagName = HTMLElementTagNameMap &
@@ -37,18 +41,21 @@ type AllElementsTagName = HTMLElementTagNameMap &
 
 export declare namespace JSX {
   interface Attributes<T extends keyof AllElementsTagName> {
-    class?: Array<string | zzReadonly<any>> | string | zzReadonly<any>;
+    class?:
+      | Array<string | IReadOnlyReactive<any>>
+      | string
+      | IReadOnlyReactive<any>;
     style?: {
       [key: string]:
-        | Array<string | zzReadonly<any>>
+        | Array<string | IReadOnlyReactive<any>>
         | string
         | number
-        | zzReadonly<any>;
+        | IReadOnlyReactive<any>;
     };
     use?:
       | Array<(view: zzHtmlNode<AllElementsTagName[T]>) => void>
       | ((view: zzHtmlNode<AllElementsTagName[T]>) => void);
-    children?: Children<AllElementsTagName[T]>;
+    children?: Children;
     [key: string]: any;
   }
 
