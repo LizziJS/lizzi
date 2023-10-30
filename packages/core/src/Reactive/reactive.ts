@@ -142,7 +142,7 @@ export class zzReactive<TValue>
   }
 }
 
-class GetReactiveIsolator extends zzIsolatorStack<zzReadonly<any>> {
+class GetReactiveIsolator extends zzIsolatorStack<IReadOnlyReactive<any>> {
   catch(
     isolatedFn: () => void,
     onUpdateFn: (ev: ReactiveEventChange<any, any>) => void
